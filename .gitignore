@@ -183,6 +183,9 @@ test-*
 *test*.json
 *test*.md
 
+# SQL files - database schemas and migrations should not be in repository
+*.sql
+
 # Specific test/debug files with credentials
 check-admin-files.js
 check-invoices-structure.js
