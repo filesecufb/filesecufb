@@ -46,9 +46,7 @@ interface ServiceConfigurationData {
   additionalInfo: string;
   
   // Terms
-  agreeTerms: boolean;
-  agreeNoRefund: boolean;
-  agreeDisclaimer: boolean;
+  agreeAllTerms: boolean;
   
   // Additional Services
   selectedAdditionalServices: string[];
@@ -58,6 +56,8 @@ const ServiceConfiguration: React.FC = () => {
   const navigate = useNavigate();
   const { serviceId } = useParams<{ serviceId?: string }>();
   const { user, profile, loading: authLoading } = useAuth();
+  
+
   
   // State for service and client data
   const [selectedService, setSelectedService] = useState<any>(null);
@@ -146,9 +146,7 @@ const ServiceConfiguration: React.FC = () => {
     decatRemarks: '',
 
     additionalInfo: '',
-    agreeTerms: false,
-    agreeNoRefund: false,
-    agreeDisclaimer: false,
+    agreeAllTerms: false,
     selectedAdditionalServices: []
   });
 
@@ -174,26 +172,70 @@ const ServiceConfiguration: React.FC = () => {
     tax_id: ''
   });
 
-  // Cargar datos del perfil cuando estén disponibles
+  // Cargar datos completos del perfil desde la base de datos
   useEffect(() => {
-    if (profile) {
-      setPersonalInfo({
-        full_name: profile.full_name || '',
-        phone: profile.phone || '',
-        email: profile.email || ''
-      });
-      
-      setBillingInfo({
-        billing_name: profile.billing_name || '',
-        billing_address: profile.billing_address || '',
-        billing_city: profile.billing_city || '',
-        billing_country: profile.billing_country || '',
-        billing_postal_code: profile.billing_postal_code || '',
-        billing_state: profile.billing_state || '',
-        tax_id: profile.tax_id || ''
-      });
+    const loadFullProfile = async () => {
+      if (user?.id) {
+
+        try {
+          const { data: fullProfile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
+
+          if (error) {
+            console.error('❌ Error loading profile:', error);
+            // Si no existe el perfil, usar datos básicos del usuario
+            const basicInfo = {
+              full_name: '',
+              phone: '',
+              email: user.email || ''
+            };
+
+            setPersonalInfo(basicInfo);
+          } else {
+
+            // Cargar datos completos del perfil
+            const personalData = {
+              full_name: fullProfile.full_name || '',
+              phone: fullProfile.phone || '',
+              email: fullProfile.email || user.email || ''
+            };
+            
+            const billingData = {
+              billing_name: fullProfile.billing_name || '',
+              billing_address: fullProfile.billing_address || '',
+              billing_city: fullProfile.billing_city || '',
+              billing_country: fullProfile.billing_country || '',
+              billing_postal_code: fullProfile.billing_postal_code || '',
+              billing_state: fullProfile.billing_state || '',
+              tax_id: fullProfile.tax_id || ''
+            };
+            
+
+            
+            setPersonalInfo(personalData);
+            setBillingInfo(billingData);
+          }
+        } catch (err) {
+          console.error('💥 Error loading full profile:', err);
+          // Fallback a datos básicos
+          setPersonalInfo({
+            full_name: '',
+            phone: '',
+            email: user.email || ''
+          });
+        }
+      } else {
+
+      }
+    };
+
+    if (!authLoading && user) {
+      loadFullProfile();
     }
-  }, [profile]);
+  }, [user, authLoading]);
 
   const handleInputChange = (field: keyof ServiceConfigurationData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -307,23 +349,11 @@ const ServiceConfiguration: React.FC = () => {
       errors.push('El teléfono es requerido');
     }
     
-    // Validar información de facturación
-    const requiredBillingFields = ['billing_name', 'billing_address', 'billing_city', 'billing_country', 'billing_postal_code'];
-    requiredBillingFields.forEach(field => {
-      if (!billingInfo[field as keyof typeof billingInfo].trim()) {
-        errors.push(`El campo de facturación ${field.replace('billing_', '')} es requerido`);
-      }
-    });
+    // Los campos de facturación son opcionales - no se validan como requeridos
     
     // Validar términos y condiciones
-    if (!formData.agreeTerms) {
-      errors.push('Debe aceptar los términos de servicio');
-    }
-    if (!formData.agreeDisclaimer) {
-      errors.push('Debe aceptar el descargo de responsabilidad');
-    }
-    if (!formData.agreeNoRefund) {
-      errors.push('Debe aceptar las políticas de devoluciones');
+    if (!formData.agreeAllTerms) {
+      errors.push('Debe aceptar los términos de servicio, descargo de responsabilidad y políticas de devoluciones');
     }
     
     return errors;
@@ -1176,47 +1206,21 @@ const ServiceConfiguration: React.FC = () => {
               <label className="flex items-start">
                 <input
                   type="checkbox"
-                  checked={formData.agreeTerms}
-                  onChange={(e) => handleInputChange('agreeTerms', e.target.checked)}
+                  checked={formData.agreeAllTerms}
+                  onChange={(e) => handleInputChange('agreeAllTerms', e.target.checked)}
                   className="mr-3 mt-1 text-blue-600 focus:ring-blue-500"
                   required
                 />
                 <span className="text-gray-700">
-                  Sí, acepto los{' '}
+                  Acepto los{' '}
                   <a href="/terms-of-service" className="text-blue-600 hover:text-blue-800 underline">
                     términos de servicio
                   </a>
-                  .
-                </span>
-              </label>
-
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  checked={formData.agreeDisclaimer}
-                  onChange={(e) => handleInputChange('agreeDisclaimer', e.target.checked)}
-                  className="mr-3 mt-1 text-blue-600 focus:ring-blue-500"
-                  required
-                />
-                <span className="text-gray-700">
-                  Sí, acepto el{' '}
+                  , el{' '}
                   <a href="/disclaimer" className="text-blue-600 hover:text-blue-800 underline">
                     descargo de responsabilidad
                   </a>
-                  .
-                </span>
-              </label>
-
-              <label className="flex items-start">
-                <input
-                  type="checkbox"
-                  checked={formData.agreeNoRefund}
-                  onChange={(e) => handleInputChange('agreeNoRefund', e.target.checked)}
-                  className="mr-3 mt-1 text-blue-600 focus:ring-blue-500"
-                  required
-                />
-                <span className="text-gray-700">
-                  Sí, acepto las{' '}
+                  {' '}y las{' '}
                   <a href="/refund-policy" className="text-blue-600 hover:text-blue-800 underline">
                     políticas de devoluciones
                   </a>
