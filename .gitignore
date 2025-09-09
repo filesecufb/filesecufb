@@ -1,0 +1,244 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+build/
+.vite/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary folders
+tmp/
+temp/
+
+# Vercel
+.vercel
+
+# Next.js
+.next/
+out/
+
+# Nuxt.js
+.nuxt/
+
+# Gatsby files
+.cache/
+public
+
+# Storybook build outputs
+.out
+.storybook-out
+
+# TypeScript
+*.tsbuildinfo
+.tsbuildinfo
+
+# Editor and IDE specific files
+.vscode/settings.json
+.vscode/launch.json
+.vscode/extensions.json
+.history/
+*.code-workspace
+
+# Package managers
+.pnpm-store/
+.yarn/
+.yarnrc.yml
+yarn.lock
+pnpm-lock.yaml
+
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+test-results/
+playwright-report/
+test-results.xml
+
+# Local development
+.cache/
+.parcel-cache/
+.sass-cache/
+.npm/
+.eslintcache
+.stylelintcache
+
+# Database and migrations (Supabase)
+supabase/.temp/
+supabase/.branches/
+supabase/.git/
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# Documentation temp files
+*.tmp
+*.temp
+
+# Error logs and debug files
+error.log
+debug.log
+lerna-debug.log*
+
+# Private/sensitive files
+.env.*.local
+.env.secrets
+config.local.*
+secrets.*
+private.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+
+# Temporary files
+.temp
+*.temp
+
+# Claude Code specific files and directories
+.claude/
+.trae/
+
+# MCP (Model Context Protocol) configuration
+.mcp.json
+
+# Supabase configuration and local development
+supabase/
+supabase.md
+supabase_config.md
+supabase.gitproject-ref
+
+# Migration and setup files
+migrate.js
+migrate-rest.js
+error.md
+
+# Test and check files - CONTAIN CREDENTIALS AND SHOULD NOT BE IN PRODUCTION
+check-*.js
+test-*.js
+debug-*.js
+investigate-*.js
+verify-*.js
+create-*.js
+
+# All files containing 'test' in their name
+*test*
+test*
+*test
+*.test.*
+test-*
+*-test
+*-test-*
+*test*.sql
+*test*.js
+*test*.ts
+*test*.tsx
+*test*.json
+*test*.md
+
+# Specific test/debug files with credentials
+check-admin-files.js
+check-invoices-structure.js
+check-order-files.js
+check-orders.js
+check-orders-status.js
+check-permissions.js
+check-rls-policies.js
+check-storage.js
+check-table-columns.js
+check-tables.js
+check-table-structure.js
+create-missing-profile.js
+create-order-files.js
+create-test-data.js
+create-test-orders.js
+debug-profiles.js
+investigate-db.js
+test-comments.js
+test-comments-fix.js
+test-file-upload.js
+test-invoice-insert.js
+test-invoice-loading.js
+verify-fix.js
+verify-setup.js
+
+# Development documentation and error logs
+error.md
+test-upload.md
+supabase.md
+supabase_config.md
+
+# Build artifacts that shouldn't be committed
+dist/
+
+# Build and deployment artifacts
+.vercel/
+.netlify/
+.firebase/
+functions/.env
+functions/node_modules/
+
+# Windows specific
+desktop.ini
+$RECYCLE.BIN/
+
+# macOS specific (additional)
+.AppleDouble
+.LSOverride
+Icon?
+.DocumentRevisions-V100
+.fseventsd
+.TemporaryItems
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux specific
+*~
+.nfs*

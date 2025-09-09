@@ -1,0 +1,367 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Mono:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Professional Color Palette */
+  --color-black: #1a1a1a;
+  --color-gray-dark: #2d2d2d;
+  --color-gray-medium: #4a4a4a;
+  --color-gray-light: #f5f5f5;
+  --color-white: #ffffff;
+  
+  /* Corporate Accent Colors */
+  --color-blue-primary: #2563eb;
+  --color-blue-dark: #1e40af;
+  --color-silver: #94a3b8;
+  --color-gray-blue: #64748b;
+  
+  /* Typography */
+  --font-primary: 'Inter', system-ui, sans-serif;
+  --font-secondary: 'Roboto Mono', monospace;
+  --font-accent: 'Poppins', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+  
+  /* Border Radius */
+  --border-radius-sm: 6px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  
+  /* Professional Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 25px rgba(0, 0, 0, 0.12);
+
+  --shadow-blue-glow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  --shadow-blue-glow-hover: 0 6px 20px rgba(37, 99, 235, 0.4);
+  
+  /* Smooth Transitions */
+  --transition-normal: 0.3s ease;
+  --transition-bounce: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Typography Settings */
+  font-family: var(--font-primary);
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Professional Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: var(--color-gray-light);
+  color: var(--color-blue-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+
+/* Professional Button System */
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-blue-primary) 0%, var(--color-blue-dark) 100%);
+  border: none;
+  border-radius: var(--border-radius-md);
+  color: var(--color-white);
+  padding: 12px 24px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: var(--transition-bounce);
+  box-shadow: var(--shadow-blue-glow);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-blue-glow-hover);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 2px solid var(--color-blue-primary);
+  border-radius: var(--border-radius-md);
+  color: var(--color-blue-primary);
+  padding: 10px 22px;
+  font-weight: 500;
+  font-family: var(--font-primary);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-blue-primary);
+  color: var(--color-blue-primary);
+  background-color: rgba(37, 99, 235, 0.05);
+}
+
+/* Professional Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-blue);
+  border-radius: var(--border-radius-sm);
+  transition: var(--transition-normal);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-blue-primary);
+}
+
+/* Professional Animation System */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes cookieBannerSlideUp {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(30px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes expandUp {
+  0% {
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* Professional Animation Utility Classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Professional Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-blue-primary) 0%, var(--color-blue-dark) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-elegant {
+  box-shadow: var(--shadow-lg);
+}
+
+.shadow-subtle {
+  box-shadow: var(--shadow-sm);
+}
+
+.border-elegant {
+  border: 1px solid var(--color-gray-medium);
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-blue-primary) 0%, var(--color-blue-dark) 100%);
+}
+
+.bg-gradient-dark {
+  background: linear-gradient(135deg, var(--color-black) 0%, var(--color-gray-dark) 100%);
+}
+
+/* Typography Utilities */
+.text-primary {
+  color: var(--color-blue-primary);
+}
+
+.text-secondary {
+  color: var(--color-gray-blue);
+}
+
+.text-muted {
+  color: var(--color-silver);
+}
+
+/* Font Family Utilities */
+.font-primary {
+  font-family: var(--font-primary);
+}
+
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+}
+
+.text-body {
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-gray-blue);
+}
+
+
+
+/* Selection styling */
+::selection {
+  background: rgba(37, 99, 235, 0.3);
+  color: var(--color-white);
+}
+
+/* Reusable CSS Classes for Common Patterns */
+.btn-hover-effect {
+  transition: all 0.3s ease;
+}
+
+.btn-hover-effect:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-hover-effect:hover.shadow-elegant {
+  box-shadow: var(--shadow-lg);
+}
+
+.stat-number {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-center {
+  text-align: center;
+}
+
+.btn-text-style {
+  font-weight: 700;
+  font-size: 1.125rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
