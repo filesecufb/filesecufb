@@ -1,4 +1,6 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/((?!.*\\.).*)",
@@ -7,7 +9,7 @@
   ],
   "headers": [
     {
-      "source": "/(favicon\\.ico|favicon\\.svg|favicon\\.png|apple-touch-icon\\.png|favicon-.*\\.png)",
+      "source": "/(favicon\\.ico|favicon\\.svg|favicon\\.png|apple-touch-icon\\.png|favicon-.*\\.png|og-image\\.png|og-image\\.svg)",
       "headers": [
         {
           "key": "Cache-Control",
