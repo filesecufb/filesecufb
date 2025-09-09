@@ -24,6 +24,7 @@ import CookiePolicy from './pages/CookiePolicy';
 import ServiceConfiguration from './pages/ServiceConfiguration';
 import OrderDetails from './pages/OrderDetails';
 import ClientDetails from './pages/ClientDetails';
+import NotFound from './pages/NotFound';
 
 // Componente para el botón flotante de cookies
 const CookieFloatingButton: React.FC = () => {
@@ -84,6 +85,8 @@ function App() {
               <Route path="/refund-policy" element={<RefundPolicy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/cookie-policy" element={<CookiePolicy />} />
+              {/* Catch-all route for 404 */}
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
           <Footer />
