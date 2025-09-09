@@ -61,7 +61,7 @@ out/
 
 # Gatsby files
 .cache/
-public
+# public - REMOVED: needed for Vite/React static files
 
 # Storybook build outputs
 .out
