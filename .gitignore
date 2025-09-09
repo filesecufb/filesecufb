@@ -245,3 +245,4 @@ Icon?
 # Linux specific
 *~
 .nfs*
+.vercel
