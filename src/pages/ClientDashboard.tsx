@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User, FileText, Download, Edit, Lock, ShoppingCart, CreditCard } from 'lucide-react';
+import { User, FileText, Download, Edit, Lock, ShoppingCart, CreditCard, Search, X, ChevronLeft, ChevronRight, Car, Calendar, Wrench, Filter, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -31,10 +31,24 @@ const ClientDashboard: React.FC = () => {
   const [fullProfile, setFullProfile] = useState<any>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [orders, setOrders] = useState<any[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<any[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
-  const [orderFiles, setOrderFiles] = useState<{[key: string]: any[]}>({});
-  const [filesLoading, setFilesLoading] = useState<{[key: string]: boolean}>({});
+  
+  // Estados para filtros y búsqueda
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [sortBy, setSortBy] = useState('newest');
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(6);
+  const [orderFiles, setOrderFiles] = useState<{ [orderId: string]: any[] }>({});
+  const [filesLoading, setFilesLoading] = useState<{ [orderId: string]: boolean }>({});
+  const [orderInvoices, setOrderInvoices] = useState<{ [orderId: string]: any[] }>({});
+  const [invoicesLoading, setInvoicesLoading] = useState<{ [orderId: string]: boolean }>({});
+  const [additionalServices, setAdditionalServices] = useState<{ [serviceId: string]: any }>({});
 
   // Cargar perfil completo desde Supabase
   useEffect(() => {
@@ -70,6 +84,56 @@ const ClientDashboard: React.FC = () => {
     }
   }, [user, authLoading]);
 
+  // Efecto para filtrar y ordenar pedidos
+  useEffect(() => {
+    let filtered = [...orders];
+
+    // Filtrar por término de búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(order => 
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        `${order.vehicle_make} ${order.vehicle_model}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order.services?.title || '').toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filtrar por estado
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(order => order.status === statusFilter);
+    }
+
+    // Filtrar por rango de fechas
+    if (dateFrom) {
+      filtered = filtered.filter(order => 
+        new Date(order.created_at) >= new Date(dateFrom)
+      );
+    }
+    if (dateTo) {
+      filtered = filtered.filter(order => 
+        new Date(order.created_at) <= new Date(dateTo + 'T23:59:59')
+      );
+    }
+
+    // Ordenar
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'price_high':
+          return parseFloat(b.total_price || '0') - parseFloat(a.total_price || '0');
+        case 'price_low':
+          return parseFloat(a.total_price || '0') - parseFloat(b.total_price || '0');
+        default:
+          return 0;
+      }
+    });
+
+    setFilteredOrders(filtered);
+    setCurrentPage(1);
+  }, [orders, searchTerm, statusFilter, dateFrom, dateTo, sortBy]);
+
   // Cargar pedidos del usuario
   useEffect(() => {
     const loadOrders = async () => {
@@ -93,9 +157,12 @@ const ClientDashboard: React.FC = () => {
           throw error;
         }
 
-        // Load service information for each order
+        // Load service information and additional services for each order
         const ordersWithServices = [];
         if (data && data.length > 0) {
+          // Load all additional services first
+          await loadAdditionalServices(data);
+          
           for (const order of data) {
             try {
               const { data: serviceData } = await supabase
@@ -120,10 +187,11 @@ const ClientDashboard: React.FC = () => {
 
         setOrders(ordersWithServices);
         
-        // Load files for completed orders
+        // Load files and invoices for completed orders
         const completedOrders = ordersWithServices.filter(order => order.status === 'completed');
         if (completedOrders.length > 0) {
           loadOrderFiles(completedOrders);
+          loadOrderInvoices(completedOrders);
         }
       } catch (err: any) {
         console.error('Error loading orders:', err);
@@ -138,6 +206,64 @@ const ClientDashboard: React.FC = () => {
       loadOrders();
     }
   }, [user, authLoading]);
+
+  // Function to load additional services
+  const loadAdditionalServices = async (orders: any[]) => {
+    const serviceIds = new Set<string>();
+    
+    // Collect all additional service IDs
+    orders.forEach(order => {
+      if (order.additional_services && Array.isArray(order.additional_services)) {
+        order.additional_services.forEach((service: any) => {
+          // Handle both string IDs and objects with id property
+          let serviceId: string;
+          if (typeof service === 'string') {
+            serviceId = service;
+          } else if (service && typeof service === 'object' && service.id) {
+            serviceId = service.id;
+          } else {
+            console.warn('Invalid service format in additional_services:', service);
+            return;
+          }
+          
+          // Validate UUID format (basic check)
+          if (serviceId && typeof serviceId === 'string' && serviceId.length > 0) {
+            serviceIds.add(serviceId);
+          }
+        });
+      }
+    });
+
+    if (serviceIds.size > 0) {
+      try {
+        const validIds = Array.from(serviceIds).filter(id => 
+          id && typeof id === 'string' && id.trim().length > 0
+        );
+        
+        if (validIds.length === 0) {
+          console.warn('No valid service IDs found');
+          return;
+        }
+
+        const { data: services, error } = await supabase
+          .from('services')
+          .select('id, title')
+          .in('id', validIds);
+
+        if (error) {
+          console.error('Error loading additional services:', error);
+        } else if (services) {
+          const servicesMap: { [serviceId: string]: any } = {};
+          services.forEach(service => {
+            servicesMap[service.id] = service;
+          });
+          setAdditionalServices(servicesMap);
+        }
+      } catch (err) {
+        console.error('Error loading additional services:', err);
+      }
+    }
+  };
 
   // Function to load files for completed orders
   const loadOrderFiles = async (completedOrders: any[]) => {
@@ -161,6 +287,31 @@ const ClientDashboard: React.FC = () => {
         console.error('Error loading files for order:', order.id, err);
       } finally {
         setFilesLoading(prev => ({ ...prev, [order.id]: false }));
+      }
+    }
+  };
+
+  // Function to load invoices for completed orders
+  const loadOrderInvoices = async (completedOrders: any[]) => {
+    for (const order of completedOrders) {
+      try {
+        setInvoicesLoading(prev => ({ ...prev, [order.id]: true }));
+        
+        const { data: invoices, error } = await supabase
+          .from('invoices')
+          .select('*')
+          .eq('order_id', order.id)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          console.error('Error loading invoices for order:', order.id, error);
+        } else {
+          setOrderInvoices(prev => ({ ...prev, [order.id]: invoices || [] }));
+        }
+      } catch (err) {
+        console.error('Exception loading invoices for order:', order.id, err);
+      } finally {
+        setInvoicesLoading(prev => ({ ...prev, [order.id]: false }));
       }
     }
   };
@@ -225,54 +376,125 @@ const ClientDashboard: React.FC = () => {
   // Los datos del perfil ahora vienen del hook useProfile()
   // Se obtienen automáticamente de Supabase
 
-  // Componente OrderCard simplificado
+  // Componente OrderCard rediseñado - Sin desplegables
   const OrderCard: React.FC<{ order: any; onDownload: (fileId: string, fileName: string) => void }> = ({ order, onDownload }) => {
-    // TODO: Implementar lógica de facturas y archivos
-    const orderInvoices: any[] = [];
-    const orderFiles: any[] = [];
-    const invoicesLoading = false;
-    const filesLoading = false;
+    // Obtener datos de facturas y archivos del estado
+    const invoices = orderInvoices[order.id] || [];
+    const files = orderFiles[order.id] || [];
+    const isLoadingInvoices = invoicesLoading[order.id] || false;
+    const isLoadingFiles = filesLoading[order.id] || false;
+
+    const getStatusIcon = (status: string) => {
+      switch (status) {
+        case 'completed':
+          return <CheckCircle className="w-5 h-5" />;
+        case 'in_progress':
+          return <Clock className="w-5 h-5" />;
+        case 'pending':
+          return <AlertCircle className="w-5 h-5" />;
+        default:
+          return <Clock className="w-5 h-5" />;
+      }
+    };
+
+    const getStatusBadge = (status: string) => {
+      const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105";
+      switch (status) {
+        case 'completed':
+        case 'delivered':
+          return `${baseClasses} bg-gradient-to-r from-green-500/30 to-emerald-500/30 text-green-300 border-green-400/60 shadow-green-500/25 hover:shadow-green-500/40`;
+        case 'in_progress':
+          return `${baseClasses} bg-gradient-to-r from-yellow-500/30 to-amber-500/30 text-yellow-300 border-yellow-400/60 shadow-yellow-500/25 hover:shadow-yellow-500/40`;
+        case 'pending':
+          return `${baseClasses} bg-gradient-to-r from-orange-500/30 to-red-500/30 text-orange-300 border-orange-400/60 shadow-orange-500/25 hover:shadow-orange-500/40`;
+        default:
+          return `${baseClasses} bg-gradient-to-r from-gray-500/30 to-slate-500/30 text-gray-300 border-gray-400/60 shadow-gray-500/25 hover:shadow-gray-500/40`;
+      }
+    };
 
     return (
-      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-gray-700/50 hover:border-primary/50 transition-all duration-300">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-semibold text-white mb-2 break-words">{order.service_name || 'Servicio'}</h3>
-            <p className="text-gray-300 mb-1 text-sm sm:text-base">Pedido: {order.id}</p>
-            <p className="text-gray-300 mb-1 text-sm sm:text-base break-words">Vehículo: {order.vehicle}</p>
-            <p className="text-gray-300 text-sm sm:text-base">Fecha: {new Date(order.order_date).toLocaleDateString('es-ES')}</p>
-          </div>
-          <div className="flex sm:flex-col justify-between sm:justify-start items-center sm:items-end gap-2 sm:gap-0 sm:text-right flex-shrink-0">
-            <p className={`text-base sm:text-lg font-semibold sm:mb-2 ${getStatusColor(order.status)}`}>
-              {getStatusText(order.status)}
-            </p>
-            <p className="text-xl sm:text-2xl font-bold text-primary">€{order.price}</p>
+      <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/10 w-full max-w-none">
+        {/* Header */}
+        <div className="p-4 sm:p-6 border-b border-gray-700/30">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="bg-primary/20 p-2 rounded-lg flex-shrink-0">
+                  <Car className="w-5 h-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-lg font-bold text-white truncate">Pedido #{order.id}</h3>
+                  <p className="text-sm text-gray-400">{new Date(order.order_date || order.created_at).toLocaleDateString('es-ES')}</p>
+                </div>
+              </div>
+              <div className={getStatusBadge(order.status)}>
+                {getStatusIcon(order.status)}
+                <span className="truncate">{getStatusText(order.status)}</span>
+              </div>
+            </div>
+            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right">
+              <p className="text-xl sm:text-2xl font-bold text-primary">€{parseFloat(order.total_price || '0').toFixed(2)}</p>
+            </div>
           </div>
         </div>
-        
-        {order.estimated_delivery && (
-          <div className="bg-gray-700/30 rounded-lg p-3 mt-4">
-            <p className="text-sm text-gray-300">
-              Entrega estimada: {new Date(order.estimated_delivery).toLocaleDateString('es-ES')}
-            </p>
+
+        {/* Vehicle & Service Info */}
+        <div className="p-4 sm:p-6 bg-gray-800/30">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-500/20 p-2 rounded-lg flex-shrink-0">
+                  <Car className="w-4 h-4 text-blue-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Vehículo</p>
+                  <p className="text-white font-medium break-words">{order.vehicle || `${order.vehicle_make || ''} ${order.vehicle_model || ''}`.trim()}</p>
+                  {order.vehicle_year && <p className="text-sm text-gray-400 mt-1">Año {order.vehicle_year}</p>}
+                </div>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="bg-purple-500/20 p-2 rounded-lg flex-shrink-0">
+                  <Wrench className="w-4 h-4 text-purple-400" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Servicio</p>
+                  <p className="text-white font-medium break-words">{order.service_name || order.service_type || 'Servicio'}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-        
-        <div className="mt-6 space-y-4">
+        </div>
+
+        {/* Content - Siempre visible */}
+        <div className="border-t border-gray-700/30 p-6">
+          {order.estimated_delivery && (
+            <div className="bg-gray-700/30 rounded-lg p-3 mb-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                <p className="text-sm text-gray-300">
+                  Entrega estimada: {new Date(order.estimated_delivery).toLocaleDateString('es-ES')}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          <div className="space-y-4">
           {/* Archivos */}
-          {filesLoading ? (
+          {isLoadingFiles ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-400 text-sm mt-2">Cargando archivos...</p>
             </div>
-          ) : orderFiles && orderFiles.length > 0 && (
+          ) : files && files.length > 0 && (
             <div className="bg-gray-700/20 rounded-lg p-4">
               <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
                 Archivos Tuneados
               </h4>
               <div className="space-y-3">
-                {orderFiles.map((file) => (
+                {files.map((file) => (
                   <div key={file.id} className="bg-gray-600/30 rounded-lg p-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                       <div className="flex-1 min-w-0">
@@ -302,43 +524,64 @@ const ClientDashboard: React.FC = () => {
           )}
           
           {/* Facturas */}
-          {invoicesLoading ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-400 text-sm mt-2">Cargando facturas...</p>
-            </div>
-          ) : orderInvoices && orderInvoices.length > 0 && (
-            <div className="bg-gray-700/20 rounded-lg p-4">
-              <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Facturas
-              </h4>
-              <div className="space-y-2">
-                {orderInvoices.map((invoice) => (
-                  <div key={invoice.id} className="bg-gray-600/30 rounded-lg p-3">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium">Factura {invoice.invoice_number}</p>
-                        <p className="text-gray-400 text-sm">
-                          {new Date(invoice.invoice_date).toLocaleDateString('es-ES')} • €{invoice.amount} • 
-                          <span className={getStatusColor(invoice.status)}> {getStatusText(invoice.status)}</span>
-                        </p>
-                      </div>
-                      <div className="flex gap-2 w-full sm:w-auto flex-shrink-0">
-                        <button
-                          onClick={() => onDownload(invoice.id, `factura_${invoice.invoice_number}.pdf`)}
-                          className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-1 sm:flex-initial"
-                        >
-                          <Download className="w-4 h-4" />
-                          Descargar
-                        </button>
-                      </div>
-                    </div>
+          {(() => {
+            if (isLoadingInvoices) {
+              return (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-gray-400 text-sm mt-2">Cargando facturas...</p>
+                </div>
+              );
+            }
+            
+            if (invoices && invoices.length > 0) {
+              return (
+                <div className="bg-gray-700/20 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Facturas ({invoices.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {invoices.map((invoice) => {
+                      return (
+                        <div key={invoice.id} className="bg-gray-600/30 rounded-lg p-3">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
+                                <span className={getStatusColor(invoice.status)}> {getStatusText(invoice.status)}</span>
+                              </p>
+                            </div>
+                            <div className="flex gap-2 w-full sm:w-auto flex-shrink-0">
+                              {invoice.file_url && (
+                                <button
+                                  onClick={() => window.open(invoice.file_url, '_blank')}
+                                  className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-1 sm:flex-initial"
+                                >
+                                  <Download className="w-4 h-4" />
+                                  Descargar
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          {invoice.admin_comments && (
+                            <div className="mt-2 p-3 bg-gray-700/40 rounded-lg border-l-4 border-primary/50">
+                              <p className="text-xs text-gray-400 font-medium mb-1">Comentarios del administrador:</p>
+                              <p className="text-sm text-gray-300">{invoice.admin_comments}</p>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </div>
+              );
+            }
+            
+            return null;
+          })()}
+          </div>
         </div>
       </div>
     );
@@ -440,7 +683,7 @@ const ClientDashboard: React.FC = () => {
     }
     
     // TODO: Implementar lógica de cambio de contraseña
-    console.log('handlePasswordChange - Lógica de Supabase removida');
+    // Password change logic removed
     toast.success('Contraseña cambiada correctamente');
     setShowPasswordChange(false);
   };
@@ -463,7 +706,21 @@ const ClientDashboard: React.FC = () => {
     }
   };
 
-  const renderOrders = () => (
+  const renderOrders = () => {
+    // Calcular paginación
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedOrders = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+
+    const clearFilters = () => {
+      setSearchTerm('');
+      setStatusFilter('all');
+      setDateFrom('');
+      setDateTo('');
+      setSortBy('newest');
+    };
+
+    return (
     <div>
       <h2 className="text-3xl font-bold text-white mb-8">{t('clientDashboard.orders.title')}</h2>
       
@@ -487,129 +744,106 @@ const ClientDashboard: React.FC = () => {
         </div>
       </div>
       
-      <div className="space-y-6">
-        {ordersLoading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="text-gray-400 mt-4">Cargando pedidos...</p>
-          </div>
-        ) : ordersError ? (
-          <div className="text-center py-8">
-            <p className="text-red-400">Error al cargar los pedidos: {ordersError}</p>
-          </div>
-        ) : orders && orders.length > 0 ? (
-          orders.map((order) => (
-            <div key={order.id} className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                {/* Order Info */}
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
-                    {/* Service Image */}
-                    {order.services?.image_url && (
-                      <img
-                        src={order.services.image_url}
-                        alt={order.services.title}
-                        className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                      />
-                    )}
-                    
-                    {/* Order Details */}
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-white mb-2">
-                        {order.services?.title || 'Servicio'}
-                      </h3>
-                      <p className="text-gray-400 text-sm mb-2">
-                        {order.services?.category || 'Categoría no especificada'}
-                      </p>
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-                        <span>Vehículo: {order.vehicle_make} {order.vehicle_model} ({order.vehicle_year})</span>
-                        <span>Pedido: {new Date(order.created_at).toLocaleDateString('es-ES')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Order Status and Price */}
-                <div className="flex flex-col lg:items-end gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      order.status === 'completed' ? 'bg-green-900/30 text-green-400 border border-green-700' :
-                      order.status === 'in_progress' ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-700' :
-                      order.status === 'pending' ? 'bg-blue-900/30 text-blue-400 border border-blue-700' :
-                      'bg-gray-900/30 text-gray-400 border border-gray-700'
-                    }`}>
-                      {order.status === 'completed' ? 'Completado' :
-                       order.status === 'in_progress' ? 'En Proceso' :
-                       order.status === 'pending' ? 'Pendiente' :
-                       order.status}
-                    </span>
-                    <span className="text-xl font-bold text-white">
-                      €{parseFloat(order.total_price || '0').toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {order.status === 'completed' && (
-                    <div className="flex flex-col gap-2">
-                      {filesLoading[order.id] ? (
-                        <div className="flex items-center gap-2 px-4 py-2 text-gray-400">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                          <span>Cargando archivos...</span>
-                        </div>
-                      ) : orderFiles[order.id] && orderFiles[order.id].length > 0 ? (
-                        <div className="space-y-2">
-                          <p className="text-sm text-gray-400 mb-2">
-                            Archivos disponibles ({orderFiles[order.id].length}):
-                          </p>
-                          {orderFiles[order.id].map((file: any) => (
-                            <div key={file.id} className="mb-3">
-                              <button
-                                onClick={() => handleDownload(file.file_url, file.file_name)}
-                                className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-medium transition-all duration-300 flex items-center gap-2 text-sm w-full justify-between"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <FileText className="w-4 h-4" />
-                                  <span className="truncate max-w-[150px]">{file.file_name}</span>
-                                  <span className="text-xs text-gray-300">
-                                    ({file.file_size ? (file.file_size / 1024 / 1024).toFixed(1) : '0'} MB)
-                                  </span>
-                                </div>
-                                <Download className="w-4 h-4 flex-shrink-0" />
-                              </button>
-                              {file.admin_comments && (
-                                <div className="mt-2 p-3 bg-gray-700/30 rounded-lg">
-                                  <p className="text-xs text-gray-400 mb-1">💬 Comentarios del administrador:</p>
-                                  <p className="text-sm text-gray-300">{file.admin_comments}</p>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-sm text-gray-400 px-4 py-2">
-                          Los archivos estarán disponibles pronto
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Additional Services */}
-              {order.additional_services && order.additional_services.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-gray-700">
-                  <p className="text-gray-400 text-sm mb-2">Servicios adicionales:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {order.additional_services.map((serviceId: string, index: number) => (
-                      <span key={index} className="bg-gray-700/50 text-gray-300 px-2 py-1 rounded text-sm">
-                        Servicio adicional
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+      {/* Barra de búsqueda y filtros */}
+      <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50 mb-8">
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Búsqueda */}
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <input
+                type="text"
+                placeholder="Buscar por ID, vehículo o servicio..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
             </div>
-          ))
-        ) : (
+          </div>
+          
+          {/* Filtro por estado */}
+          <div className="min-w-[160px]">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+            >
+              <option value="all">Todos los estados</option>
+              <option value="pending">Pendiente</option>
+              <option value="in_progress">En Progreso</option>
+              <option value="completed">Completado</option>
+            </select>
+          </div>
+          
+          {/* Filtro por fecha desde */}
+           <div className="min-w-[140px]">
+             <input
+               type="date"
+               value={dateFrom}
+               onChange={(e) => setDateFrom(e.target.value)}
+               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+               placeholder="Desde"
+             />
+           </div>
+           
+           {/* Filtro por fecha hasta */}
+           <div className="min-w-[140px]">
+             <input
+               type="date"
+               value={dateTo}
+               onChange={(e) => setDateTo(e.target.value)}
+               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+               placeholder="Hasta"
+             />
+           </div>
+           
+           {/* Ordenamiento */}
+           <div className="min-w-[160px]">
+             <select
+               value={sortBy}
+               onChange={(e) => setSortBy(e.target.value)}
+               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+             >
+               <option value="newest">Más reciente</option>
+               <option value="oldest">Más antiguo</option>
+               <option value="price_high">Precio mayor</option>
+               <option value="price_low">Precio menor</option>
+             </select>
+           </div>
+          
+
+          
+          {/* Limpiar filtros */}
+           {(searchTerm || statusFilter !== 'all' || dateFrom || dateTo || sortBy !== 'newest') && (
+             <button
+               onClick={clearFilters}
+               className="px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+               title="Limpiar filtros"
+             >
+               <X className="h-4 w-4" />
+             </button>
+           )}
+        </div>
+        
+        {/* Contador de resultados */}
+        <div className="mt-4 text-sm text-gray-400">
+          Mostrando {paginatedOrders.length} de {filteredOrders.length} pedidos
+          {filteredOrders.length !== orders.length && ` (filtrados de ${orders.length} total)`}
+        </div>
+      </div>
+      
+      {/* Lista de pedidos */}
+      {ordersLoading ? (
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-gray-400 mt-4">Cargando pedidos...</p>
+        </div>
+      ) : ordersError ? (
+        <div className="text-center py-8">
+          <p className="text-red-400">Error al cargar los pedidos: {ordersError}</p>
+        </div>
+      ) : filteredOrders.length === 0 ? (
+        orders.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-gray-800/30 rounded-xl p-8 border border-gray-700">
               <ShoppingCart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
@@ -623,10 +857,79 @@ const ClientDashboard: React.FC = () => {
               </button>
             </div>
           </div>
-        )}
-      </div>
+        ) : (
+          <div className="text-center py-12">
+            <div className="bg-gray-800/30 rounded-xl p-8 border border-gray-700">
+              <p className="text-gray-400 mb-4">No se encontraron pedidos con los filtros aplicados.</p>
+              <button
+                onClick={clearFilters}
+                className="text-primary hover:text-primary/80 font-semibold"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          </div>
+        )
+      ) : (
+        <>
+          <div className="space-y-6">
+            {paginatedOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={{
+                  id: order.id,
+                  service_name: order.services?.title || 'Servicio',
+                  vehicle: `${order.vehicle_make} ${order.vehicle_model} (${order.vehicle_year})`,
+                  order_date: order.created_at,
+                  status: order.status,
+                  total_price: order.total_price,
+                  additional_services: order.additional_services,
+                  services: order.services
+                }}
+                onDownload={handleDownload}
+              />
+            ))}
+          </div>
+          
+          {/* Paginación */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 text-white"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-3 py-2 border rounded-lg ${
+                    currentPage === page
+                      ? 'bg-primary text-white border-primary'
+                      : 'bg-gray-800 border-gray-600 hover:bg-gray-700 text-white'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+              
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-700 text-white"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
-  );
+    );
+  };
 
 
 
