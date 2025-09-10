@@ -54,6 +54,10 @@ interface OrderData {
     full_name: string;
     email: string;
     phone?: string;
+    billing_address?: string;
+    billing_city?: string;
+    billing_postal_code?: string;
+    billing_country?: string;
   };
   order_files?: AdminFile[];
   invoices?: AdminInvoice[];

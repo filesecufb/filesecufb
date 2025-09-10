@@ -2086,6 +2086,7 @@ const OrdersSection: React.FC = () => {
 
 // Upload Maps Section
 const UploadMapsSection: React.FC = () => {
+  const { profile } = useAuth();
   const [comments, setComments] = useState<{[key: string]: string}>({});
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [pendingUploads, setPendingUploads] = useState<any[]>([]);
@@ -2274,7 +2275,7 @@ const UploadMapsSection: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: pendingUploads.find(upload => upload.fullOrder.id === orderId)?.fullOrder.client_id,
-            uploaded_by: user?.id || null,
+            uploaded_by: profile?.id || null,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
@@ -2680,6 +2681,7 @@ const UploadInvoicesSection: React.FC = () => {
 
 // Upload Invoice Tab Component
 const UploadInvoiceTab: React.FC = () => {
+  const { profile } = useAuth();
   const [completedOrders, setCompletedOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -2867,7 +2869,7 @@ const UploadInvoiceTab: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: completedOrders.find(order => order.fullOrder.id === orderId)?.fullOrder.client_id,
-            uploaded_by: user?.id || null,
+            uploaded_by: profile?.id || null,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
