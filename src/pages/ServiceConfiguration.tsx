@@ -27,7 +27,7 @@ interface ServiceConfigurationData {
 
   
   // Files
-  mainFile: File | null;
+  mainFile: File[];
   hasOptionalAttachments: boolean;
   optionalAttachments: File[];
   
@@ -132,7 +132,7 @@ const ServiceConfiguration: React.FC = () => {
     softwareNumber: '',
 
 
-    mainFile: null,
+    mainFile: [],
     hasOptionalAttachments: false,
     optionalAttachments: [],
     hasModifiedParts: false,
@@ -261,7 +261,11 @@ const ServiceConfiguration: React.FC = () => {
         optionalAttachments: [...prev.optionalAttachments, ...newFiles] 
       }));
     } else {
-      setFormData(prev => ({ ...prev, mainFile: files[0] }));
+      const newFiles = Array.from(files).filter(file => file.size <= 20 * 1024 * 1024); // 20MB limit
+      setFormData(prev => ({ 
+        ...prev, 
+        mainFile: [...prev.mainFile, ...newFiles] 
+      }));
     }
   };
 
@@ -329,8 +333,8 @@ const ServiceConfiguration: React.FC = () => {
     const errors: string[] = [];
     
     // Validar archivo principal
-    if (!formData.mainFile) {
-      errors.push('Debe seleccionar un archivo principal');
+    if (!formData.mainFile || formData.mainFile.length === 0) {
+      errors.push('Debe seleccionar al menos un archivo principal');
     }
     
     // Validar información del vehículo
@@ -357,6 +361,16 @@ const ServiceConfiguration: React.FC = () => {
     }
     
     return errors;
+  };
+
+  // Función para sanitizar nombres de archivos
+  const sanitizeFileName = (fileName: string): string => {
+    return fileName
+      .normalize('NFD') // Descomponer caracteres acentuados
+      .replace(/[\u0300-\u036f]/g, '') // Eliminar diacríticos (acentos)
+      .replace(/[^a-zA-Z0-9.-]/g, '-') // Reemplazar caracteres especiales con guiones
+      .replace(/-+/g, '-') // Reemplazar múltiples guiones con uno solo
+      .replace(/^-|-$/g, ''); // Eliminar guiones al inicio y final
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -402,43 +416,57 @@ const ServiceConfiguration: React.FC = () => {
         throw new Error(`Error al actualizar perfil: ${profileError.message}`);
       }
 
-      // 2. Subir archivos a Supabase Storage
-      let mainFileUrl = null;
+      // 2. Las carpetas se crearán automáticamente al subir los archivos reales
+      // No es necesario crear archivos temporales que causan errores 400
+      
+      // 3. Subir archivos a Supabase Storage
+      const mainFileUrls = [];
       const optionalFileUrls = [];
 
-      // Subir archivo principal
-      if (formData.mainFile) {
-        const mainFileName = `main-${user.id}-${Date.now()}.${formData.mainFile.name.split('.').pop()}`;
-        const { error: mainFileError } = await supabase.storage
-          .from('order-files')
-          .upload(mainFileName, formData.mainFile);
-        
-        if (mainFileError) {
-          throw new Error(`Error al subir archivo principal: ${mainFileError.message}`);
+      // Subir archivos principales
+      if (formData.mainFile && formData.mainFile.length > 0) {
+        for (let i = 0; i < formData.mainFile.length; i++) {
+          const file = formData.mainFile[i];
+          const fileExtension = file.name.split('.').pop();
+          const originalName = file.name.replace(`.${fileExtension}`, '');
+          const sanitizedName = sanitizeFileName(originalName);
+          const mainFileName = `${sanitizedName}.${fileExtension}`;
+          const mainFilePath = `clientordersprincipal/${user.id}/${Date.now()}-${i}/${mainFileName}`;
+          const { error: mainFileError } = await supabase.storage
+            .from('order-files')
+            .upload(mainFilePath, file);
+          
+          if (mainFileError) {
+            throw new Error(`Error al subir archivo principal ${i + 1}: ${mainFileError.message}`);
+          }
+          
+          mainFileUrls.push(mainFilePath);
         }
-        
-        mainFileUrl = mainFileName;
       }
 
       // Subir archivos opcionales
       if (formData.hasOptionalAttachments && formData.optionalAttachments.length > 0) {
         for (let i = 0; i < formData.optionalAttachments.length; i++) {
           const file = formData.optionalAttachments[i];
-          const optionalFileName = `optional-${user.id}-${Date.now()}-${i}.${file.name.split('.').pop()}`;
+          const fileExtension = file.name.split('.').pop();
+          const originalName = file.name.replace(`.${fileExtension}`, '');
+          const sanitizedName = sanitizeFileName(originalName);
+          const optionalFileName = `${sanitizedName}.${fileExtension}`;
+          const optionalFilePath = `clientorderadicional/${user.id}/${Date.now()}-${i}/${optionalFileName}`;
           
           const { error: optionalFileError } = await supabase.storage
             .from('order-files')
-            .upload(optionalFileName, file);
+            .upload(optionalFilePath, file);
           
           if (optionalFileError) {
             throw new Error(`Error al subir archivo opcional ${i + 1}: ${optionalFileError.message}`);
           }
           
-          optionalFileUrls.push(optionalFileName);
+          optionalFileUrls.push(optionalFilePath);
         }
       }
 
-      // 3. Calcular precios de servicios adicionales
+      // 4. Calcular precios de servicios adicionales
       const additionalServicesPrice = additionalServices
         .filter(service => formData.selectedAdditionalServices.includes(service.id))
         .reduce((sum, service) => {
@@ -448,7 +476,7 @@ const ServiceConfiguration: React.FC = () => {
           return sum + price;
         }, 0);
 
-      // 4. Crear el pedido
+      // 5. Crear el pedido
       const orderData = {
         client_id: user.id,
         service_id: selectedService.id,
@@ -488,7 +516,7 @@ const ServiceConfiguration: React.FC = () => {
         additional_services: formData.selectedAdditionalServices,
         
         // File URLs
-        main_file_url: mainFileUrl,
+        main_file_url: mainFileUrls.length > 0 ? JSON.stringify(mainFileUrls) : null,
         optional_attachments_urls: optionalFileUrls,
         
         // Pricing
@@ -508,7 +536,7 @@ const ServiceConfiguration: React.FC = () => {
         throw new Error(`Error al crear pedido: ${orderError.message}`);
       }
 
-      toast.success('¡Perfil actualizado y pedido creado exitosamente!');
+      toast.success('¡Pedido realizado correctamente!');
       
       // Navegar al dashboard del cliente
       navigate('/client-dashboard');
@@ -647,17 +675,21 @@ const ServiceConfiguration: React.FC = () => {
                   busca archivos en tu dispositivo
                   <input
                     type="file"
+                    multiple
                     className="hidden"
                     onChange={(e) => handleFileUpload(e.target.files)}
                   />
                 </label>
               </p>
-              {formData.mainFile && (
-                <p className="text-green-600 font-medium">
-                  Archivo seleccionado: {formData.mainFile.name}
-                </p>
-              )}
-              {!formData.mainFile && (
+              {formData.mainFile.length > 0 ? (
+                <div className="text-left">
+                  {formData.mainFile.map((file, index) => (
+                    <p key={index} className="text-green-600 font-medium">
+                      {file.name}
+                    </p>
+                  ))}
+                </div>
+              ) : (
                 <p className="text-gray-500 text-sm">Ningún archivo seleccionado</p>
               )}
             </div>

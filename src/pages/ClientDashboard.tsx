@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { User, FileText, Download, Edit, Lock, ShoppingCart, CreditCard, Search, X, ChevronLeft, ChevronRight, Car, Calendar, Wrench, Filter, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { User, FileText, Download, Edit, Lock, ShoppingCart, CreditCard, Search, X, ChevronLeft, ChevronRight, Car, Calendar, Wrench, Filter, CheckCircle, Clock, AlertCircle, Eye, Printer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import jsPDF from 'jspdf';
 
 // Las interfaces ahora se importan desde los hooks
 // TunedFile desde useFiles
@@ -45,10 +46,13 @@ const ClientDashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(6);
   const [orderFiles, setOrderFiles] = useState<{ [orderId: string]: any[] }>({});
+  const [adminFiles, setAdminFiles] = useState<{ [orderId: string]: any[] }>({});
   const [filesLoading, setFilesLoading] = useState<{ [orderId: string]: boolean }>({});
+  const [adminFilesLoading, setAdminFilesLoading] = useState<{ [orderId: string]: boolean }>({});
   const [orderInvoices, setOrderInvoices] = useState<{ [orderId: string]: any[] }>({});
   const [invoicesLoading, setInvoicesLoading] = useState<{ [orderId: string]: boolean }>({});
   const [additionalServices, setAdditionalServices] = useState<{ [serviceId: string]: any }>({});
+  const [selectedOrderForModal, setSelectedOrderForModal] = useState<any>(null);
 
   // Cargar perfil completo desde Supabase
   useEffect(() => {
@@ -269,6 +273,7 @@ const ClientDashboard: React.FC = () => {
   const loadOrderFiles = async (completedOrders: any[]) => {
     for (const order of completedOrders) {
       try {
+        // Load client files
         setFilesLoading(prev => ({ ...prev, [order.id]: true }));
         
         const { data: files, error } = await supabase
@@ -276,17 +281,48 @@ const ClientDashboard: React.FC = () => {
           .select('*')
           .eq('order_id', order.id)
           .eq('client_id', user.id)
+          .eq('uploaded_by', user.id)
           .order('created_at', { ascending: false });
 
         if (error) {
-          console.error('Error loading files for order:', order.id, error);
+          console.error('Error loading client files for order:', order.id, error);
         } else {
           setOrderFiles(prev => ({ ...prev, [order.id]: files || [] }));
         }
+
+        // Load admin files
+        setAdminFilesLoading(prev => ({ ...prev, [order.id]: true }));
+        
+        // Load admin files - need to get admin user IDs first
+        const { data: adminProfiles, error: adminProfileError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('role', 'admin');
+
+        if (adminProfileError) {
+          console.error('Error loading admin profiles:', adminProfileError);
+          setAdminFiles(prev => ({ ...prev, [order.id]: [] }));
+        } else {
+          const adminIds = adminProfiles?.map(profile => profile.id) || [];
+          
+          const { data: adminFilesData, error: adminError } = await supabase
+            .from('order_files')
+            .select('*')
+            .eq('order_id', order.id)
+            .in('uploaded_by', adminIds)
+            .order('created_at', { ascending: false });
+
+          if (adminError) {
+             console.error('Error loading admin files for order:', order.id, adminError);
+           } else {
+             setAdminFiles(prev => ({ ...prev, [order.id]: adminFilesData || [] }));
+           }
+         }
       } catch (err) {
         console.error('Error loading files for order:', order.id, err);
       } finally {
         setFilesLoading(prev => ({ ...prev, [order.id]: false }));
+        setAdminFilesLoading(prev => ({ ...prev, [order.id]: false }));
       }
     }
   };
@@ -482,39 +518,128 @@ const ClientDashboard: React.FC = () => {
           
           <div className="space-y-4">
           {/* Archivos */}
-          {isLoadingFiles ? (
+          {(isLoadingFiles || adminFilesLoading[order.id]) ? (
             <div className="text-center py-4">
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
               <p className="text-gray-400 text-sm mt-2">Cargando archivos...</p>
             </div>
-          ) : files && files.length > 0 && (
+          ) : ((files && files.length > 0) || (adminFiles[order.id] && adminFiles[order.id].length > 0)) && (
             <div className="bg-gray-700/20 rounded-lg p-4">
               <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                 <FileText className="w-5 h-5" />
                 Archivos Tuneados
               </h4>
+              
+              {/* Archivos del Cliente */}
+              {files && files.length > 0 && (
+                <div className="mb-4">
+                  <h5 className="text-md font-medium text-gray-300 mb-3 flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Tus archivos subidos
+                  </h5>
+                  <div className="space-y-3">
+                    {files.map((file) => (
+                      <div key={file.id} className="bg-gray-600/30 rounded-lg p-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium break-words">{file.file_name}</p>
+                            <p className="text-gray-400 text-sm break-words">
+                              Subido: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => onDownload(file.file_url, file.file_name)}
+                            className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
+                          >
+                            <Download className="w-4 h-4" />
+                            Descargar
+                          </button>
+                        </div>
+                        {file.admin_comments && (
+                          <div className="bg-gray-700/40 rounded-lg p-3 border-l-4 border-primary/50">
+                            <p className="text-gray-300 text-sm font-medium mb-1">Comentarios técnicos:</p>
+                            <p className="text-gray-200 text-sm leading-relaxed">{file.admin_comments}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Archivos del Admin */}
+              {adminFiles[order.id] && adminFiles[order.id].length > 0 && (
+                <div>
+                  <div className="space-y-3">
+                    {adminFiles[order.id].map((file) => (
+                      <div key={file.id} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium break-words">{file.file_name}</p>
+                            <p className="text-gray-400 text-sm break-words">
+                              Procesado: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => onDownload(file.file_url, file.file_name)}
+                            className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
+                          >
+                            <Download className="w-4 h-4" />
+                            Descargar
+                          </button>
+                        </div>
+                        {file.admin_comments && (
+                          <div className="bg-green-800/40 rounded-lg p-3 border-l-4 border-green-400/50">
+                            <p className="text-green-300 text-sm font-medium mb-1">Comentarios del admin:</p>
+                            <p className="text-green-100 text-sm leading-relaxed">{file.admin_comments}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* Facturas */}
+          {isLoadingInvoices ? (
+            <div className="text-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+              <p className="text-gray-400 text-sm mt-2">Cargando facturas...</p>
+            </div>
+          ) : (invoices && invoices.length > 0) && (
+            <div className="bg-gray-700/20 rounded-lg p-4">
+              <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                <CreditCard className="w-5 h-5" />
+                Facturas
+              </h4>
+              
               <div className="space-y-3">
-                {files.map((file) => (
-                  <div key={file.id} className="bg-gray-600/30 rounded-lg p-3">
+                {invoices.map((invoice) => (
+                  <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium break-words">{file.file_name}</p>
+                        <p className="text-white font-medium break-words">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
                         <p className="text-gray-400 text-sm break-words">
-                          Subido: {new Date(file.upload_date).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                          Generada: {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
+                          <span className={getStatusColor(invoice.status)}>{getStatusText(invoice.status)}</span>
                         </p>
                       </div>
-                      <button
-                        onClick={() => onDownload(file.id, file.file_name)}
-                        className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
-                      >
-                        <Download className="w-4 h-4" />
-                        Descargar
-                      </button>
+                      {invoice.file_url && (
+                        <button
+                          onClick={() => onDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
+                        >
+                          <Download className="w-4 h-4" />
+                          Descargar
+                        </button>
+                      )}
                     </div>
-                    {file.comments && (
-                      <div className="bg-gray-700/40 rounded-lg p-3 border-l-4 border-primary/50">
-                        <p className="text-gray-300 text-sm font-medium mb-1">Comentarios técnicos:</p>
-                        <p className="text-gray-200 text-sm leading-relaxed">{file.comments}</p>
+                    {invoice.admin_comments && (
+                      <div className="bg-blue-800/40 rounded-lg p-3 border-l-4 border-blue-400/50">
+                        <p className="text-blue-300 text-sm font-medium mb-1">Comentarios del admin:</p>
+                        <p className="text-blue-100 text-sm leading-relaxed">{invoice.admin_comments}</p>
                       </div>
                     )}
                   </div>
@@ -523,64 +648,16 @@ const ClientDashboard: React.FC = () => {
             </div>
           )}
           
-          {/* Facturas */}
-          {(() => {
-            if (isLoadingInvoices) {
-              return (
-                <div className="text-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                  <p className="text-gray-400 text-sm mt-2">Cargando facturas...</p>
-                </div>
-              );
-            }
-            
-            if (invoices && invoices.length > 0) {
-              return (
-                <div className="bg-gray-700/20 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Facturas ({invoices.length})
-                  </h4>
-                  <div className="space-y-2">
-                    {invoices.map((invoice) => {
-                      return (
-                        <div key={invoice.id} className="bg-gray-600/30 rounded-lg p-3">
-                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
-                              <p className="text-gray-400 text-sm">
-                                {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
-                                <span className={getStatusColor(invoice.status)}> {getStatusText(invoice.status)}</span>
-                              </p>
-                            </div>
-                            <div className="flex gap-2 w-full sm:w-auto flex-shrink-0">
-                              {invoice.file_url && (
-                                <button
-                                  onClick={() => window.open(invoice.file_url, '_blank')}
-                                  className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-1 sm:flex-initial"
-                                >
-                                  <Download className="w-4 h-4" />
-                                  Descargar
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                          {invoice.admin_comments && (
-                            <div className="mt-2 p-3 bg-gray-700/40 rounded-lg border-l-4 border-primary/50">
-                              <p className="text-xs text-gray-400 font-medium mb-1">Comentarios del administrador:</p>
-                              <p className="text-sm text-gray-300">{invoice.admin_comments}</p>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            }
-            
-            return null;
-          })()}
+          {/* Botón Ver más - Al final de la tarjeta */}
+          <div className="mt-6 pt-4 border-t border-gray-700/30 flex justify-center">
+            <button
+              onClick={() => setSelectedOrderForModal(order)}
+              className="bg-transparent hover:bg-gray-700/50 text-primary hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              Ver más
+            </button>
+          </div>
           </div>
         </div>
       </div>
@@ -690,19 +767,582 @@ const ClientDashboard: React.FC = () => {
 
   const handleDownload = async (fileUrl: string, fileName: string) => {
     try {
-      // Create a temporary link to download the file
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = fileName;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Validar que la URL no esté vacía
+      if (!fileUrl || fileUrl.trim() === '') {
+        toast.error('URL de archivo no válida');
+        return;
+      }
+
+      // Si es una URL completa de Supabase, descargar usando fetch para preservar el nombre
+      if (fileUrl.startsWith('http')) {
+        try {
+          const response = await fetch(fileUrl);
+          if (!response.ok) {
+            throw new Error('Error al obtener el archivo');
+          }
+          
+          const blob = await response.blob();
+          const downloadUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = fileName; // Usar el nombre original
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(downloadUrl);
+          
+          toast.success(`Descargando ${fileName}...`);
+          return;
+        } catch (fetchError) {
+          console.error('Error with fetch download:', fetchError);
+          // Fallback al método anterior
+          const link = document.createElement('a');
+          link.href = fileUrl;
+          link.download = fileName;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          toast.success(`Descargando ${fileName}...`);
+          return;
+        }
+      }
+
+      // Determinar el bucket basado en la URL del archivo
+      let bucketName = 'order-files';
+      if (fileUrl.includes('adminorders/')) {
+        bucketName = 'adminorders';
+      }
+
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .download(fileUrl);
+
+      if (error) {
+        throw error;
+      }
+
+      // Crear URL para descarga
+      const downloadUrl = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
       
       toast.success(`Descargando ${fileName}...`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error downloading file:', error);
-      toast.error('Error al descargar el archivo');
+      toast.error(`Error al descargar archivo: ${error.message || 'Error desconocido'}`);
+    }
+  };
+
+  // Función para formatear fecha
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  // Función para extraer el path del archivo desde una URL completa de Supabase Storage
+  const extractFilePathFromUrl = (url: string): string => {
+    try {
+      // Si ya es un path relativo (no contiene http), devolverlo tal como está
+      if (!url.startsWith('http')) {
+        return url;
+      }
+      
+      // Extraer el path después de '/object/'
+      const objectIndex = url.indexOf('/object/');
+      if (objectIndex !== -1) {
+        return url.substring(objectIndex + 8); // +8 para saltar '/object/'
+      }
+      
+      // Si no encuentra el patrón, intentar extraer después del bucket name
+      const bucketPattern = '/order-files/';
+      const bucketIndex = url.indexOf(bucketPattern);
+      if (bucketIndex !== -1) {
+        return url.substring(bucketIndex + bucketPattern.length);
+      }
+      
+      // Como último recurso, devolver la URL completa
+      return url;
+    } catch (error) {
+      console.error('Error extracting file path:', error);
+      return url;
+    }
+  };
+
+  // Función para extraer el nombre original del archivo desde una URL de Supabase Storage
+  const extractFileNameFromUrl = (url: string): string => {
+    try {
+      if (!url) return 'archivo-sin-nombre';
+      
+      // Extraer el path del archivo
+      const filePath = extractFilePathFromUrl(url);
+      
+      // Obtener solo el nombre del archivo (última parte del path)
+      const fileName = filePath.split('/').pop() || 'archivo-sin-nombre';
+      
+      // Decodificar URL para manejar caracteres especiales
+      const decodedFileName = decodeURIComponent(fileName);
+      
+      // Remover el timestamp del inicio del nombre si existe (formato: timestamp_nombreoriginal)
+      const timestampPattern = /^\d{13}_/; // 13 dígitos seguidos de guión bajo
+      const originalName = decodedFileName.replace(timestampPattern, '');
+      
+      return originalName || 'archivo-sin-nombre';
+    } catch (error) {
+      console.error('Error extracting file name:', error);
+      return 'archivo-sin-nombre';
+    }
+  };
+
+  // Función para generar PDF del pedido (idéntica a OrderDetails.tsx)
+  const generatePDF = async (order: any) => {
+    if (!order) return;
+
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+      const margin = 20;
+      let yPosition = 25;
+
+      // Colores corporativos
+      const primaryColor = [59, 130, 246]; // Azul primario
+      const darkColor = [31, 41, 55]; // Gris oscuro
+      const lightColor = [107, 114, 128]; // Gris claro
+      const accentColor = [16, 185, 129]; // Verde accent
+
+      // Función para verificar si necesitamos una nueva página
+      const checkNewPage = (requiredSpace: number) => {
+        if (yPosition + requiredSpace > pageHeight - 30) {
+          doc.addPage();
+          yPosition = 30;
+          return true;
+        }
+        return false;
+      };
+
+      // Función para agregar logo (simulado con texto estilizado)
+      const addLogo = () => {
+        // Logo simulado con texto estilizado
+        doc.setFontSize(24);
+        doc.setTextColor(...primaryColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text('FILESECUFB', margin, yPosition);
+        
+        // Subtítulo del logo
+        doc.setFontSize(10);
+        doc.setTextColor(...lightColor);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Professional ECU Services', margin, yPosition + 8);
+        
+        yPosition += 20;
+      };
+
+      // Función para agregar header con información de la empresa
+      const addCompanyHeader = () => {
+        // Línea decorativa superior
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(2);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 10;
+
+        // Información de la empresa (lado derecho)
+        const companyInfo = [
+          'www.filesecufb.com',
+          'info@filesecufb.com',
+          '+34 630 84 10 47'
+        ];
+        
+        doc.setFontSize(9);
+        doc.setTextColor(...lightColor);
+        companyInfo.forEach((info, index) => {
+          doc.text(info, pageWidth - margin, yPosition + (index * 5), { align: 'right' });
+        });
+        
+        yPosition += 25;
+      };
+
+      // Función para agregar título del documento
+      const addDocumentTitle = () => {
+        doc.setFontSize(28);
+        doc.setTextColor(...darkColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text('DETALLE DEL PEDIDO', pageWidth / 2, yPosition, { align: 'center' });
+        
+        // Línea decorativa bajo el título
+        yPosition += 8;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(pageWidth / 2 - 40, yPosition, pageWidth / 2 + 40, yPosition);
+        yPosition += 20;
+      };
+
+      // Función para agregar información básica del pedido
+      const addOrderBasicInfo = () => {
+        // Fondo gris claro para la información básica
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 25, 'F');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(...darkColor);
+        doc.setFont('helvetica', 'bold');
+        
+        // Primera fila
+        doc.text(`Pedido #${order.id.slice(-8).toUpperCase()}`, margin + 5, yPosition + 5);
+        doc.text(`Fecha: ${formatDate(order.created_at)}`, pageWidth / 2, yPosition + 5, { align: 'center' });
+        doc.text(`Total: €${parseFloat(order.total_price?.toString() || '0').toFixed(2)}`, pageWidth - margin - 5, yPosition + 5, { align: 'right' });
+        
+        // Segunda fila
+        doc.text(`Servicio: ${order.services?.title || 'N/A'}`, margin + 5, yPosition + 15);
+        
+        yPosition += 35;
+      };
+
+      // Función para agregar sección con título
+      const addSection = (title: string, content: () => void) => {
+        checkNewPage(30);
+        
+        // Título de sección
+        doc.setFontSize(16);
+        doc.setTextColor(...primaryColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text(title, margin, yPosition);
+        
+        // Línea bajo el título
+        yPosition += 3;
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPosition, margin + 60, yPosition);
+        yPosition += 12;
+        
+        content();
+        yPosition += 18;
+      };
+
+      // Función para agregar información del cliente
+      const addClientInfo = () => {
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        doc.setFont('helvetica', 'normal');
+        
+        const clientData = [
+          { label: 'Nombre Completo:', value: order.profiles?.full_name || 'N/A' },
+          { label: 'Email:', value: order.profiles?.email || 'N/A' },
+          { label: 'Teléfono:', value: order.profiles?.phone || 'N/A' },
+          { label: 'Dirección:', value: order.profiles?.address || 'N/A' },
+          { label: 'Ciudad:', value: order.profiles?.city || 'N/A' },
+          { label: 'Código Postal:', value: order.profiles?.postal_code || 'N/A' },
+          { label: 'País:', value: order.profiles?.country || 'N/A' }
+        ];
+        
+        clientData.forEach((item, index) => {
+          if (item.value !== 'N/A') {
+            doc.setFont('helvetica', 'bold');
+            doc.text(item.label, margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.text(item.value, margin + 40, yPosition);
+            yPosition += 8;
+          }
+        });
+      };
+
+      // Función para agregar información del vehículo
+      const addVehicleInfo = () => {
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        
+        const vehicleData = [
+          { label: 'Marca:', value: order.vehicle_make },
+          { label: 'Modelo:', value: order.vehicle_model },
+          { label: 'Generación:', value: order.vehicle_generation },
+          { label: 'Motor:', value: order.vehicle_engine },
+          { label: 'Año:', value: order.vehicle_year },
+          { label: 'ECU:', value: order.vehicle_ecu },
+          { label: 'Transmisión:', value: order.vehicle_gearbox },
+          { label: 'Potencia:', value: order.engine_hp ? `${order.engine_hp} HP${order.engine_kw ? ` (${order.engine_kw} kW)` : ''}` : null },
+          { label: 'Lectura:', value: order.read_method },
+          { label: 'Hardware:', value: order.hardware_number },
+          { label: 'Software:', value: order.software_number }
+        ];
+        
+        let col1Y = yPosition;
+        let col2Y = yPosition;
+        const colWidth = (pageWidth - 2 * margin) / 2;
+        
+        vehicleData.forEach((item, index) => {
+          if (item.value) {
+            const isLeftColumn = index % 2 === 0;
+            const xPos = isLeftColumn ? margin : margin + colWidth;
+            const currentY = isLeftColumn ? col1Y : col2Y;
+            
+            doc.setFont('helvetica', 'bold');
+            doc.text(item.label, xPos, currentY);
+            doc.setFont('helvetica', 'normal');
+            doc.text(item.value, xPos + 35, currentY);
+            
+            if (isLeftColumn) {
+              col1Y += 8;
+            } else {
+              col2Y += 8;
+            }
+          }
+        });
+        
+        yPosition = Math.max(col1Y, col2Y);
+      };
+
+      // Función para agregar modificaciones del vehículo
+      const addVehicleModifications = () => {
+        const modifications = [
+          { key: 'aftermarket_exhaust', label: 'Escape Aftermarket', remarks: 'aftermarket_exhaust_remarks' },
+          { key: 'aftermarket_intake_manifold', label: 'Colector de Admisión Aftermarket', remarks: 'aftermarket_intake_manifold_remarks' },
+          { key: 'cold_air_intake', label: 'Admisión de Aire Frío', remarks: 'cold_air_intake_remarks' },
+          { key: 'decat', label: 'Decat', remarks: 'decat_remarks' }
+        ];
+        
+        const hasAnyModification = modifications.some(({ key }) => order[key as keyof any]);
+        
+        if (!hasAnyModification) {
+          doc.setFontSize(11);
+          doc.setTextColor(...lightColor);
+          doc.setFont('helvetica', 'italic');
+          doc.text('No se han reportado modificaciones en el vehículo.', margin, yPosition);
+          yPosition += 8;
+          return;
+        }
+        
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        
+        modifications.forEach(({ key, label, remarks }) => {
+          const hasModification = order[key as keyof any] as boolean;
+          const remarkText = order[remarks as keyof any] as string;
+          
+          if (hasModification) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(`• ${label}`, margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            yPosition += 8;
+            
+            if (remarkText && remarkText.trim()) {
+              doc.setTextColor(...lightColor);
+              doc.setFont('helvetica', 'italic');
+              const lines = doc.splitTextToSize(`  Observaciones: ${remarkText}`, pageWidth - 2 * margin - 10);
+              lines.forEach((line: string) => {
+                doc.text(line, margin + 5, yPosition);
+                yPosition += 7;
+              });
+              yPosition += 3;
+            }
+            
+            doc.setTextColor(...darkColor);
+          }
+        });
+      };
+
+      // Función para agregar servicios adicionales
+      const addAdditionalServices = () => {
+        if (!order.additional_services_details || order.additional_services_details.length === 0) return;
+        
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        
+        let totalAdditional = 0;
+        
+        order.additional_services_details.forEach((service: any, index: number) => {
+          const price = parseFloat(service.price || 0);
+          totalAdditional += price;
+          
+          doc.setFont('helvetica', 'normal');
+          doc.text(`• ${service.title}`, margin, yPosition);
+          doc.setFont('helvetica', 'bold');
+          doc.text(`€${price.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
+          yPosition += 8;
+        });
+        
+        // Total de servicios adicionales
+        if (totalAdditional > 0) {
+          yPosition += 5;
+          doc.setDrawColor(...lightColor);
+          doc.line(margin, yPosition, pageWidth - margin, yPosition);
+          yPosition += 8;
+          
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...primaryColor);
+          doc.text('Total Servicios Adicionales:', margin, yPosition);
+          doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
+        }
+      };
+
+      // Función para agregar archivos del cliente
+      const addClientFiles = () => {
+        const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
+          if (!mainFileUrl) return [];
+          if (mainFileUrl.startsWith('[')) {
+            try {
+              const parsed = JSON.parse(mainFileUrl);
+              return Array.isArray(parsed) ? parsed : [mainFileUrl];
+            } catch (error) {
+              return [mainFileUrl];
+            }
+          }
+          return [mainFileUrl];
+        };
+        
+        const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
+        const additionalFiles = order.optional_attachments_urls || [];
+        
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        
+        if (mainFileUrls.length > 0) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Archivos Principales:', margin, yPosition);
+          yPosition += 8;
+          
+          doc.setFont('helvetica', 'normal');
+          mainFileUrls.forEach((url, index) => {
+            if (url && url.trim() !== '') {
+              const fileName = extractFileNameFromUrl(url);
+              doc.text(`• ${fileName}`, margin + 5, yPosition);
+              yPosition += 7;
+            }
+          });
+          yPosition += 8;
+        }
+        
+        if (additionalFiles.length > 0) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Archivos Adicionales:', margin, yPosition);
+          yPosition += 8;
+          
+          doc.setFont('helvetica', 'normal');
+          additionalFiles.forEach((url, index) => {
+            if (url && url.trim() !== '') {
+              const fileName = extractFileNameFromUrl(url);
+              doc.text(`• ${fileName}`, margin + 5, yPosition);
+              yPosition += 7;
+            }
+          });
+        }
+      };
+
+      // Función para agregar información adicional
+      const addAdditionalInfo = () => {
+        if (!order.additional_info) return;
+        
+        doc.setFontSize(11);
+        doc.setTextColor(...darkColor);
+        doc.setFont('helvetica', 'normal');
+        
+        const lines = doc.splitTextToSize(order.additional_info, pageWidth - 2 * margin - 10);
+        lines.forEach((line: string) => {
+          checkNewPage(10);
+          doc.text(line, margin, yPosition);
+          yPosition += 7;
+        });
+      };
+
+      // Función para agregar resumen financiero
+      const addFinancialSummary = () => {
+        checkNewPage(40);
+        
+        // Fondo para el resumen
+        doc.setFillColor(248, 250, 252);
+        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 35, 'F');
+        
+        doc.setFontSize(14);
+        doc.setTextColor(...primaryColor);
+        doc.setFont('helvetica', 'bold');
+        doc.text('RESUMEN FINANCIERO', margin + 5, yPosition + 8);
+        
+        yPosition += 20;
+        
+        // Detalles financieros
+        const basePrice = parseFloat(order.base_price?.toString() || '0');
+        const additionalPrice = order.additional_services_details?.reduce((sum: number, service: any) => 
+          sum + parseFloat(service.price || 0), 0) || 0;
+        const totalPrice = parseFloat(order.total_price?.toString() || '0');
+        
+        doc.setFontSize(12);
+        doc.setTextColor(...darkColor);
+        doc.setFont('helvetica', 'normal');
+        
+        if (basePrice > 0) {
+          doc.text('Precio Base:', margin + 5, yPosition);
+          doc.text(`€${basePrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
+          yPosition += 8;
+        }
+        
+        if (additionalPrice > 0) {
+          doc.text('Servicios Adicionales:', margin + 5, yPosition);
+          doc.text(`€${additionalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
+          yPosition += 8;
+        }
+        
+        // Línea separadora
+        doc.setDrawColor(...primaryColor);
+        doc.setLineWidth(1);
+        doc.line(margin + 5, yPosition, pageWidth - margin - 5, yPosition);
+        yPosition += 8;
+        
+        // Total final
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...primaryColor);
+        doc.text('TOTAL:', margin + 5, yPosition);
+        doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
+      };
+
+      // Función para agregar footer
+      const addFooter = () => {
+        const footerY = pageHeight - 20;
+        
+        doc.setFontSize(8);
+        doc.setTextColor(...lightColor);
+        doc.setFont('helvetica', 'normal');
+        
+        // Línea separadora
+        doc.setDrawColor(...lightColor);
+        doc.setLineWidth(0.5);
+        doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
+        
+        // Texto del footer
+        doc.text('Este documento ha sido generado automáticamente por FilesECUFB', pageWidth / 2, footerY, { align: 'center' });
+        doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, pageWidth / 2, footerY + 5, { align: 'center' });
+      };
+
+      // Construir el PDF
+      addLogo();
+      addCompanyHeader();
+      addDocumentTitle();
+      addOrderBasicInfo();
+      
+      addSection('INFORMACIÓN DEL CLIENTE', addClientInfo);
+      addSection('INFORMACIÓN DEL VEHÍCULO', addVehicleInfo);
+      addSection('MODIFICACIONES DEL VEHÍCULO', addVehicleModifications);
+      addSection('SERVICIOS ADICIONALES', addAdditionalServices);
+      addSection('ARCHIVOS DEL CLIENTE', addClientFiles);
+      addSection('INFORMACIÓN ADICIONAL', addAdditionalInfo);
+      addFinancialSummary();
+      addFooter();
+
+      // Guardar el PDF
+      doc.save(`pedido-${order.id.slice(-8)}-${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('PDF generado correctamente');
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      toast.error('Error al generar el PDF');
     }
   };
 
@@ -876,16 +1516,7 @@ const ClientDashboard: React.FC = () => {
             {paginatedOrders.map((order) => (
               <OrderCard
                 key={order.id}
-                order={{
-                  id: order.id,
-                  service_name: order.services?.title || 'Servicio',
-                  vehicle: `${order.vehicle_make} ${order.vehicle_model} (${order.vehicle_year})`,
-                  order_date: order.created_at,
-                  status: order.status,
-                  total_price: order.total_price,
-                  additional_services: order.additional_services,
-                  services: order.services
-                }}
+                order={order}
                 onDownload={handleDownload}
               />
             ))}
@@ -1312,6 +1943,481 @@ const ClientDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Modal de información completa del pedido */}
+      {selectedOrderForModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            {/* Header del Modal */}
+            <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-white">Información Completa - Pedido #{selectedOrderForModal.id}</h2>
+              <button
+                onClick={() => setSelectedOrderForModal(null)}
+                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Contenido del Modal */}
+            <div className="p-6 space-y-6">
+              {/* Información Básica del Pedido */}
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Información del Pedido
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-400 text-sm">ID del Pedido</p>
+                    <p className="text-white font-medium">#{selectedOrderForModal.id}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Fecha del Pedido</p>
+                    <p className="text-white font-medium">{new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Estado</p>
+                    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedOrderForModal.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                      selectedOrderForModal.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-orange-500/20 text-orange-400'
+                    }`}>
+                      {getStatusText(selectedOrderForModal.status)}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Precio Total</p>
+                    <p className="text-white font-bold text-lg">€{parseFloat(selectedOrderForModal.total_price || '0').toFixed(2)}</p>
+                  </div>
+                  {selectedOrderForModal.estimated_delivery && (
+                    <div className="md:col-span-2">
+                      <p className="text-gray-400 text-sm">Entrega Estimada</p>
+                      <p className="text-white font-medium">{new Date(selectedOrderForModal.estimated_delivery).toLocaleDateString('es-ES')}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Información del Cliente */}
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Información del Cliente
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-gray-400 text-sm">Nombre</p>
+                    <p className="text-white font-medium">{fullProfile?.full_name || user?.email || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Email</p>
+                    <p className="text-white font-medium">{user?.email || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Teléfono</p>
+                    <p className="text-white font-medium">{fullProfile?.phone || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Dirección</p>
+                    <p className="text-white font-medium">{fullProfile?.billing_address || 'No especificado'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Información del Vehículo */}
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Car className="w-5 h-5" />
+                  Información del Vehículo
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-gray-400 text-sm">Marca</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_make || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Modelo</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_model || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Generación</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_generation || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Motor</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_engine || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">ECU</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_ecu || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Año</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_year || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Caja de cambios</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_gearbox || 'No especificado'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">Servicio</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.service_name || selectedOrderForModal.service_type || selectedOrderForModal.services?.title || 'Servicio'}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Información Adicional del Vehículo */}
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Información Adicional
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {(selectedOrderForModal.engine_hp || selectedOrderForModal.engine_kw) && (
+                    <div>
+                      <p className="text-gray-400 text-sm">Potencia del motor</p>
+                      <p className="text-white font-medium">
+                        {selectedOrderForModal.engine_hp && `${selectedOrderForModal.engine_hp} HP`}
+                        {selectedOrderForModal.engine_hp && selectedOrderForModal.engine_kw && ' / '}
+                        {selectedOrderForModal.engine_kw && `${selectedOrderForModal.engine_kw} kW`}
+                      </p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.vin && (
+                    <div>
+                      <p className="text-gray-400 text-sm">VIN</p>
+                      <p className="text-white font-medium break-all">{selectedOrderForModal.vin}</p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.read_method && (
+                    <div>
+                      <p className="text-gray-400 text-sm">Método de lectura</p>
+                      <p className="text-white font-medium">{selectedOrderForModal.read_method}</p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.hardware_number && (
+                    <div>
+                      <p className="text-gray-400 text-sm">Número de hardware</p>
+                      <p className="text-white font-medium">{selectedOrderForModal.hardware_number}</p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.software_number && (
+                    <div>
+                      <p className="text-gray-400 text-sm">Número de software</p>
+                      <p className="text-white font-medium">{selectedOrderForModal.software_number}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Piezas Modificadas */}
+              {selectedOrderForModal.has_modified_parts && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Wrench className="w-5 h-5" />
+                    Piezas Modificadas
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedOrderForModal.aftermarket_exhaust && (
+                      <div className="bg-gray-700/30 rounded-lg p-3">
+                        <p className="text-white font-medium">Escape aftermarket</p>
+                        {selectedOrderForModal.aftermarket_exhaust_remarks && (
+                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_exhaust_remarks}</p>
+                        )}
+                      </div>
+                    )}
+                    {selectedOrderForModal.aftermarket_intake_manifold && (
+                      <div className="bg-gray-700/30 rounded-lg p-3">
+                        <p className="text-white font-medium">Colector de admisión aftermarket</p>
+                        {selectedOrderForModal.aftermarket_intake_manifold_remarks && (
+                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_intake_manifold_remarks}</p>
+                        )}
+                      </div>
+                    )}
+                    {selectedOrderForModal.cold_air_intake && (
+                      <div className="bg-gray-700/30 rounded-lg p-3">
+                        <p className="text-white font-medium">Admisión de aire frío</p>
+                        {selectedOrderForModal.cold_air_intake_remarks && (
+                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.cold_air_intake_remarks}</p>
+                        )}
+                      </div>
+                    )}
+                    {selectedOrderForModal.decat && (
+                      <div className="bg-gray-700/30 rounded-lg p-3">
+                        <p className="text-white font-medium">Decat</p>
+                        {selectedOrderForModal.decat_remarks && (
+                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.decat_remarks}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              
+              {/* Servicios Adicionales */}
+              {selectedOrderForModal.additional_services_details && selectedOrderForModal.additional_services_details.length > 0 && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Wrench className="w-5 h-5" />
+                    Servicios Adicionales
+                  </h3>
+                  <div className="space-y-3">
+                    {selectedOrderForModal.additional_services_details.map((service, index) => (
+                      <div key={index} className="bg-gray-700/30 rounded-lg p-3">
+                        <div className="flex justify-between items-center">
+                          <p className="text-white font-medium">{service.title}</p>
+                          <p className="text-green-400 font-semibold">€{service.price}</p>
+                        </div>
+                        {service.description && (
+                          <p className="text-gray-400 text-sm mt-2">{service.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Información Adicional */}
+              {selectedOrderForModal.additional_info && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Información Adicional
+                  </h3>
+                  <div>
+                    <p className="text-gray-400 text-sm mb-2">Comentarios adicionales</p>
+                    <p className="text-white whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Información de Precios */}
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Información de Precios
+                </h3>
+                <div className="space-y-3">
+                  {selectedOrderForModal.base_price && (
+                    <div className="flex justify-between">
+                      <p className="text-gray-400 text-sm">Precio base del servicio</p>
+                      <p className="text-white font-medium">€{selectedOrderForModal.base_price}</p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.additional_services_price && selectedOrderForModal.additional_services_price > 0 && (
+                    <div className="flex justify-between">
+                      <p className="text-gray-400 text-sm">Servicios adicionales</p>
+                      <p className="text-white font-medium">€{selectedOrderForModal.additional_services_price}</p>
+                    </div>
+                  )}
+                  {selectedOrderForModal.total_price && (
+                    <div className="flex justify-between border-t border-gray-600 pt-3">
+                      <p className="text-white font-semibold">Total</p>
+                      <p className="text-white font-bold text-lg">€{selectedOrderForModal.total_price}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Documentos del Cliente */}
+              {(selectedOrderForModal.main_file_url || selectedOrderForModal.optional_attachments_urls) && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Documentos del Cliente
+                  </h3>
+                  
+                  {/* Archivo Principal */}
+                  {selectedOrderForModal.main_file_url && (
+                    <div className="mb-4">
+                      <h4 className="text-md font-medium text-blue-300 mb-3">Archivo Principal</h4>
+                      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
+                        <div>
+                          <p className="text-white font-medium">
+                            {selectedOrderForModal.main_file_url.split('/').pop()?.split('?')[0] || 'Archivo principal'}
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            {new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDownload(selectedOrderForModal.main_file_url, selectedOrderForModal.main_file_url.split('/').pop()?.split('?')[0] || 'archivo_principal')}
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                        >
+                          <Download className="w-4 h-4" />
+                          Descargar
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Archivos Adicionales */}
+                  {selectedOrderForModal.optional_attachments_urls && selectedOrderForModal.optional_attachments_urls.length > 0 && (
+                    <div>
+                      <h4 className="text-md font-medium text-gray-300 mb-3">Archivos Adicionales</h4>
+                      <div className="space-y-2">
+                        {selectedOrderForModal.optional_attachments_urls.map((url, index) => (
+                          <div key={index} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
+                            <div>
+                              <p className="text-white font-medium">
+                                {url.split('/').pop()?.split('?')[0] || `Archivo adicional ${index + 1}`}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDownload(url, url.split('/').pop()?.split('?')[0] || `archivo_adicional_${index + 1}`)}
+                              className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                            >
+                              <Download className="w-4 h-4" />
+                              Descargar
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Archivos */}
+              {((orderFiles[selectedOrderForModal.id] && orderFiles[selectedOrderForModal.id].length > 0) || 
+                (adminFiles[selectedOrderForModal.id] && adminFiles[selectedOrderForModal.id].length > 0)) && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Archivos del Pedido
+                  </h3>
+                  
+                  {/* Archivos del Cliente */}
+                  {orderFiles[selectedOrderForModal.id] && orderFiles[selectedOrderForModal.id].length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-md font-medium text-gray-300 mb-3">Archivos Originales</h4>
+                      <div className="space-y-2">
+                        {orderFiles[selectedOrderForModal.id].map((file) => (
+                          <div key={file.id} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
+                            <div>
+                              <p className="text-white font-medium">{file.file_name}</p>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(file.created_at).toLocaleDateString('es-ES')} • 
+                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDownload(file.file_url, file.file_name)}
+                              className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                            >
+                              <Download className="w-4 h-4" />
+                              Descargar
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Archivos del Admin */}
+                  {adminFiles[selectedOrderForModal.id] && adminFiles[selectedOrderForModal.id].length > 0 && (
+                    <div>
+                      <h4 className="text-md font-medium text-green-300 mb-3">Archivos Tuneados</h4>
+                      <div className="space-y-2">
+                        {adminFiles[selectedOrderForModal.id].map((file) => (
+                          <div key={file.id} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
+                            <div>
+                              <p className="text-white font-medium">{file.file_name}</p>
+                              <p className="text-gray-400 text-sm">
+                                {new Date(file.created_at).toLocaleDateString('es-ES')} • 
+                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                              </p>
+                              {file.admin_comments && (
+                                <p className="text-green-200 text-sm mt-2 italic">{file.admin_comments}</p>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleDownload(file.file_url, file.file_name)}
+                              className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                            >
+                              <Download className="w-4 h-4" />
+                              Descargar
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {/* Facturas */}
+              {orderInvoices[selectedOrderForModal.id] && orderInvoices[selectedOrderForModal.id].length > 0 && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <CreditCard className="w-5 h-5" />
+                    Facturas
+                  </h3>
+                  <div className="space-y-2">
+                    {orderInvoices[selectedOrderForModal.id].map((invoice) => (
+                      <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
+                        <div>
+                          <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
+                          <p className="text-gray-400 text-sm">
+                            {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
+                            <span className={getStatusColor(invoice.status)}>{getStatusText(invoice.status)}</span>
+                          </p>
+                          {invoice.admin_comments && (
+                            <p className="text-blue-200 text-sm mt-2 italic">{invoice.admin_comments}</p>
+                          )}
+                        </div>
+                        {invoice.file_url && (
+                          <button
+                            onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
+                            className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                          >
+                            <Download className="w-4 h-4" />
+                            Descargar
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Información Extra */}
+              {selectedOrderForModal.additional_info && (
+                <div className="bg-gray-800/50 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Información Extra
+                  </h3>
+                  <div className="bg-gray-700/30 rounded-lg p-4">
+                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Footer del Modal */}
+            <div className="sticky bottom-0 bg-gray-900 border-t border-gray-700 p-6 flex justify-between items-center">
+              <button
+                onClick={() => generatePDF(selectedOrderForModal)}
+                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
+              >
+                <Printer className="w-5 h-5" />
+                Imprimir PDF
+              </button>
+              <button
+                onClick={() => setSelectedOrderForModal(null)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

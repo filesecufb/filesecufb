@@ -164,6 +164,7 @@ error.md
 check-*.js
 test-*.js
 debug-*.js
+debug_data.js
 investigate-*.js
 verify-*.js
 create-*.js

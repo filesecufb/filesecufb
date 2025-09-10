@@ -2251,7 +2251,7 @@ const UploadMapsSection: React.FC = () => {
         const timestamp = Date.now();
         const randomSuffix = Math.random().toString(36).substring(2, 8);
         const fileName = `${orderId}_${timestamp}_${randomSuffix}_${file.name}`;
-        const filePath = `orders/${orderId}/${fileName}`;
+        const filePath = `adminorders/${fileName}`;
 
         // Upload file to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase.storage
@@ -2274,6 +2274,7 @@ const UploadMapsSection: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: pendingUploads.find(upload => upload.fullOrder.id === orderId)?.fullOrder.client_id,
+            uploaded_by: user?.id,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
@@ -2866,6 +2867,7 @@ const UploadInvoiceTab: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: completedOrders.find(order => order.fullOrder.id === orderId)?.fullOrder.client_id,
+            uploaded_by: user?.id,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
