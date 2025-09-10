@@ -935,13 +935,13 @@ const ClientDashboard: React.FC = () => {
       const addLogo = () => {
         // Logo simulado con texto estilizado
         doc.setFontSize(24);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('FILESECUFB', margin, yPosition);
         
         // Subtítulo del logo
         doc.setFontSize(10);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setFont('helvetica', 'normal');
         doc.text('Professional ECU Services', margin, yPosition + 8);
         
@@ -951,7 +951,7 @@ const ClientDashboard: React.FC = () => {
       // Función para agregar header con información de la empresa
       const addCompanyHeader = () => {
         // Línea decorativa superior
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(2);
         doc.line(margin, yPosition, pageWidth - margin, yPosition);
         yPosition += 10;
@@ -964,7 +964,7 @@ const ClientDashboard: React.FC = () => {
         ];
         
         doc.setFontSize(9);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         companyInfo.forEach((info, index) => {
           doc.text(info, pageWidth - margin, yPosition + (index * 5), { align: 'right' });
         });
@@ -975,13 +975,13 @@ const ClientDashboard: React.FC = () => {
       // Función para agregar título del documento
       const addDocumentTitle = () => {
         doc.setFontSize(28);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('DETALLE DEL PEDIDO', pageWidth / 2, yPosition, { align: 'center' });
         
         // Línea decorativa bajo el título
         yPosition += 8;
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(1);
         doc.line(pageWidth / 2 - 40, yPosition, pageWidth / 2 + 40, yPosition);
         yPosition += 20;
@@ -994,7 +994,7 @@ const ClientDashboard: React.FC = () => {
         doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 25, 'F');
         
         doc.setFontSize(12);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'bold');
         
         // Primera fila
@@ -1014,13 +1014,13 @@ const ClientDashboard: React.FC = () => {
         
         // Título de sección
         doc.setFontSize(16);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text(title, margin, yPosition);
         
         // Línea bajo el título
         yPosition += 3;
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(0.5);
         doc.line(margin, yPosition, margin + 60, yPosition);
         yPosition += 12;
@@ -1032,7 +1032,7 @@ const ClientDashboard: React.FC = () => {
       // Función para agregar información del cliente
       const addClientInfo = () => {
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         const clientData = [
@@ -1059,7 +1059,7 @@ const ClientDashboard: React.FC = () => {
       // Función para agregar información del vehículo
       const addVehicleInfo = () => {
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         const vehicleData = [
           { label: 'Marca:', value: order.vehicle_make },
@@ -1114,7 +1114,7 @@ const ClientDashboard: React.FC = () => {
         
         if (!hasAnyModification) {
           doc.setFontSize(11);
-          doc.setTextColor(...lightColor);
+          doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
           doc.setFont('helvetica', 'italic');
           doc.text('No se han reportado modificaciones en el vehículo.', margin, yPosition);
           yPosition += 8;
@@ -1122,7 +1122,7 @@ const ClientDashboard: React.FC = () => {
         }
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         modifications.forEach(({ key, label, remarks }) => {
           const hasModification = order[key as keyof any] as boolean;
@@ -1135,7 +1135,7 @@ const ClientDashboard: React.FC = () => {
             yPosition += 8;
             
             if (remarkText && remarkText.trim()) {
-              doc.setTextColor(...lightColor);
+              doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
               doc.setFont('helvetica', 'italic');
               const lines = doc.splitTextToSize(`  Observaciones: ${remarkText}`, pageWidth - 2 * margin - 10);
               lines.forEach((line: string) => {
@@ -1145,7 +1145,7 @@ const ClientDashboard: React.FC = () => {
               yPosition += 3;
             }
             
-            doc.setTextColor(...darkColor);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
           }
         });
       };
@@ -1155,7 +1155,7 @@ const ClientDashboard: React.FC = () => {
         if (!order.additional_services_details || order.additional_services_details.length === 0) return;
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         let totalAdditional = 0;
         
@@ -1173,12 +1173,12 @@ const ClientDashboard: React.FC = () => {
         // Total de servicios adicionales
         if (totalAdditional > 0) {
           yPosition += 5;
-          doc.setDrawColor(...lightColor);
+          doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
           doc.line(margin, yPosition, pageWidth - margin, yPosition);
           yPosition += 8;
           
           doc.setFont('helvetica', 'bold');
-          doc.setTextColor(...primaryColor);
+          doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
           doc.text('Total Servicios Adicionales:', margin, yPosition);
           doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
         }
@@ -1203,7 +1203,7 @@ const ClientDashboard: React.FC = () => {
         const additionalFiles = order.optional_attachments_urls || [];
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         if (mainFileUrls.length > 0) {
           doc.setFont('helvetica', 'bold');
@@ -1242,7 +1242,7 @@ const ClientDashboard: React.FC = () => {
         if (!order.additional_info) return;
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         const lines = doc.splitTextToSize(order.additional_info, pageWidth - 2 * margin - 10);
@@ -1262,7 +1262,7 @@ const ClientDashboard: React.FC = () => {
         doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 35, 'F');
         
         doc.setFontSize(14);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('RESUMEN FINANCIERO', margin + 5, yPosition + 8);
         
@@ -1275,7 +1275,7 @@ const ClientDashboard: React.FC = () => {
         const totalPrice = parseFloat(order.total_price?.toString() || '0');
         
         doc.setFontSize(12);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         if (basePrice > 0) {
@@ -1291,7 +1291,7 @@ const ClientDashboard: React.FC = () => {
         }
         
         // Línea separadora
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(1);
         doc.line(margin + 5, yPosition, pageWidth - margin - 5, yPosition);
         yPosition += 8;
@@ -1299,7 +1299,7 @@ const ClientDashboard: React.FC = () => {
         // Total final
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.text('TOTAL:', margin + 5, yPosition);
         doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
       };
@@ -1309,11 +1309,11 @@ const ClientDashboard: React.FC = () => {
         const footerY = pageHeight - 20;
         
         doc.setFontSize(8);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setFont('helvetica', 'normal');
         
         // Línea separadora
-        doc.setDrawColor(...lightColor);
+        doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setLineWidth(0.5);
         doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
         

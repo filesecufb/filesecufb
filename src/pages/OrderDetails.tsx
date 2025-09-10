@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, User, Car, FileText, Settings, CheckCircle, Clock, AlertCircle, ChevronDown, FileDown, Upload, MapPin, Wrench, CreditCard, Trash2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 interface OrderData {
@@ -85,6 +86,7 @@ interface AdminInvoice {
 const OrderDetails: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -316,7 +318,7 @@ const OrderDetails: React.FC = () => {
         .insert({
           order_id: order.id,
           client_id: order.client_id,
-          uploaded_by: user?.id,
+          uploaded_by: user?.id || null,
           file_name: file.name,
           file_url: publicUrl,
           file_size: file.size,
@@ -656,13 +658,13 @@ const OrderDetails: React.FC = () => {
       const addLogo = () => {
         // Logo simulado con texto estilizado
         doc.setFontSize(24);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('FILESECUFB', margin, yPosition);
         
         // Subtítulo del logo
         doc.setFontSize(10);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setFont('helvetica', 'normal');
         doc.text('Professional ECU Services', margin, yPosition + 8);
         
@@ -672,7 +674,7 @@ const OrderDetails: React.FC = () => {
       // Función para agregar header con información de la empresa
       const addCompanyHeader = () => {
         // Línea decorativa superior
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(2);
         doc.line(margin, yPosition, pageWidth - margin, yPosition);
         yPosition += 10;
@@ -685,7 +687,7 @@ const OrderDetails: React.FC = () => {
         ];
         
         doc.setFontSize(9);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         companyInfo.forEach((info, index) => {
           doc.text(info, pageWidth - margin, yPosition + (index * 5), { align: 'right' });
         });
@@ -696,13 +698,13 @@ const OrderDetails: React.FC = () => {
       // Función para agregar título del documento
       const addDocumentTitle = () => {
         doc.setFontSize(28);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('DETALLE DEL PEDIDO', pageWidth / 2, yPosition, { align: 'center' });
         
         // Línea decorativa bajo el título
         yPosition += 8;
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(1);
         doc.line(pageWidth / 2 - 40, yPosition, pageWidth / 2 + 40, yPosition);
         yPosition += 20;
@@ -715,7 +717,7 @@ const OrderDetails: React.FC = () => {
         doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 25, 'F');
         
         doc.setFontSize(12);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'bold');
         
         // Primera fila
@@ -735,13 +737,13 @@ const OrderDetails: React.FC = () => {
         
         // Título de sección
         doc.setFontSize(16);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text(title, margin, yPosition);
         
         // Línea bajo el título
         yPosition += 3;
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(0.5);
         doc.line(margin, yPosition, margin + 60, yPosition);
         yPosition += 12;
@@ -753,17 +755,17 @@ const OrderDetails: React.FC = () => {
       // Función para agregar información del cliente
       const addClientInfo = () => {
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         const clientData = [
           { label: 'Nombre Completo:', value: order.profiles?.full_name || 'N/A' },
           { label: 'Email:', value: order.profiles?.email || 'N/A' },
           { label: 'Teléfono:', value: order.profiles?.phone || 'N/A' },
-          { label: 'Dirección:', value: order.profiles?.address || 'N/A' },
-          { label: 'Ciudad:', value: order.profiles?.city || 'N/A' },
-          { label: 'Código Postal:', value: order.profiles?.postal_code || 'N/A' },
-          { label: 'País:', value: order.profiles?.country || 'N/A' }
+          { label: 'Dirección:', value: order.profiles?.billing_address || 'N/A' },
+          { label: 'Ciudad:', value: order.profiles?.billing_city || 'N/A' },
+          { label: 'Código Postal:', value: order.profiles?.billing_postal_code || 'N/A' },
+          { label: 'País:', value: order.profiles?.billing_country || 'N/A' }
         ];
         
         clientData.forEach((item, index) => {
@@ -780,7 +782,7 @@ const OrderDetails: React.FC = () => {
       // Función para agregar información del vehículo
       const addVehicleInfo = () => {
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         const vehicleData = [
           { label: 'Marca:', value: order.vehicle_make },
@@ -835,7 +837,7 @@ const OrderDetails: React.FC = () => {
         
         if (!hasAnyModification) {
           doc.setFontSize(11);
-          doc.setTextColor(...lightColor);
+          doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
           doc.setFont('helvetica', 'italic');
           doc.text('No se han reportado modificaciones en el vehículo.', margin, yPosition);
           yPosition += 8;
@@ -843,7 +845,7 @@ const OrderDetails: React.FC = () => {
         }
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         modifications.forEach(({ key, label, remarks }) => {
           const hasModification = order[key as keyof OrderData] as boolean;
@@ -856,7 +858,7 @@ const OrderDetails: React.FC = () => {
             yPosition += 8;
             
             if (remarkText && remarkText.trim()) {
-              doc.setTextColor(...lightColor);
+              doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
               doc.setFont('helvetica', 'italic');
               const lines = doc.splitTextToSize(`  Observaciones: ${remarkText}`, pageWidth - 2 * margin - 10);
               lines.forEach((line: string) => {
@@ -866,7 +868,7 @@ const OrderDetails: React.FC = () => {
               yPosition += 3;
             }
             
-            doc.setTextColor(...darkColor);
+            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
           }
         });
       };
@@ -876,7 +878,7 @@ const OrderDetails: React.FC = () => {
         if (!order.additional_services_details || order.additional_services_details.length === 0) return;
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         let totalAdditional = 0;
         
@@ -894,12 +896,12 @@ const OrderDetails: React.FC = () => {
         // Total de servicios adicionales
         if (totalAdditional > 0) {
           yPosition += 5;
-          doc.setDrawColor(...lightColor);
+          doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
           doc.line(margin, yPosition, pageWidth - margin, yPosition);
           yPosition += 8;
           
           doc.setFont('helvetica', 'bold');
-          doc.setTextColor(...primaryColor);
+          doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
           doc.text('Total Servicios Adicionales:', margin, yPosition);
           doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
         }
@@ -920,11 +922,11 @@ const OrderDetails: React.FC = () => {
           return [mainFileUrl];
         };
         
-        const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
+        const mainFileUrls = parseMainFileUrl(order.main_file_url);
         const additionalFiles = order.optional_attachments_urls || [];
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         if (mainFileUrls.length > 0) {
           doc.setFont('helvetica', 'bold');
@@ -963,7 +965,7 @@ const OrderDetails: React.FC = () => {
         if (!order.additional_info) return;
         
         doc.setFontSize(11);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         const lines = doc.splitTextToSize(order.additional_info, pageWidth - 2 * margin - 10);
@@ -983,7 +985,7 @@ const OrderDetails: React.FC = () => {
         doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 35, 'F');
         
         doc.setFontSize(14);
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
         doc.text('RESUMEN FINANCIERO', margin + 5, yPosition + 8);
         
@@ -996,7 +998,7 @@ const OrderDetails: React.FC = () => {
         const totalPrice = parseFloat(order.total_price?.toString() || '0');
         
         doc.setFontSize(12);
-        doc.setTextColor(...darkColor);
+        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         doc.setFont('helvetica', 'normal');
         
         if (basePrice > 0) {
@@ -1012,7 +1014,7 @@ const OrderDetails: React.FC = () => {
         }
         
         // Línea separadora
-        doc.setDrawColor(...primaryColor);
+        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setLineWidth(1);
         doc.line(margin + 5, yPosition, pageWidth - margin - 5, yPosition);
         yPosition += 8;
@@ -1020,7 +1022,7 @@ const OrderDetails: React.FC = () => {
         // Total final
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(...primaryColor);
+        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.text('TOTAL:', margin + 5, yPosition);
         doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
       };
@@ -1030,11 +1032,11 @@ const OrderDetails: React.FC = () => {
         const footerY = pageHeight - 20;
         
         doc.setFontSize(8);
-        doc.setTextColor(...lightColor);
+        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setFont('helvetica', 'normal');
         
         // Línea separadora
-        doc.setDrawColor(...lightColor);
+        doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
         doc.setLineWidth(0.5);
         doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
         
@@ -1091,7 +1093,7 @@ const OrderDetails: React.FC = () => {
     };
     
     // Verificar archivos principales
-    const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
+    const mainFileUrls = parseMainFileUrl(order.main_file_url);
     const hasMainFiles = mainFileUrls.length > 0;
     
     // Verificar archivos adicionales
@@ -1130,7 +1132,7 @@ const OrderDetails: React.FC = () => {
       };
       
       // Descargar archivos principales
-      const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
+      const mainFileUrls = parseMainFileUrl(order.main_file_url);
       if (mainFileUrls.length > 0) {
         mainFileUrls.forEach((url, index) => {
           if (url && url.trim() !== '') {
@@ -1493,7 +1495,7 @@ const OrderDetails: React.FC = () => {
                   };
                   
                   // Manejar tanto main_file_url (string/JSON) como main_file_urls (array) para compatibilidad
-                  const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
+                  const mainFileUrls = parseMainFileUrl(order.main_file_url);
                   
                   return mainFileUrls.length > 0 ? (
                     <div className="space-y-3">

@@ -2274,7 +2274,7 @@ const UploadMapsSection: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: pendingUploads.find(upload => upload.fullOrder.id === orderId)?.fullOrder.client_id,
-            uploaded_by: user?.id,
+            uploaded_by: user?.id || null,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
@@ -2867,7 +2867,7 @@ const UploadInvoiceTab: React.FC = () => {
           .insert({
             order_id: orderId,
             client_id: completedOrders.find(order => order.fullOrder.id === orderId)?.fullOrder.client_id,
-            uploaded_by: user?.id,
+            uploaded_by: user?.id || null,
             file_name: file.name,
             file_url: publicUrl,
             file_size: file.size,
