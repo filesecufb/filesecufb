@@ -90,7 +90,7 @@ interface AdminInvoice {
 const OrderDetails: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isAdmin, loading: authLoading } = useAuth();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +104,22 @@ const OrderDetails: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{[key: string]: boolean}>({});
   const [deletingFile, setDeletingFile] = useState<{[key: string]: boolean}>({});
   const [downloadingAllFiles, setDownloadingAllFiles] = useState(false);
+
+  // Protección de rutas: Solo admins pueden acceder
+  useEffect(() => {
+    if (!authLoading) {
+      if (!user) {
+        toast.error('Debes iniciar sesión para acceder a esta página.');
+        navigate('/login', { replace: true });
+        return;
+      }
+      if (!isAdmin) {
+        toast.error('Acceso denegado. Esta página es solo para administradores.');
+        navigate('/', { replace: true });
+        return;
+      }
+    }
+  }, [authLoading, user, isAdmin, navigate]);
 
   // Cargar datos del pedido desde Supabase
   useEffect(() => {
@@ -1187,6 +1203,19 @@ const OrderDetails: React.FC = () => {
     }
   };
 
+  // Mostrar loading mientras se verifica la autenticación
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-white mb-2">Verificando acceso...</h2>
+          <p className="text-gray-400">Comprobando permisos de administrador</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
@@ -1221,76 +1250,82 @@ const OrderDetails: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col gap-4 mb-6 sm:mb-8">
+          {/* Botón de volver y título */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <button
               onClick={() => navigate('/admin?section=orders')}
-              className="flex items-center space-x-2 px-4 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-white rounded-lg hover:bg-gray-800/70 hover:border-primary/50 transition-all"
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-gray-800/50 backdrop-blur-sm border border-gray-700 text-white rounded-xl hover:bg-gray-800/70 hover:border-primary/50 transition-all min-h-[48px] text-sm sm:text-base font-medium active:scale-95 w-full sm:w-auto"
             >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Volver a Pedidos</span>
+              <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="sm:hidden">Volver a Pedidos</span>
+              <span className="hidden sm:inline">Volver a Pedidos</span>
             </button>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Pedido #{order.id.slice(-8).toUpperCase()}</h1>
-              <p className="text-gray-400 mt-1">{formatDate(order.created_at)}</p>
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white break-words leading-tight">Pedido #{order.id.slice(-8).toUpperCase()}</h1>
+              <p className="text-gray-400 mt-1 text-sm sm:text-base">{formatDate(order.created_at)}</p>
             </div>
           </div>
-          <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl ${getStatusColor(order.status)}`}>
-            {getStatusIcon(order.status)}
-            <span className="font-semibold">{getStatusDisplay(order.status)}</span>
+          
+          {/* Estado del pedido */}
+          <div className="flex justify-center sm:justify-end">
+            <div className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-xl min-h-[48px] font-medium ${getStatusColor(order.status)}`}>
+              {getStatusIcon(order.status)}
+              <span className="font-semibold text-sm sm:text-base">{getStatusDisplay(order.status)}</span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Información Principal */}
-          <div className="xl:col-span-2 space-y-6">
+        <div className="flex flex-col xl:grid xl:grid-cols-3 gap-4 sm:gap-6 xl:gap-8">
+          {/* Información Principal - Aparece primero en móviles */}
+          <div className="order-1 xl:order-1 xl:col-span-2 space-y-4 sm:space-y-6">
             {/* Cliente */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <User className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-bold text-white">Información del Cliente</h2>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <h2 className="text-lg sm:text-xl font-bold text-white">Información del Cliente</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Nombre completo</label>
-                    <p className="text-white text-lg font-medium">{order.profiles?.full_name || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Nombre completo</label>
+                    <p className="text-white text-base sm:text-lg font-medium break-words">{order.profiles?.full_name || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Correo electrónico</label>
-                    <p className="text-white font-medium">{order.profiles?.email || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Correo electrónico</label>
+                    <p className="text-white font-medium text-sm sm:text-base break-all">{order.profiles?.email || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Teléfono</label>
-                    <p className="text-white font-medium">{order.profiles?.phone || 'No proporcionado'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Teléfono</label>
+                    <p className="text-white font-medium text-sm sm:text-base">{order.profiles?.phone || 'No proporcionado'}</p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">ID Cliente</label>
-                    <p className="text-gray-300 text-sm font-mono">{order.client_id.slice(-8)}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">ID Cliente</label>
+                    <p className="text-gray-300 text-xs sm:text-sm font-mono">{order.client_id.slice(-8)}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Servicio */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <Settings className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-bold text-white">Servicio Solicitado</h2>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <h2 className="text-lg sm:text-xl font-bold text-white">Servicio Solicitado</h2>
               </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-white text-lg font-semibold">{order.services?.title || 'N/A'}</h3>
-                    <p className="text-gray-400">{order.services?.category || ''}</p>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0">
+                  <div className="flex-1">
+                    <h3 className="text-white text-base sm:text-lg font-semibold break-words">{order.services?.title || 'N/A'}</h3>
+                    <p className="text-gray-400 text-sm sm:text-base">{order.services?.category || ''}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-primary">€{parseFloat(order.total_price?.toString() || '0').toFixed(2)}</p>
-                    <p className="text-gray-400 text-sm">Precio total</p>
+                  <div className="text-left sm:text-right">
+                    <p className="text-2xl sm:text-3xl font-bold text-primary">€{parseFloat(order.total_price?.toString() || '0').toFixed(2)}</p>
+                    <p className="text-gray-400 text-xs sm:text-sm">Precio total</p>
                   </div>
                 </div>
                 {order.additional_services_details && order.additional_services_details.length > 0 && (
@@ -1310,71 +1345,71 @@ const OrderDetails: React.FC = () => {
             </div>
 
             {/* Vehículo */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <Car className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-bold text-white">Información del Vehículo</h2>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                <Car className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <h2 className="text-lg sm:text-xl font-bold text-white">Información del Vehículo</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Marca y Modelo</label>
-                    <p className="text-white font-semibold">
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Marca y Modelo</label>
+                    <p className="text-white font-semibold text-sm sm:text-base break-words">
                       {order.vehicle_make} {order.vehicle_model}
                     </p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Generación</label>
-                    <p className="text-white font-medium">{order.vehicle_generation || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Generación</label>
+                    <p className="text-white font-medium text-sm sm:text-base">{order.vehicle_generation || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Año</label>
-                    <p className="text-white font-medium">{order.vehicle_year || 'N/A'}</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-gray-400 text-sm font-medium">Motor</label>
-                    <p className="text-white font-medium">{order.vehicle_engine || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-gray-400 text-sm font-medium">ECU</label>
-                    <p className="text-white font-medium">{order.vehicle_ecu || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <label className="text-gray-400 text-sm font-medium">Transmisión</label>
-                    <p className="text-white font-medium">{order.vehicle_gearbox || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Año</label>
+                    <p className="text-white font-medium text-sm sm:text-base">{order.vehicle_year || 'N/A'}</p>
                   </div>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Potencia</label>
-                    <p className="text-white font-medium">
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Motor</label>
+                    <p className="text-white font-medium text-sm sm:text-base break-words">{order.vehicle_engine || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">ECU</label>
+                    <p className="text-white font-medium text-sm sm:text-base break-words">{order.vehicle_ecu || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Transmisión</label>
+                    <p className="text-white font-medium text-sm sm:text-base">{order.vehicle_gearbox || 'N/A'}</p>
+                  </div>
+                </div>
+                <div className="space-y-3 sm:space-y-4">
+                  <div>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Potencia</label>
+                    <p className="text-white font-medium text-sm sm:text-base">
                       {order.engine_hp ? `${order.engine_hp} HP` : 'N/A'}
                       {order.engine_kw && ` (${order.engine_kw} kW)`}
                     </p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Método de Lectura</label>
-                    <p className="text-white font-medium">{order.read_method || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Método de Lectura</label>
+                    <p className="text-white font-medium text-sm sm:text-base break-words">{order.read_method || 'N/A'}</p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-sm font-medium">Número de Hardware</label>
-                    <p className="text-white font-medium">{order.hardware_number || 'N/A'}</p>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">Número de Hardware</label>
+                    <p className="text-white font-medium text-xs sm:text-sm font-mono break-all">{order.hardware_number || 'N/A'}</p>
                   </div>
                 </div>
                 {(order.vin || order.software_number) && (
-                  <div className="md:col-span-2 lg:col-span-3 space-y-4">
+                  <div className="sm:col-span-2 lg:col-span-3 space-y-3 sm:space-y-4">
                     {order.vin && (
                       <div>
-                        <label className="text-gray-400 text-sm font-medium">VIN</label>
-                        <p className="text-white font-mono text-sm">{order.vin}</p>
+                        <label className="text-gray-400 text-xs sm:text-sm font-medium">VIN</label>
+                        <p className="text-white font-mono text-xs sm:text-sm break-all">{order.vin}</p>
                       </div>
                     )}
                     {order.software_number && (
                       <div>
-                        <label className="text-gray-400 text-sm font-medium">Número de Software</label>
-                        <p className="text-white font-mono text-sm">{order.software_number}</p>
+                        <label className="text-gray-400 text-xs sm:text-sm font-medium">Número de Software</label>
+                        <p className="text-white font-mono text-xs sm:text-sm break-all">{order.software_number}</p>
                       </div>
                     )}
                   </div>
@@ -1384,12 +1419,12 @@ const OrderDetails: React.FC = () => {
 
             {/* Modificaciones */}
             {order.has_modified_parts && (
-              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <Wrench className="w-6 h-6 text-primary" />
-                  <h2 className="text-xl font-bold text-white">Modificaciones del Vehículo</h2>
+              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+                <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                  <Wrench className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                  <h2 className="text-lg sm:text-xl font-bold text-white">Modificaciones del Vehículo</h2>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {[
                     { key: 'aftermarket_exhaust', label: 'Escape Aftermarket', remarks: 'aftermarket_exhaust_remarks' },
                     { key: 'aftermarket_intake_manifold', label: 'Colector de Admisión Aftermarket', remarks: 'aftermarket_intake_manifold_remarks' },
@@ -1400,17 +1435,17 @@ const OrderDetails: React.FC = () => {
                     const remarkText = order[remarks as keyof OrderData] as string;
                     
                     return (
-                      <div key={key} className="border border-gray-600/50 rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-white font-medium">{label}</h3>
-                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      <div key={key} className="border border-gray-600/50 rounded-lg p-3 sm:p-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2">
+                          <h3 className="text-white font-medium text-sm sm:text-base break-words">{label}</h3>
+                          <span className={`px-2 sm:px-3 py-1 text-xs font-semibold rounded-full self-start sm:self-auto ${
                             hasModification ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
                           }`}>
                             {hasModification ? 'Sí' : 'No'}
                           </span>
                         </div>
                         {hasModification && remarkText && (
-                          <p className="text-gray-300 text-sm mt-2">{remarkText}</p>
+                          <p className="text-gray-300 text-xs sm:text-sm mt-2 break-words">{remarkText}</p>
                         )}
                       </div>
                     );
@@ -1421,33 +1456,33 @@ const OrderDetails: React.FC = () => {
 
             {/* Información Adicional */}
             {order.additional_info && (
-              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-                <h2 className="text-xl font-bold text-white mb-4">Información Adicional</h2>
-                <div className="bg-gray-900/50 rounded-lg p-4">
-                  <p className="text-gray-300 leading-relaxed">{order.additional_info}</p>
+              <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+                <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Información Adicional</h2>
+                <div className="bg-gray-900/50 rounded-lg p-3 sm:p-4">
+                  <p className="text-gray-300 leading-relaxed text-sm sm:text-base break-words">{order.additional_info}</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Panel Lateral */}
-          <div className="space-y-6">
+          {/* Panel Lateral - Aparece segundo en móviles, después del contenido principal */}
+          <div className="order-2 xl:order-2 space-y-4 sm:space-y-6">
             {/* Acciones Rápidas */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">Acciones</h2>
-              <div className="space-y-4">
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Acciones</h2>
+              <div className="space-y-3 sm:space-y-4">
                 <button
                   onClick={generatePDF}
-                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600/20 text-green-400 border border-green-600/30 rounded-xl hover:bg-green-600/30 transition-colors"
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600/20 text-green-400 border border-green-600/30 rounded-xl hover:bg-green-600/30 transition-colors min-h-[44px] text-sm sm:text-base"
                 >
-                  <FileDown className="w-5 h-5" />
+                  <FileDown className="w-4 h-4 sm:w-5 sm:h-5" />
                   <span className="font-medium">Descargar Información</span>
                 </button>
 
                 <button
                   onClick={downloadAllClientFiles}
                   disabled={!hasClientFiles()}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 border rounded-xl transition-colors font-medium ${
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 border rounded-xl transition-colors font-medium min-h-[44px] text-sm sm:text-base ${
                     hasClientFiles()
                       ? 'bg-primary/20 text-primary border-primary/30 hover:bg-primary/30' 
                       : 'bg-gray-600/20 text-gray-500 border-gray-600/30 cursor-not-allowed'
@@ -1455,12 +1490,12 @@ const OrderDetails: React.FC = () => {
                 >
                   {downloadingAllFiles ? (
                     <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                      <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary"></div>
                       <span>Descargando...</span>
                     </>
                   ) : (
                     <>
-                      <Download className="w-5 h-5" />
+                      <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                       <span>Descargar Todo</span>
                     </>
                   )}
@@ -1469,15 +1504,15 @@ const OrderDetails: React.FC = () => {
             </div>
 
             {/* Archivos */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <FileText className="w-6 h-6 text-primary" />
-                <h2 className="text-xl font-bold text-white">Archivos</h2>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <div className="flex items-center space-x-2 sm:space-x-3 mb-4 sm:mb-6">
+                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <h2 className="text-lg sm:text-xl font-bold text-white">Archivos</h2>
               </div>
               
               {/* Archivo principal */}
-              <div className="mb-6">
-                <h3 className="text-white font-medium mb-3">Archivo Principal del Cliente</h3>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Archivo Principal del Cliente</h3>
                 {(() => {
                   // Función para parsear main_file_url que puede ser string simple o JSON array
                   const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
@@ -1504,30 +1539,30 @@ const OrderDetails: React.FC = () => {
                   return mainFileUrls.length > 0 ? (
                     <div className="space-y-3">
                       {mainFileUrls.map((url, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="w-5 h-5 text-primary" />
-                            <div>
-                              <p className="text-white font-medium">{extractFileNameFromUrl(url)}</p>
-                              <p className="text-gray-400 text-sm">Archivo de ECU</p>
+                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
+                              <p className="text-gray-400 text-xs sm:text-sm">Archivo de ECU</p>
                             </div>
                           </div>
                           <button
                             onClick={() => downloadFile(url, extractFileNameFromUrl(url))}
-                            className="flex items-center space-x-2 px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors"
+                            className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
                           >
                             <Download className="w-4 h-4" />
-                            <span className="text-sm font-medium">Descargar</span>
+                            <span>Descargar</span>
                           </button>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
+                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                       <div className="text-center">
-                        <FileText className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-                        <p className="text-gray-400 font-medium">No hay archivos principales</p>
-                        <p className="text-gray-500 text-sm">El cliente aún no ha subido archivos de ECU</p>
+                        <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
+                        <p className="text-gray-400 font-medium text-sm sm:text-base">No hay archivos principales</p>
+                        <p className="text-gray-500 text-xs sm:text-sm">El cliente aún no ha subido archivos de ECU</p>
                       </div>
                     </div>
                   );
@@ -1535,72 +1570,72 @@ const OrderDetails: React.FC = () => {
               </div>
 
               {/* Archivos adicionales del cliente */}
-              <div className="mb-6">
-                <h3 className="text-white font-medium mb-3">Archivos Adicionales del Cliente</h3>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Archivos Adicionales del Cliente</h3>
                 {order.optional_attachments_urls && order.optional_attachments_urls.length > 0 ? (
                   <div className="space-y-3">
                     {order.optional_attachments_urls.map((url, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
-                        <div className="flex items-center space-x-3">
-                          <FileText className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="text-white font-medium">{extractFileNameFromUrl(url)}</p>
-                            <p className="text-gray-400 text-sm">Documento adjunto</p>
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
+                            <p className="text-gray-400 text-xs sm:text-sm">Documento adjunto</p>
                           </div>
                         </div>
                         <button
                           onClick={() => downloadFile(url, extractFileNameFromUrl(url))}
-                          className="flex items-center space-x-2 px-3 py-1 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors"
+                          className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
                         >
                           <Download className="w-4 h-4" />
-                          <span className="text-sm font-medium">Descargar</span>
+                          <span>Descargar</span>
                         </button>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
+                  <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
-                      <FileText className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium">No hay archivos adicionales</p>
-                      <p className="text-gray-500 text-sm">El cliente no ha subido documentos adicionales</p>
+                      <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">No hay archivos adicionales</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">El cliente no ha subido documentos adicionales</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Mapas tuneados subidos por admin */}
-              <div className="mb-6">
-                <h3 className="text-white font-medium mb-3">Mapas Tuneados (Admin)</h3>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Mapas Tuneados (Admin)</h3>
                 {order.order_files && order.order_files.filter(f => f.file_category === 'map').length > 0 ? (
                   <div className="space-y-3">
                     {order.order_files.filter(f => f.file_category === 'map').map((file) => (
                       <div key={file.id} className="p-3 bg-green-900/20 rounded-lg border border-green-600/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-3">
-                            <MapPin className="w-5 h-5 text-green-400" />
-                            <div>
-                              <p className="text-white font-medium">{file.file_name}</p>
-                              <p className="text-gray-400 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-2">
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                            <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-white font-medium text-sm sm:text-base truncate">{file.file_name}</p>
+                              <p className="text-gray-400 text-xs sm:text-sm">
                                 Subido: {new Date(file.created_at).toLocaleDateString('es-ES')}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 self-start sm:self-auto">
                             <button
                               onClick={() => window.open(file.file_url, '_blank')}
-                              className="flex items-center space-x-2 px-3 py-1 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors"
+                              className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
-                              <span className="text-sm font-medium">Descargar</span>
+                              <span className="hidden sm:inline">Descargar</span>
                             </button>
                             <button
                               onClick={() => confirmDelete(file.id)}
                               disabled={deletingFile[file.id]}
-                              className="flex items-center space-x-2 px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Trash2 className="w-4 h-4" />
-                              <span className="text-sm font-medium">
+                              <span className="hidden sm:inline">
                                 {deletingFile[file.id] ? 'Eliminando...' : 'Eliminar'}
                               </span>
                             </button>
@@ -1609,26 +1644,26 @@ const OrderDetails: React.FC = () => {
                         
                         {/* Comentarios editables */}
                         <div className="mt-3">
-                          <label className="text-gray-400 text-sm font-medium">Comentarios del Admin:</label>
+                          <label className="text-gray-400 text-xs sm:text-sm font-medium">Comentarios del Admin:</label>
                           {editingComments[file.id] ? (
                             <div className="mt-2 space-y-2">
                               <textarea
                                 value={tempComments[file.id] || ''}
                                 onChange={(e) => setTempComments(prev => ({ ...prev, [file.id]: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                                 rows={3}
                                 placeholder="Añadir comentarios sobre este mapa..."
                               />
-                              <div className="flex space-x-2">
+                              <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
                                 <button
                                   onClick={() => saveComment(file.id, 'order_files')}
-                                  className="px-3 py-1 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors text-sm"
+                                  className="px-3 py-2 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors text-sm min-h-[44px]"
                                 >
                                   Guardar
                                 </button>
                                 <button
                                   onClick={() => cancelEditingComment(file.id)}
-                                  className="px-3 py-1 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm"
+                                  className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm min-h-[44px]"
                                 >
                                   Cancelar
                                 </button>
@@ -1637,12 +1672,12 @@ const OrderDetails: React.FC = () => {
                           ) : (
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
-                                <p className="text-gray-300 text-sm">
+                                <p className="text-gray-300 text-xs sm:text-sm">
                                   {file.admin_comments || 'Sin comentarios'}
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(file.id, file.admin_comments || '')}
-                                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                                  className="text-primary hover:text-primary/80 text-xs sm:text-sm font-medium min-h-[44px] flex items-center"
                                 >
                                   Editar
                                 </button>
@@ -1684,48 +1719,48 @@ const OrderDetails: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
+                  <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
-                      <MapPin className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium">No hay mapas tuneados</p>
-                      <p className="text-gray-500 text-sm">Aún no se han subido mapas tuneados</p>
+                      <MapPin className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">No hay mapas tuneados</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">Aún no se han subido mapas tuneados</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Facturas subidas por admin */}
-              <div className="mb-6">
-                <h3 className="text-white font-medium mb-3">Facturas (Admin)</h3>
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Facturas (Admin)</h3>
                 {order.invoices && order.invoices.length > 0 ? (
                   <div className="space-y-3">
                     {order.invoices.map((invoice) => (
                       <div key={invoice.id} className="p-3 bg-blue-900/20 rounded-lg border border-blue-600/30">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-3">
-                            <CreditCard className="w-5 h-5 text-blue-400" />
-                            <div>
-                              <p className="text-white font-medium">{invoice.file_name}</p>
-                              <p className="text-gray-400 text-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-2">
+                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-white font-medium text-sm sm:text-base truncate">{invoice.file_name}</p>
+                              <p className="text-gray-400 text-xs sm:text-sm">
                                 Subido: {new Date(invoice.created_at).toLocaleDateString('es-ES')}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-2 self-start sm:self-auto">
                             <button
                               onClick={() => window.open(invoice.file_url, '_blank')}
-                              className="flex items-center space-x-2 px-3 py-1 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors"
+                              className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
-                              <span className="text-sm font-medium">Descargar</span>
+                              <span className="hidden sm:inline">Descargar</span>
                             </button>
                             <button
                               onClick={() => confirmDelete(invoice.id)}
                               disabled={deletingFile[invoice.id]}
-                              className="flex items-center space-x-2 px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Trash2 className="w-4 h-4" />
-                              <span className="text-sm font-medium">
+                              <span className="hidden sm:inline">
                                 {deletingFile[invoice.id] ? 'Eliminando...' : 'Eliminar'}
                               </span>
                             </button>
@@ -1734,26 +1769,26 @@ const OrderDetails: React.FC = () => {
                         
                         {/* Comentarios editables */}
                         <div className="mt-3">
-                          <label className="text-gray-400 text-sm font-medium">Comentarios del Admin:</label>
+                          <label className="text-gray-400 text-xs sm:text-sm font-medium">Comentarios del Admin:</label>
                           {editingComments[invoice.id] ? (
                             <div className="mt-2 space-y-2">
                               <textarea
                                 value={tempComments[invoice.id] || ''}
                                 onChange={(e) => setTempComments(prev => ({ ...prev, [invoice.id]: e.target.value }))}
-                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                                 rows={3}
                                 placeholder="Añadir comentarios sobre esta factura..."
                               />
-                              <div className="flex space-x-2">
+                              <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
                                 <button
                                   onClick={() => saveComment(invoice.id, 'invoices')}
-                                  className="px-3 py-1 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors text-sm"
+                                  className="px-3 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors text-sm min-h-[44px]"
                                 >
                                   Guardar
                                 </button>
                                 <button
                                   onClick={() => cancelEditingComment(invoice.id)}
-                                  className="px-3 py-1 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm"
+                                  className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm min-h-[44px]"
                                 >
                                   Cancelar
                                 </button>
@@ -1762,12 +1797,12 @@ const OrderDetails: React.FC = () => {
                           ) : (
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
-                                <p className="text-gray-300 text-sm">
+                                <p className="text-gray-300 text-xs sm:text-sm">
                                   {invoice.admin_comments || 'Sin comentarios'}
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(invoice.id, invoice.admin_comments || '')}
-                                  className="text-primary hover:text-primary/80 text-sm font-medium"
+                                  className="text-primary hover:text-primary/80 text-xs sm:text-sm font-medium min-h-[44px] flex items-center"
                                 >
                                   Editar
                                 </button>
@@ -1779,24 +1814,24 @@ const OrderDetails: React.FC = () => {
                         {/* Diálogo de confirmación de eliminación */}
                         {showDeleteConfirm[invoice.id] && (
                           <div className="mt-3 p-3 bg-red-900/30 border border-red-600/50 rounded-lg">
-                            <div className="flex items-start space-x-3">
-                              <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+                            <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3">
+                              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 sm:mt-0.5" />
                               <div className="flex-1">
                                 <p className="text-red-400 font-medium text-sm">¿Eliminar esta factura?</p>
                                 <p className="text-gray-300 text-xs mt-1">
                                   Esta acción no se puede deshacer. El archivo se eliminará permanentemente.
                                 </p>
-                                <div className="flex space-x-2 mt-3">
+                                <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0 mt-3">
                                   <button
                                     onClick={() => deleteFile(invoice.id, 'invoices')}
                                     disabled={deletingFile[invoice.id]}
-                                    className="px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="px-3 py-2 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                                   >
                                     {deletingFile[invoice.id] ? 'Eliminando...' : 'Confirmar'}
                                   </button>
                                   <button
                                     onClick={() => cancelDelete(invoice.id)}
-                                    className="px-3 py-1 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm font-medium"
+                                    className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm font-medium min-h-[44px]"
                                   >
                                     Cancelar
                                   </button>
@@ -1809,25 +1844,25 @@ const OrderDetails: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
+                  <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
-                      <CreditCard className="w-12 h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium">No hay facturas</p>
-                      <p className="text-gray-500 text-sm">Aún no se han subido facturas</p>
+                      <CreditCard className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">No hay facturas</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">Aún no se han subido facturas</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Subir mapa tuneado */}
-              <div className="mb-6">
-                <h3 className="text-white font-medium mb-3">Subir Mapa Tuneado</h3>
-                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6">
-                  <div className="space-y-4">
+              <div className="mb-4 sm:mb-6">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Subir Mapa Tuneado</h3>
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
                     <textarea
                       value={mapComment}
                       onChange={(e) => setMapComment(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                       rows={3}
                       placeholder="Comentarios sobre el mapa tuneado..."
                     />
@@ -1841,20 +1876,20 @@ const OrderDetails: React.FC = () => {
                       />
                       <label
                         htmlFor="map-upload"
-                        className="cursor-pointer flex flex-col items-center space-y-3"
+                        className="cursor-pointer flex flex-col items-center space-y-2 sm:space-y-3 min-h-[44px] justify-center py-3"
                       >
-                        <Upload className="w-8 h-8 text-gray-400" />
+                        <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                         <div>
-                          <p className="text-white font-medium">Subir mapa tuneado</p>
-                          <p className="text-gray-400 text-sm">Cualquier formato</p>
+                          <p className="text-white font-medium text-sm sm:text-base">Subir mapa tuneado</p>
+                          <p className="text-gray-400 text-xs sm:text-sm">Cualquier formato</p>
                         </div>
                       </label>
                     </div>
                     
                     {uploading && (
                       <div className="text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-                        <p className="text-gray-400 text-sm mt-2">Subiendo mapa...</p>
+                        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-primary mx-auto"></div>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">Subiendo mapa...</p>
                       </div>
                     )}
                   </div>
@@ -1863,13 +1898,13 @@ const OrderDetails: React.FC = () => {
 
               {/* Subir factura */}
               <div>
-                <h3 className="text-white font-medium mb-3">Subir Factura</h3>
-                <div className="border-2 border-dashed border-blue-600/30 rounded-lg p-6">
-                  <div className="space-y-4">
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Subir Factura</h3>
+                <div className="border-2 border-dashed border-blue-600/30 rounded-lg p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
                     <textarea
                       value={invoiceComment}
                       onChange={(e) => setInvoiceComment(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                       rows={3}
                       placeholder="Comentarios sobre la factura..."
                     />
@@ -1884,20 +1919,20 @@ const OrderDetails: React.FC = () => {
                       />
                       <label
                         htmlFor="invoice-upload"
-                        className="cursor-pointer flex flex-col items-center space-y-3"
+                        className="cursor-pointer flex flex-col items-center space-y-2 sm:space-y-3 min-h-[44px] justify-center py-3"
                       >
-                        <CreditCard className="w-8 h-8 text-blue-400" />
+                        <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
                         <div>
-                          <p className="text-white font-medium">Subir factura</p>
-                          <p className="text-gray-400 text-sm">PDF, JPG, PNG, DOC</p>
+                          <p className="text-white font-medium text-sm sm:text-base">Subir factura</p>
+                          <p className="text-gray-400 text-xs sm:text-sm">PDF, JPG, PNG, DOC</p>
                         </div>
                       </label>
                     </div>
                     
                     {uploadingInvoice && (
                       <div className="text-center">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
-                        <p className="text-gray-400 text-sm mt-2">Subiendo factura...</p>
+                        <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-500 mx-auto"></div>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">Subiendo factura...</p>
                       </div>
                     )}
                   </div>
@@ -1906,12 +1941,12 @@ const OrderDetails: React.FC = () => {
             </div>
 
             {/* Estado del Pedido */}
-            <div className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 z-10">
-              <h2 className="text-xl font-bold text-white mb-6">Estado del Pedido</h2>
+            <div className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6 z-10">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Estado del Pedido</h2>
               <div className="relative">
                 <button
                   onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors ${
+                  className={`w-full flex items-center justify-between px-3 sm:px-4 py-3 rounded-xl border transition-colors min-h-[44px] ${
                     isStatusDropdownOpen 
                       ? 'bg-gray-700 border-primary/50' 
                       : 'bg-gray-700/50 border-gray-600 hover:bg-gray-700'
@@ -1919,7 +1954,7 @@ const OrderDetails: React.FC = () => {
                 >
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(order.status)}
-                    <span className={`font-semibold ${
+                    <span className={`font-semibold text-sm sm:text-base ${
                       order.status === 'pending' ? 'text-yellow-400' :
                       order.status === 'in_progress' ? 'text-blue-400' :
                       order.status === 'completed' ? 'text-green-400' :
@@ -1939,12 +1974,12 @@ const OrderDetails: React.FC = () => {
                       <button
                         key={status}
                         onClick={() => handleStatusChange(status)}
-                        className={`w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                        className={`w-full flex items-center space-x-2 px-3 sm:px-4 py-3 text-left hover:bg-gray-700 transition-colors first:rounded-t-xl last:rounded-b-xl min-h-[44px] ${
                           order.status === status ? 'bg-gray-700' : ''
                         }`}
                       >
                         {getStatusIcon(status)}
-                        <span className={`font-medium ${
+                        <span className={`font-medium text-sm sm:text-base ${
                           status === 'pending' ? 'text-yellow-400' :
                           status === 'in_progress' ? 'text-blue-400' :
                           status === 'completed' ? 'text-green-400' :
@@ -1963,21 +1998,21 @@ const OrderDetails: React.FC = () => {
             </div>
 
             {/* Resumen */}
-            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-6">Resumen</h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Fecha de pedido:</span>
-                  <span className="text-white font-medium">{formatDate(order.created_at)}</span>
+            <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">Resumen</h2>
+              <div className="space-y-3 sm:space-y-4">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                  <span className="text-gray-400 text-sm sm:text-base">Fecha de pedido:</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{formatDate(order.created_at)}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-400">Última actualización:</span>
-                  <span className="text-white font-medium">{formatDate(order.updated_at)}</span>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                  <span className="text-gray-400 text-sm sm:text-base">Última actualización:</span>
+                  <span className="text-white font-medium text-sm sm:text-base">{formatDate(order.updated_at)}</span>
                 </div>
-                <div className="border-t border-gray-600 pt-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-white font-bold text-lg">Total:</span>
-                    <span className="text-primary font-bold text-2xl">€{parseFloat(order.total_price?.toString() || '0').toFixed(2)}</span>
+                <div className="border-t border-gray-600 pt-3 sm:pt-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                    <span className="text-white font-bold text-base sm:text-lg">Total:</span>
+                    <span className="text-primary font-bold text-xl sm:text-2xl">€{parseFloat(order.total_price?.toString() || '0').toFixed(2)}</span>
                   </div>
                 </div>
               </div>

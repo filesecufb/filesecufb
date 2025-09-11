@@ -157,6 +157,24 @@ const ClientDashboard: React.FC = () => {
           .eq('client_id', user.id)
           .order('created_at', { ascending: false });
 
+
+
+        // Cargar información del perfil del cliente por separado
+        let clientProfile = null;
+        if (data && data.length > 0) {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, full_name, email, phone, billing_address, billing_city, billing_postal_code, billing_country')
+            .eq('id', user.id)
+            .single();
+
+          if (profileError) {
+            console.warn('Error loading client profile:', profileError);
+          } else {
+            clientProfile = profileData;
+          }
+        }
+
         if (error) {
           throw error;
         }
@@ -165,7 +183,7 @@ const ClientDashboard: React.FC = () => {
         const ordersWithServices = [];
         if (data && data.length > 0) {
           // Load all additional services first
-          await loadAdditionalServices(data);
+          const additionalServicesMap = await loadAdditionalServices(data);
           
           for (const order of data) {
             try {
@@ -175,15 +193,45 @@ const ClientDashboard: React.FC = () => {
                 .eq('id', order.service_id)
                 .single();
 
+              // Process additional services details
+              let additionalServicesDetails = [];
+              if (order.additional_services && Array.isArray(order.additional_services)) {
+                additionalServicesDetails = order.additional_services.map((service: any) => {
+                  let serviceId: string;
+                  if (typeof service === 'string') {
+                    serviceId = service;
+                  } else if (service && typeof service === 'object' && service.id) {
+                    serviceId = service.id;
+                  } else {
+                    return null;
+                  }
+                  
+                  const serviceDetails = additionalServicesMap[serviceId];
+                  if (serviceDetails) {
+                    return {
+                      id: serviceDetails.id,
+                      title: serviceDetails.title,
+                      price: serviceDetails.price,
+                      description: serviceDetails.description
+                    };
+                  }
+                  return null;
+                }).filter(Boolean);
+              }
+
               ordersWithServices.push({
                 ...order,
-                services: serviceData
+                services: serviceData,
+                additional_services_details: additionalServicesDetails,
+                profiles: clientProfile // Agregar información del perfil del cliente
               });
             } catch (err) {
               console.error('Error loading service for order:', order.id, err);
               ordersWithServices.push({
                 ...order,
-                services: null
+                services: null,
+                additional_services_details: [],
+                profiles: clientProfile // Agregar información del perfil del cliente
               });
             }
           }
@@ -246,27 +294,31 @@ const ClientDashboard: React.FC = () => {
         
         if (validIds.length === 0) {
           console.warn('No valid service IDs found');
-          return;
+          return {};
         }
 
         const { data: services, error } = await supabase
           .from('services')
-          .select('id, title')
+          .select('id, title, price, description')
           .in('id', validIds);
 
         if (error) {
           console.error('Error loading additional services:', error);
+          return {};
         } else if (services) {
           const servicesMap: { [serviceId: string]: any } = {};
           services.forEach(service => {
             servicesMap[service.id] = service;
           });
           setAdditionalServices(servicesMap);
+          return servicesMap;
         }
       } catch (err) {
         console.error('Error loading additional services:', err);
+        return {};
       }
     }
+    return {};
   };
 
   // Function to load files for completed orders
@@ -496,7 +548,20 @@ const ClientDashboard: React.FC = () => {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Servicio</p>
-                  <p className="text-white font-medium break-words">{order.service_name || order.service_type || 'Servicio'}</p>
+                  <p className="text-white font-medium break-words">{order.services?.title || order.service_name || order.service_type || 'Servicio no especificado'}</p>
+                  {order.additional_services_details && order.additional_services_details.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Servicios Adicionales</p>
+                      <div className="space-y-1">
+                        {order.additional_services_details.map((service, index) => (
+                          <div key={index} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-300">{service.title}</span>
+                            <span className="text-primary font-medium">€{service.price}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1039,10 +1104,10 @@ const ClientDashboard: React.FC = () => {
           { label: 'Nombre Completo:', value: order.profiles?.full_name || 'N/A' },
           { label: 'Email:', value: order.profiles?.email || 'N/A' },
           { label: 'Teléfono:', value: order.profiles?.phone || 'N/A' },
-          { label: 'Dirección:', value: order.profiles?.address || 'N/A' },
-          { label: 'Ciudad:', value: order.profiles?.city || 'N/A' },
-          { label: 'Código Postal:', value: order.profiles?.postal_code || 'N/A' },
-          { label: 'País:', value: order.profiles?.country || 'N/A' }
+          { label: 'Dirección:', value: order.profiles?.billing_address || 'N/A' },
+          { label: 'Ciudad:', value: order.profiles?.billing_city || 'N/A' },
+          { label: 'Código Postal:', value: order.profiles?.billing_postal_code || 'N/A' },
+          { label: 'País:', value: order.profiles?.billing_country || 'N/A' }
         ];
         
         clientData.forEach((item, index) => {
