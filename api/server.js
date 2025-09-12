@@ -16,7 +16,12 @@ const PORT = process.env.PORT || 3001;
 
 // Configurar CORS
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:5174',
+    'https://filesecufb.com',
+    'https://www.filesecufb.com'
+  ],
   credentials: true
 }));
 
