@@ -413,6 +413,25 @@ export default async function handler(req, res) {
     const vehicleInfo = dbOrderData.vehicle_info;
     const totalPrice = dbOrderData.total_price || '0';
     
+    // Botón para ir al dashboard del cliente (solo cuando esté completado)
+    const dashboardButton = dbOrderData.status === 'completed' ? `
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="https://filesecufb.com/client-dashboard?section=orders" 
+           style="display: inline-block; 
+                  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+                  color: white; 
+                  padding: 16px 32px; 
+                  text-decoration: none; 
+                  border-radius: 8px; 
+                  font-weight: 600; 
+                  font-size: 16px; 
+                  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); 
+                  transition: all 0.3s ease;">
+          ${language === 'en' ? 'View My Orders' : 'Ver Mis Pedidos'}
+        </a>
+      </div>
+    ` : '';
+
     const emailContent = `
         <div class="content">
           <h1 class="title">${texts.statusUpdate}</h1>
@@ -447,6 +466,8 @@ export default async function handler(req, res) {
             <span class="info-value">${new Date().toLocaleString(language === 'en' ? 'en-US' : 'es-ES')}</span>
           </div>
         </div>
+        
+        ${dashboardButton}
         
         <div style="background: #f8fafc; border-radius: 8px; padding: 24px; margin: 20px 0; text-align: center;">
            <h4 style="color: #1e293b; margin-bottom: 12px; font-size: 16px;">${texts.importantInfo}</h4>
