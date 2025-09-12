@@ -126,7 +126,9 @@ function getTexts(language = 'es') {
       warranty: 'Este archivo incluye garantía de funcionamiento',
       support: 'Soporte técnico disponible durante 30 días',
       thanksForTrust: 'Gracias por confiar en FILESECUFB',
-      excellenceCommitment: 'Esperamos que disfrutes de los resultados.'
+      excellenceCommitment: 'Esperamos que disfrutes de los resultados.',
+      viewMyOrders: 'Ver Mis Pedidos',
+      accessDashboard: 'Accede a tu dashboard para ver todos tus pedidos'
     },
     en: {
       orderCompleted: 'Order Completed',
@@ -153,7 +155,9 @@ function getTexts(language = 'es') {
       warranty: 'This file includes functionality warranty',
       support: 'Technical support available for 30 days',
       thanksForTrust: 'Thank you for trusting FILESECUFB',
-      excellenceCommitment: 'We hope you enjoy the results.'
+      excellenceCommitment: 'We hope you enjoy the results.',
+      viewMyOrders: 'View My Orders',
+      accessDashboard: 'Access your dashboard to view all your orders'
     }
   };
   
@@ -454,6 +458,16 @@ export default async function handler(req, res) {
             </a>
           </div>
           ` : ''}
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="https://filesecufb.com/client-dashboard?section=orders" 
+               style="display: inline-block; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px; box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3); transition: all 0.3s ease;">
+              🏠 ${texts.viewMyOrders}
+            </a>
+            <p style="margin-top: 10px; font-size: 14px; color: #64748b;">
+              ${texts.accessDashboard}
+            </p>
+          </div>
           
           <div class="card">
             <h3 class="card-title">${texts.orderSummary}</h3>
