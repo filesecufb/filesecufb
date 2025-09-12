@@ -1,0 +1,72 @@
+{
+  "disclaimer": {
+    "title": "⚠️ IMPORTANT WARNING",
+    "lastUpdated": "Last updated: January 15, 2025",
+    "generalDisclaimer": {
+      "title": "IMPORTANT WARNING",
+      "content": "Modifying your vehicle's ECU carries significant risks. By using our files, you assume ALL RESPONSIBILITY for any consequences that may arise."
+    },
+    "professionalAdvice": {
+      "title": "1. NATURE OF RISKS",
+      "content": "ECU reprogramming involves modifying the operating parameters of the engine and other vehicle systems. This may result in:",
+      "list": [
+        "Mechanical damage: Engine, turbo, clutch, transmission failure",
+        "Electrical damage: ECU, sensor, actuator failures",
+        "Warranty loss: Complete voiding of manufacturer warranty",
+        "Emission problems: Non-compliance with environmental regulations",
+        "Safety failures: Unpredictable vehicle behavior",
+        "Legal problems: Traffic violations or local regulation breaches"
+      ]
+    },
+    "accuracyOfInformation": {
+      "title": "2. TOTAL LIABILITY EXEMPTION",
+      "content": "WE EXPRESSLY DECLARE that we are NOT responsible for:",
+      "noGuarantee": "Any direct, indirect, incidental or consequential damage, economic losses of any nature, damage to persons or property, traffic accidents or related incidents, fines, sanctions or legal proceedings, repair or replacement costs of components, loss of time, profits or opportunities, damage to third parties or their properties."
+    },
+    "externalLinks": {
+      "title": "3. NO PERFORMANCE WARRANTIES",
+      "content": "WE DO NOT GUARANTEE:",
+      "noResponsibility": "Specific increases in power or torque, improvements in fuel consumption, correct operation in all vehicles, compatibility with existing modifications, long-term engine durability, compliance with emission regulations, maintenance of original reliability."
+    },
+    "limitationOfLiability": {
+      "title": "4. USER RESPONSIBILITY",
+      "content": "By using our files, you accept that it is your EXCLUSIVE RESPONSIBILITY:",
+      "exclusions": [
+        "To verify compatibility with your specific vehicle",
+        "To make backups of the original programming",
+        "To hire qualified professional installation",
+        "To verify compliance with local regulations",
+        "To assume all associated risks",
+        "To inform your insurance about modifications",
+        "To perform additional maintenance if necessary",
+        "To monitor vehicle operation after installation"
+      ]
+    },
+    "technicalIssues": {
+      "title": "5. PROFESSIONAL INSTALLATION RECOMMENDED",
+      "content": "WE STRONGLY RECOMMEND that installation be performed by professionals with experience in ECU reprogramming, specialized tuning shops, technicians with adequate equipment, people with advanced mechanical knowledge. WARNING: Incorrect installation can cause irreversible and dangerous damage."
+    },
+    "userResponsibility": {
+      "title": "6. LEGAL LIMITATIONS",
+      "content": "IMPORTANT: The use of our files may be illegal in certain jurisdictions, violate local emission regulations, breach traffic regulations, affect vehicle homologation, invalidate circulation permits.",
+      "responsibilities": [
+        "It is your responsibility to verify and comply with all applicable laws in your location",
+        "Our files are designed for EXCLUSIVE USE IN COMPETITION AND CLOSED CIRCUITS",
+        "Use on public roads may be illegal and dangerous",
+        "The user assumes all responsibility for the use made of the files"
+      ]
+    },
+    "modifications": {
+      "title": "8. VEHICLE MODIFICATIONS",
+      "content": "Modifications made with our files are IRREVERSIBLE in some cases, may require additional physical modifications, may affect other vehicle systems, may require specific fuels, may alter driving behavior."
+    },
+    "governingLaw": {
+      "title": "9. INSURANCE AND COVERAGE",
+      "content": "WARNING: ECU modifications may void your insurance policy. It is your responsibility to inform your insurance company about any modifications and verify that you maintain adequate coverage."
+    },
+    "contact": {
+      "title": "10. RISK ACCEPTANCE",
+      "content": "By downloading and using our files, you expressly declare that: You have read and fully understood this disclaimer, you accept all risks associated with ECU modifications, you waive any claims against our company, you assume all responsibility for the consequences of its use, you have the legal capacity to assume these risks. FINAL REMINDER: If you are not willing to assume ALL the risks mentioned in this document, DO NOT USE OUR FILES. Its use implies total acceptance of these terms."
+    }
+  }
+}

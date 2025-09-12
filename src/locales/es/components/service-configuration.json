@@ -1,0 +1,120 @@
+{
+  "errors": {
+    "noServiceSpecified": "No se especificó ningún servicio",
+    "serviceNotFound": "Servicio no encontrado",
+    "selectedServiceNotFound": "Servicio seleccionado no encontrado",
+    "sessionCheckError": "Error al verificar la sesión",
+    "orderCreationError": "Error al crear el pedido",
+    "loadingAdditionalServices": "Error al cargar servicios adicionales"
+  },
+  "navigation": {
+    "back": "Volver"
+  },
+  "headers": {
+    "serviceConfiguration": "Configuración del Servicio",
+    "vehicleInfo": "Información del Vehículo",
+    "additionalInfo": "Información Adicional",
+    "modifiedParts": "Piezas Modificadas",
+    "additionalServices": "Servicios Adicionales",
+    "extraInfo": "Información Extra",
+    "personalInfo": "Información Personal",
+    "billingInfo": "Información de Facturación",
+    "termsAndConditions": "Términos y Condiciones",
+    "pricingSummary": "Resumen de Precios",
+    "completeInformation": "Complete la información de su vehículo y servicio requerido",
+    "fileToModify": "Archivo a Modificar"
+  },
+  "fileUpload": {
+    "dragFileHere": "Arrastra tu archivo aquí, o busca archivos en tu dispositivo",
+    "browseFiles": "busca archivos",
+    "noFileSelected": "Ningún archivo seleccionado",
+    "hasOptionalAttachments": "¿Tienes archivos adjuntos opcionales?",
+    "optionalAttachmentsLabel": "Archivos adjuntos opcionales (solo archivos menores a 20MB)",
+    "dragOptionalFiles": "Arrastra tus archivos aquí, o busca archivos en tu dispositivo",
+    "noOptionalFiles": "Ningún archivo seleccionado"
+  },
+  "labels": {
+    "make": "Marca",
+    "model": "Modelo",
+    "generation": "Generación",
+    "engine": "Motor",
+    "ecu": "ECU",
+    "year": "Año",
+    "gearbox": "Caja de cambios",
+    "engineHp": "Potencia del motor (HP) (opcional)",
+    "engineKw": "o kW (opcional)",
+    "vin": "VIN (Número de identificación del vehículo) (opcional)",
+    "readMethod": "Método de lectura",
+    "hardwareNumber": "Número de hardware (opcional)",
+    "softwareNumber": "Número de software",
+    "additionalCarInfo": "Cualquier información adicional sobre el coche (opcional)",
+    "fullName": "Nombre Completo",
+    "phone": "Teléfono",
+    "email": "Correo Electrónico",
+    "billingName": "Nombre/Empresa para Facturación",
+    "taxId": "NIF/VAT/Tax ID",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "state": "Estado/Provincia",
+    "postalCode": "Código Postal",
+    "country": "País"
+  },
+  "placeholders": {
+    "enterMake": "Ingresa la marca",
+    "enterModel": "Ingresa el modelo",
+    "enterGeneration": "Ingresa la generación",
+    "enterEngine": "Ingresa el motor",
+    "enterEcu": "Ingresa la ECU",
+    "enterYear": "Ingresa el año",
+    "enterGearbox": "Ingresa el tipo de caja de cambios",
+    "engineHpExample": "Ej: 150",
+    "engineKwExample": "Ej: 110",
+    "vinExample": "Ej: WVWZZZ1JZ3W386752",
+    "readMethodExample": "Ej: OBD, Bench, Boot",
+    "optionalRemarks": "Observaciones (opcional)",
+    "additionalInfoPlaceholder": "Por favor, proporciona más información sobre tu pedido para que podamos ayudarte más rápida y eficientemente sin preguntas adicionales de nuestros ingenieros",
+    "enterFullName": "Ingresa tu nombre completo",
+    "phoneExample": "Ej: +34 123456789",
+    "registrationEmail": "Correo de registro",
+    "billingNamePlaceholder": "Nombre o empresa para la factura",
+    "taxIdPlaceholder": "Número de identificación fiscal",
+    "fullAddress": "Dirección completa",
+    "city": "Ciudad",
+    "stateProvince": "Estado o provincia",
+    "postalCode": "Código postal",
+    "country": "País"
+  },
+  "modifiedParts": {
+    "hasModifiedParts": "¿El coche tiene piezas modificadas?",
+    "detailsRequest": "Si es así, por favor proporciona detalles sobre las modificaciones:",
+    "aftermarketExhaust": "Escape Aftermarket",
+    "aftermarketIntakeManifold": "Colector de Admisión Aftermarket",
+    "coldAirIntake": "Admisión de Aire Frío",
+    "decat": "Decat"
+  },
+  "messages": {
+    "loadingService": "Cargando servicio...",
+    "orderSuccess": "¡Pedido creado exitosamente!",
+    "loadingAdditionalServices": "Cargando servicios adicionales...",
+    "noAdditionalServices": "No hay servicios adicionales disponibles en este momento",
+    "includeCountryPrefix": "Incluye el prefijo de tu país (ej: +34 para España)",
+    "registrationEmailNotEditable": "Correo de registro (no editable)"
+  },
+  "pricing": {
+    "priceOnRequest": "Precio a consultar",
+    "total": "Total"
+  },
+  "terms": {
+    "acceptTerms": "Acepto los",
+    "termsOfService": "términos de servicio",
+    "the": "el",
+    "disclaimer": "descargo de responsabilidad",
+    "and": "y las",
+    "refundPolicies": "políticas de devoluciones"
+  },
+  "buttons": {
+    "cancel": "Cancelar",
+    "processing": "Procesando...",
+    "createOrder": "Crear Pedido"
+  }
+}

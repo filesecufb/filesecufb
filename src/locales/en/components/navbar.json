@@ -1,0 +1,23 @@
+{
+  "navbar": {
+    "links": {
+      "home": "HOME",
+      "services": "SERVICES",
+      "contact": "CONTACT",
+      "admin": "ADMIN",
+      "client": "CLIENT"
+    },
+    "buttons": {
+      "account": "MY ACCOUNT",
+      "logout": "LOGOUT",
+      "closing": "CLOSING..."
+    },
+    "authenticated": {
+      "dashboard": "DASHBOARD",
+      "myOrders": "MY ORDERS",
+      "myDashboard": "My Dashboard",
+      "myProfile": "My Profile",
+      "logout": "Sign Out"
+    }
+  }
+}

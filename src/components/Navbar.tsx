@@ -102,12 +102,12 @@ const Navbar: React.FC = () => {
             {user && profile && !loading && (
               isAdmin ? (
                 <Link to="/admin" className="text-white hover:text-primary transition-all duration-300 font-medium relative group">
-                  <span className="relative z-10">DASHBOARD</span>
+                  <span className="relative z-10">{t('navbar.authenticated.dashboard')}</span>
                   <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                 </Link>
               ) : (
                 <Link to="/client-dashboard?section=orders" className="text-white hover:text-primary transition-all duration-300 font-medium relative group">
-                  <span className="relative z-10">MIS PEDIDOS</span>
+                  <span className="relative z-10">{t('navbar.authenticated.myOrders')}</span>
                   <span className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-primary scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                 </Link>
               )
@@ -133,14 +133,14 @@ const Navbar: React.FC = () => {
                       className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
                       <User className="w-4 h-4" />
-                      <span>{isAdmin ? 'Mi Dashboard' : 'Mi Perfil'}</span>
+                      <span>{isAdmin ? t('navbar.authenticated.myDashboard') : t('navbar.authenticated.myProfile')}</span>
                     </button>
                     <button
                       onClick={handleSignOut}
                       className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 transition-colors flex items-center space-x-2"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Cerrar Sesión</span>
+                      <span>{t('navbar.authenticated.logout')}</span>
                     </button>
                   </div>
                 )}
@@ -180,11 +180,11 @@ const Navbar: React.FC = () => {
             {user && profile && !loading && (
               isAdmin ? (
                 <Link to="/admin" className="text-white hover:text-primary block px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:bg-gradient-primary" onClick={() => setIsMenuOpen(false)}>
-                  DASHBOARD
+                  {t('navbar.authenticated.dashboard')}
                 </Link>
               ) : (
                 <Link to="/client-dashboard?section=orders" className="text-white hover:text-primary block px-3 py-2 rounded-lg font-medium transition-all duration-300 hover:bg-gradient-primary" onClick={() => setIsMenuOpen(false)}>
-                  MIS PEDIDOS
+                  {t('navbar.authenticated.myOrders')}
                 </Link>
               )
             )}
@@ -204,14 +204,14 @@ const Navbar: React.FC = () => {
                   className="w-full text-left text-white hover:text-primary flex items-center space-x-2 py-2"
                 >
                   <User className="w-4 h-4" />
-                  <span>{isAdmin ? 'Mi Dashboard' : 'Mi Perfil'}</span>
+                  <span>{isAdmin ? t('navbar.authenticated.myDashboard') : t('navbar.authenticated.myProfile')}</span>
                 </button>
                 <button
                   onClick={handleSignOut}
                   className="w-full text-left text-white hover:text-primary flex items-center space-x-2 py-2"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Cerrar Sesión</span>
+                  <span>{t('navbar.authenticated.logout')}</span>
                 </button>
               </div>
             ) : (

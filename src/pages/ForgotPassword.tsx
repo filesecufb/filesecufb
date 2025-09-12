@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Mail, AlertCircle, Loader2, ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSEO } from '../hooks/useSEO'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 
 const ForgotPassword = () => {
   const { t } = useTranslation()
+  useSEO('forgotPassword')
   const { resetPassword } = useAuth()
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,7 +56,7 @@ const ForgotPassword = () => {
       <div className="max-w-md w-full space-y-8 relative z-10">
         <div className="bg-gradient-dark backdrop-blur-sm rounded-2xl border border-elegant shadow-elegant p-8">
           <div className="text-center mb-8">
-            <h2 className="text-h1 text-white mb-2 uppercase tracking-wider">{t('auth.forgotPassword.title')}</h2>
+            <h2 className="text-h1 text-white mb-2 uppercase tracking-wider" dangerouslySetInnerHTML={{ __html: t('auth.forgotPassword.title') }}></h2>
             <p className="text-text-secondary uppercase tracking-wide">{t('auth.forgotPassword.subtitle')}</p>
           </div>
 

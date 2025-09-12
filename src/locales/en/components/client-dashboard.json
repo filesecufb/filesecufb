@@ -1,0 +1,251 @@
+{
+  "title": "CLIENT <span class=\"text-primary\">PANEL</span>",
+  "sidebar": {
+    "orders": "Orders",
+    "profile": "Profile",
+    "billing": "Billing",
+    "account": "Account"
+  },
+  "orders": {
+    "title": "My Orders",
+    "totalOrders": "Total Orders",
+    "completedOrders": "Completed",
+    "inProgressOrders": "In Progress",
+    "pendingOrders": "Pending",
+    "stats": {
+      "total": "Total Orders",
+      "completed": "Completed",
+      "inProgress": "In Progress"
+    },
+    "filters": {
+      "search": "Search by ID, vehicle or service...",
+      "searchPlaceholder": "Search by ID, vehicle or service...",
+      "sortBy": "Sort by",
+      "clearFilters": "Clear filters",
+      "results": "Results",
+      "page": "Page",
+      "allStatuses": "All statuses",
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "dateTo": "Date to",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "priceHigh": "Price: High to Low",
+      "priceLow": "Price: Low to High"
+    },
+    "showing": "Showing",
+    "of": "of",
+    "orders": "orders",
+    "empty": {
+      "title": "You don't have any orders yet",
+      "description": "When you place your first order, it will appear here",
+      "viewServices": "View Services"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "actions": {
+      "download": "Download",
+      "viewMore": "View more",
+      "generatePdf": "Generate PDF"
+    },
+    "card": {
+      "vehicle": "Vehicle",
+      "year": "Year",
+      "service": "Service",
+      "additionalServices": "Additional Services",
+      "viewMore": "View more"
+    },
+    "files": {
+      "clientFiles": "Client Files",
+      "adminFiles": "Processed Files",
+      "invoices": "Invoices",
+      "uploaded": "Uploaded",
+      "processed": "Processed",
+      "unknownSize": "Unknown size"
+    }
+  },
+  "profile": {
+    "title": "My Profile",
+    "personalInfo": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "city": "City",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "edit": "Edit",
+    "notSpecified": "Not specified",
+    "billingInfo": "Billing Information",
+    "billingName": "Name or company for billing",
+    "billingNamePlaceholder": "Enter name or company",
+    "taxId": "Tax identification number",
+    "taxIdPlaceholder": "Enter tax identification number",
+    "state": "State or province",
+    "statePlaceholder": "Enter state or province",
+    "accountInfo": "Account Information",
+    "userId": "User ID",
+    "registrationDate": "Registration Date",
+    "changePassword": "Change Password",
+    "actions": {
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
+    }
+  },
+  "billing": {
+    "title": "Billing Information",
+    "companyName": "Company name for invoice",
+    "taxId": "Tax identification number",
+    "address": "Full address",
+    "city": "City",
+    "state": "State or province",
+    "postalCode": "Postal code",
+    "country": "Country"
+  },
+  "account": {
+    "title": "Account Settings",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password"
+  },
+  "modal": {
+    "completeInfo": "Complete Order Information",
+    "orderNumber": "Order Number",
+    "orderId": "Order ID",
+    "orderDate": "Order Date",
+    "status": "Status",
+    "totalPrice": "Total Price",
+    "clientInfo": "Client Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "vehicleInfo": "Vehicle Information",
+    "brand": "Brand",
+    "model": "Model",
+    "generation": "Generation",
+    "engine": "Engine",
+    "ecu": "ECU",
+    "year": "Year",
+    "gearbox": "Gearbox",
+    "service": "Service",
+    "additionalInfo": "Additional Information",
+    "enginePower": "Engine Power",
+    "vin": "VIN",
+    "readMethod": "Read Method",
+    "hardwareNumber": "Hardware Number",
+    "softwareNumber": "Software Number",
+    "modifiedParts": "Modified Parts",
+    "aftermarketExhaust": "Aftermarket Exhaust",
+    "aftermarketIntakeManifold": "Aftermarket Intake Manifold",
+    "coldAirIntake": "Cold Air Intake",
+    "decat": "Decat",
+    "additionalComments": "Additional Comments",
+    "priceInfo": "Price Information",
+    "basePrice": "Base Price",
+    "additionalServicesPrice": "Additional Services Price",
+    "total": "Total",
+    "clientDocuments": "Client Documents",
+    "mainFile": "Main File",
+    "additionalFiles": "Additional Files",
+    "extraInfo": "Extra Information",
+    "orderFiles": "Order Files",
+    "originalFiles": "Original Files",
+    "tunedFiles": "Tuned Files",
+    "unknownSize": "Unknown size",
+    "invoices": "Invoices",
+    "orderInfo": "Complete Order Information",
+    "vehicleModifications": "Vehicle Modifications",
+    "additionalServices": "Additional Services",
+    "financialSummary": "Financial Summary",
+    "clientFiles": "Client Files",
+    "vehicle": {
+      "make": "Make",
+      "model": "Model",
+      "generation": "Generation",
+      "year": "Year",
+      "transmission": "Transmission"
+    },
+    "modifications": {
+      "aftermarketIntakeManifold": "Aftermarket Intake Manifold",
+      "coldAirIntake": "Cold Air Intake",
+      "noModifications": "No vehicle modifications have been reported."
+    },
+    "pricing": {
+      "basePrice": "Base Price",
+      "additionalServices": "Additional Services",
+      "total": "TOTAL",
+      "totalAdditionalServices": "Total Additional Services"
+    },
+    "files": {
+      "mainFiles": "Main Files",
+      "additionalFiles": "Additional Files"
+    }
+  },
+  "pdf": {
+    "sections": {
+      "clientInfo": "CLIENT INFORMATION",
+      "vehicleInfo": "VEHICLE INFORMATION",
+      "vehicleModifications": "VEHICLE MODIFICATIONS",
+      "additionalServices": "ADDITIONAL SERVICES",
+      "clientFiles": "CLIENT FILES",
+      "additionalInfo": "ADDITIONAL INFORMATION"
+    },
+    "footer": "This document has been automatically generated by FilesECUFB"
+  },
+  "messages": {
+    "loading": {
+      "verifyingSession": "Verifying session...",
+      "loadingDashboard": "Loading dashboard...",
+      "loadingOrders": "Loading orders..."
+    },
+    "errors": {
+      "loadingProfile": "Error loading profile information",
+      "loadingOrders": "Error loading orders",
+      "invalidFileUrl": "Invalid file URL",
+      "downloadError": "Error downloading file",
+      "unknownError": "Unknown error",
+      "connectionError": "Connection error while downloading file",
+      "downloadRetry": "Error downloading file. Please try again.",
+      "pdfGenerationError": "Error generating PDF",
+      "pdfError": "Error generating PDF"
+    },
+    "success": {
+      "profileUpdated": "Profile updated successfully",
+      "passwordChanged": "Password changed successfully"
+    },
+    "validation": {
+      "passwordMismatch": "Passwords do not match"
+    },
+    "empty": {
+      "noOrders": "You don't have any orders yet",
+      "noFiles": "No files available",
+      "noInvoices": "No invoices available"
+    }
+  },
+  "common": {
+    "na": "N/A",
+    "yes": "Yes",
+    "no": "No",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "save": "Save",
+    "cancel": "Cancel",
+    "change": "Change",
+    "download": "Download",
+    "printPDF": "Print PDF"
+  }
+}

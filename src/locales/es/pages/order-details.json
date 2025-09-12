@@ -1,0 +1,121 @@
+{
+  "title": "Detalles del Pedido",
+  "backToOrders": "Volver a Pedidos",
+  "orderNumber": "Pedido #",
+  "customerInfo": {
+    "title": "Información del Cliente",
+    "fullName": "Nombre completo",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "clientId": "ID Cliente"
+  },
+  "serviceInfo": {
+    "title": "Servicio Solicitado",
+    "totalPrice": "Precio total",
+    "additionalServices": "Servicios adicionales"
+  },
+  "vehicleInfo": {
+    "title": "Información del Vehículo",
+    "brandModel": "Marca y Modelo",
+    "generation": "Generación",
+    "year": "Año",
+    "engine": "Motor",
+    "ecu": "ECU",
+    "transmission": "Transmisión",
+    "power": "Potencia",
+    "readingMethod": "Método de Lectura",
+    "hardwareNumber": "Número de Hardware",
+    "vin": "VIN",
+    "softwareNumber": "Número de Software"
+  },
+  "modifications": {
+    "title": "Modificaciones del Vehículo",
+    "aftermarketExhaust": "Escape Aftermarket",
+    "aftermarketIntakeManifold": "Colector de Admisión Aftermarket",
+    "coldAirIntake": "Admisión de Aire Frío",
+    "decat": "Decat"
+  },
+  "additionalInfo": {
+    "title": "Información Adicional"
+  },
+  "actions": {
+    "title": "Acciones",
+    "downloadInfo": "Descargar Información",
+    "downloadAll": "Descargar Todo"
+  },
+  "files": {
+    "title": "Archivos",
+    "mainFile": {
+      "title": "Archivo Principal del Cliente",
+      "ecuFile": "Archivo de ECU",
+      "noFiles": "No hay archivos principales",
+      "noFilesDescription": "El cliente aún no ha subido archivos de ECU"
+    },
+    "additionalFiles": {
+      "title": "Archivos Adicionales del Cliente",
+      "noFiles": "No hay archivos adicionales",
+      "noFilesDescription": "El cliente no ha subido documentos adicionales"
+    },
+    "tunedMaps": {
+      "title": "Mapas Tuneados (Admin)",
+      "uploaded": "Subido",
+      "adminComments": "Comentarios del Admin:",
+      "addComments": "Añadir comentarios sobre este mapa...",
+      "noMaps": "No hay mapas tuneados",
+      "noMapsDescription": "Aún no se han subido mapas tuneados",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "deleteConfirm": "¿Eliminar este mapa?",
+      "deleteDescription": "Esta acción no se puede deshacer. El archivo se eliminará permanentemente.",
+      "confirm": "Confirmar",
+      "deleting": "Eliminando..."
+    },
+    "invoices": {
+      "title": "Facturas (Admin)",
+      "addComments": "Añadir comentarios sobre esta factura...",
+      "noComments": "Sin comentarios",
+      "edit": "Editar",
+      "deleteConfirm": "¿Eliminar esta factura?",
+      "deleteDescription": "Esta acción no se puede deshacer. El archivo se eliminará permanentemente.",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "deleting": "Eliminando...",
+      "noInvoices": "No hay facturas",
+      "noInvoicesDescription": "Aún no se han subido facturas"
+    }
+  },
+  "upload": {
+    "tunedMap": {
+      "title": "Subir Mapa Tuneado",
+      "comments": "Comentarios sobre el mapa tuneado...",
+      "uploadText": "Subir mapa tuneado",
+      "formatText": "Cualquier formato",
+      "uploading": "Subiendo mapa..."
+    },
+    "invoice": {
+      "title": "Subir Factura",
+      "comments": "Comentarios sobre la factura...",
+      "uploadText": "Subir factura",
+      "formatText": "PDF, JPG, PNG, DOC",
+      "uploading": "Subiendo factura..."
+    }
+  },
+  "orderStatus": {
+    "title": "Estado del Pedido",
+    "pending": "Pendiente",
+    "inProgress": "En Proceso",
+    "completed": "Completado",
+    "cancelled": "Cancelado"
+  },
+  "summary": {
+    "title": "Resumen",
+    "orderDate": "Fecha de pedido:",
+    "lastUpdate": "Última actualización:",
+    "total": "Total:"
+  },
+  "common": {
+    "download": "Descargar",
+    "notProvided": "No proporcionado",
+    "na": "N/A"
+  }
+}

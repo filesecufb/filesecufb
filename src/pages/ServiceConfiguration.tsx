@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ChevronLeft, Upload, Info, User, CreditCard } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -56,6 +57,7 @@ const ServiceConfiguration: React.FC = () => {
   const navigate = useNavigate();
   const { serviceId } = useParams<{ serviceId?: string }>();
   const { user, profile, loading: authLoading } = useAuth();
+  const { t } = useTranslation('service-configuration');
   
 
   
@@ -70,7 +72,7 @@ const ServiceConfiguration: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!serviceId) {
-        setError('No se especificó un servicio');
+        setError(t('errors.noServiceSpecified'));
         setLoading(false);
         return;
       }
@@ -87,7 +89,7 @@ const ServiceConfiguration: React.FC = () => {
           .single();
 
         if (serviceError) {
-          throw new Error('Servicio no encontrado o no disponible');
+          throw new Error(t('errors.serviceNotFound'));
         }
 
         setSelectedService(serviceData);
@@ -334,7 +336,7 @@ const ServiceConfiguration: React.FC = () => {
     
     // Validar archivo principal
     if (!formData.mainFile || formData.mainFile.length === 0) {
-      errors.push('Debe seleccionar al menos un archivo principal');
+      errors.push(t('errors.mainFileRequired'));
     }
     
     // Validar información del vehículo
@@ -347,17 +349,17 @@ const ServiceConfiguration: React.FC = () => {
     
     // Validar información personal
     if (!personalInfo.full_name.trim()) {
-      errors.push('El nombre completo es requerido');
+      errors.push(t('errors.fullNameRequired'));
     }
     if (!personalInfo.phone.trim()) {
-      errors.push('El teléfono es requerido');
+      errors.push(t('errors.phoneRequired'));
     }
     
     // Los campos de facturación son opcionales - no se validan como requeridos
     
     // Validar términos y condiciones
     if (!formData.agreeAllTerms) {
-      errors.push('Debe aceptar los términos de servicio, descargo de responsabilidad y políticas de devoluciones');
+      errors.push(t('errors.termsRequired'));
     }
     
     return errors;
@@ -381,12 +383,12 @@ const ServiceConfiguration: React.FC = () => {
     // Validar formulario
     const validationErrors = validateForm();
     if (validationErrors.length > 0) {
-      toast.error(`Errores en el formulario:\n${validationErrors.join('\n')}`);
+      toast.error(`${t('errors.formErrors')}:\n${validationErrors.join('\n')}`);
       return;
     }
     
     if (!selectedService) {
-      toast.error('No se ha seleccionado un servicio');
+      toast.error(t('errors.noServiceSelected'));
       return;
     }
     
@@ -533,17 +535,17 @@ const ServiceConfiguration: React.FC = () => {
         .insert(orderData);
 
       if (orderError) {
-        throw new Error(`Error al crear pedido: ${orderError.message}`);
+        throw new Error(`${t('errors.orderCreationError')}: ${orderError.message}`);
       }
 
-      toast.success('¡Pedido realizado correctamente!');
+      toast.success(t('messages.orderSuccess'));
       
       // Navegar al dashboard del cliente
       navigate('/client-dashboard');
       
     } catch (error) {
       console.error('Error al procesar el pedido:', error);
-      toast.error(error instanceof Error ? error.message : 'Error al procesar el pedido');
+      toast.error(error instanceof Error ? error.message : t('errors.orderProcessingError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -555,7 +557,7 @@ const ServiceConfiguration: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verificando sesión...</p>
+          <p className="mt-4 text-gray-600">{t('messages.verifyingSession')}</p>
         </div>
       </div>
     );
@@ -572,7 +574,7 @@ const ServiceConfiguration: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando información del servicio...</p>
+          <p className="mt-4 text-gray-600">{t('messages.loadingService')}</p>
         </div>
       </div>
     );
@@ -583,13 +585,13 @@ const ServiceConfiguration: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-600 text-xl mb-4">Error</div>
+          <div className="text-red-600 text-xl mb-4">{t('errors.error')}</div>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => navigate(-1)}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Volver
+            {t('navigation.back')}
           </button>
         </div>
       </div>
@@ -600,12 +602,12 @@ const ServiceConfiguration: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-600 text-xl mb-4">Servicio no encontrado</div>
+          <div className="text-gray-600 text-xl mb-4">{t('errors.serviceNotFound')}</div>
           <button
             onClick={() => navigate('/services')}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
-            Ver todos los servicios
+            {t('navigation.viewAllServices')}
           </button>
         </div>
       </div>
@@ -622,10 +624,10 @@ const ServiceConfiguration: React.FC = () => {
             className="flex items-center text-blue-600 hover:text-blue-800 mb-4"
           >
             <ChevronLeft className="w-5 h-5 mr-1" />
-            Volver
+            {t('navigation.back')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Configuración del Servicio</h1>
-          <p className="text-gray-600 mt-2">Complete la información de su vehículo y servicio requerido</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('headers.serviceConfiguration')}</h1>
+          <p className="text-gray-600 mt-2">{t('headers.completeInformation')}</p>
         </div>
 
         {/* Información del Servicio Seleccionado */}
@@ -642,14 +644,14 @@ const ServiceConfiguration: React.FC = () => {
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
             <div className="flex items-center">
               <Info className="w-5 h-5 text-yellow-600 mr-2" />
-              <p className="text-yellow-800">No se encontró el servicio seleccionado.</p>
+              <p className="text-yellow-800">{t('errors.selectedServiceNotFound')}</p>
             </div>
           </div>
         ) : (
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
             <div className="flex items-center">
               <Info className="w-5 h-5 text-gray-600 mr-2" />
-              <p className="text-gray-700">No se ha seleccionado ningún servicio específico.</p>
+              <p className="text-gray-700">{t('messages.noSpecificServiceSelected')}</p>
             </div>
           </div>
         )}
@@ -658,7 +660,7 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* File Upload */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Archivo a modificar</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.fileToModify')}</h2>
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
@@ -670,9 +672,9 @@ const ServiceConfiguration: React.FC = () => {
             >
               <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-600 mb-2">
-                Arrastra tu archivo aquí, o{' '}
+                {t('fileUpload.dragFileHere')}{' '}
                 <label className="text-blue-600 hover:text-blue-800 cursor-pointer underline">
-                  busca archivos en tu dispositivo
+                  {t('fileUpload.browseFiles')}
                   <input
                     type="file"
                     multiple
@@ -690,7 +692,7 @@ const ServiceConfiguration: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">Ningún archivo seleccionado</p>
+                <p className="text-gray-500 text-sm">{t('fileUpload.noFileSelected')}</p>
               )}
             </div>
 
@@ -702,14 +704,14 @@ const ServiceConfiguration: React.FC = () => {
                   onChange={(e) => handleInputChange('hasOptionalAttachments', e.target.checked)}
                   className="mr-3 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-700">¿Tienes archivos adjuntos opcionales?</span>
+                <span className="text-gray-700">{t('fileUpload.hasOptionalAttachments')}</span>
               </label>
             </div>
 
             {formData.hasOptionalAttachments && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Archivos adjuntos opcionales (solo archivos menores a 20MB)
+                  {t('fileUpload.optionalAttachmentsLabel')}
                 </label>
                 <div
                   className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -722,9 +724,9 @@ const ServiceConfiguration: React.FC = () => {
                 >
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-gray-600 text-sm mb-2">
-                    Arrastra tus archivos aquí, o{' '}
+                    {t('fileUpload.dragOptionalFiles')}{' '}
                     <label className="text-blue-600 hover:text-blue-800 cursor-pointer underline">
-                      busca archivos en tu dispositivo
+                      {t('fileUpload.browseFiles')}
                       <input
                         type="file"
                         multiple
@@ -742,7 +744,7 @@ const ServiceConfiguration: React.FC = () => {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-gray-500 text-sm">Ningún archivo seleccionado</p>
+                    <p className="text-gray-500 text-sm">{t('fileUpload.noOptionalFiles')}</p>
                   )}
                 </div>
               </div>
@@ -751,88 +753,88 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Vehicle Information */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Información del Vehículo</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.vehicleInfo')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Marca</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.make')}</label>
                 <input
                   type="text"
                   value={formData.make}
                   onChange={(e) => handleInputChange('make', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa la marca"
+                  placeholder={t('placeholders.enterMake')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Modelo</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.model')}</label>
                 <input
                   type="text"
                   value={formData.model}
                   onChange={(e) => handleInputChange('model', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa el modelo"
+                  placeholder={t('placeholders.enterModel')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Generación</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.generation')}</label>
                 <input
                   type="text"
                   value={formData.generation}
                   onChange={(e) => handleInputChange('generation', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa la generación"
+                  placeholder={t('placeholders.enterGeneration')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Motor</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.engine')}</label>
                 <input
                   type="text"
                   value={formData.engine}
                   onChange={(e) => handleInputChange('engine', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa el motor"
+                  placeholder={t('placeholders.enterEngine')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ECU</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.ecu')}</label>
                 <input
                   type="text"
                   value={formData.ecu}
                   onChange={(e) => handleInputChange('ecu', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa la ECU"
+                  placeholder={t('placeholders.enterEcu')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Año</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.year')}</label>
                 <input
                   type="text"
                   value={formData.year}
                   onChange={(e) => handleInputChange('year', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa el año"
+                  placeholder={t('placeholders.enterYear')}
                   required
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Caja de cambios</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.gearbox')}</label>
                 <input
                   type="text"
                   value={formData.gearbox}
                   onChange={(e) => handleInputChange('gearbox', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa el tipo de caja de cambios"
+                  placeholder={t('placeholders.enterGearbox')}
                   required
                 />
               </div>
@@ -841,55 +843,55 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Additional Information */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Información Adicional</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.additionalInfo')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Potencia del motor (HP) (opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.engineHp')}</label>
                 <input
                   type="number"
                   value={formData.engineHp}
                   onChange={(e) => handleInputChange('engineHp', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: 150"
+                  placeholder={t('placeholders.engineHpExample')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">o kW (opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.engineKw')}</label>
                 <input
                   type="number"
                   value={formData.engineKw}
                   onChange={(e) => handleInputChange('engineKw', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: 110"
+                  placeholder={t('placeholders.engineKwExample')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">VIN (Número de identificación del vehículo) (opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.vin')}</label>
                 <input
                   type="text"
                   value={formData.vin}
                   onChange={(e) => handleInputChange('vin', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: 1HGBH41JXMN109186"
+                  placeholder={t('placeholders.vinExample')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Método de lectura</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.readMethod')}</label>
                 <input
                   type="text"
                   value={formData.readMethod}
                   onChange={(e) => handleInputChange('readMethod', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa el método de lectura (ej: OBD, Bench, Boot, BDM)"
+                  placeholder={t('placeholders.readMethodExample')}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Número de hardware (opcional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.hardwareNumber')}</label>
                 <input
                   type="text"
                   value={formData.hardwareNumber}
@@ -899,7 +901,7 @@ const ServiceConfiguration: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Número de software</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.softwareNumber')}</label>
                 <input
                   type="text"
                   value={formData.softwareNumber}
@@ -917,7 +919,7 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Modified Parts */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Nuevo servicio de archivos</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.modifiedParts')}</h2>
             <div className="mb-6">
               <label className="flex items-center">
                 <input
@@ -926,14 +928,14 @@ const ServiceConfiguration: React.FC = () => {
                   onChange={(e) => handleInputChange('hasModifiedParts', e.target.checked)}
                   className="mr-3 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-700">¿El coche tiene piezas modificadas?</span>
+                <span className="text-gray-700">{t('modifiedParts.hasModifiedParts')}</span>
               </label>
             </div>
 
             {formData.hasModifiedParts && (
               <div className="space-y-6">
                 <p className="text-gray-600 text-sm mb-4">
-                  Para brindarle el mejor servicio posible, nos gustaría pedirle que complete la lista a continuación con el mayor detalle posible.
+                  {t('modifiedParts.detailsRequest')}
                 </p>
 
                 <div className="space-y-4">
@@ -945,13 +947,13 @@ const ServiceConfiguration: React.FC = () => {
                         onChange={(e) => handleInputChange('aftermarketExhaust', e.target.checked)}
                         className="mr-3 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-gray-700 font-medium">Escape Aftermarket</span>
+                      <span className="text-gray-700 font-medium">{t('modifiedParts.aftermarketExhaust')}</span>
                     </label>
                     {formData.aftermarketExhaust && (
                       <textarea
                         value={formData.aftermarketExhaustRemarks}
                         onChange={(e) => handleInputChange('aftermarketExhaustRemarks', e.target.value)}
-                        placeholder="Observaciones (opcional)"
+                        placeholder={t('placeholders.optionalRemarks')}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows={2}
                       />
@@ -966,7 +968,7 @@ const ServiceConfiguration: React.FC = () => {
                         onChange={(e) => handleInputChange('aftermarketIntakeManifold', e.target.checked)}
                         className="mr-3 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-gray-700 font-medium">Colector de Admisión Aftermarket</span>
+                      <span className="text-gray-700 font-medium">{t('modifiedParts.aftermarketIntakeManifold')}</span>
                     </label>
                     {formData.aftermarketIntakeManifold && (
                       <textarea
@@ -987,7 +989,7 @@ const ServiceConfiguration: React.FC = () => {
                         onChange={(e) => handleInputChange('coldAirIntake', e.target.checked)}
                         className="mr-3 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-gray-700 font-medium">Admisión de Aire Frío</span>
+                      <span className="text-gray-700 font-medium">{t('modifiedParts.coldAirIntake')}</span>
                     </label>
                     {formData.coldAirIntake && (
                       <textarea
@@ -1008,7 +1010,7 @@ const ServiceConfiguration: React.FC = () => {
                         onChange={(e) => handleInputChange('decat', e.target.checked)}
                         className="mr-3 text-blue-600 focus:ring-blue-500"
                       />
-                      <span className="text-gray-700 font-medium">Decat</span>
+                      <span className="text-gray-700 font-medium">{t('modifiedParts.decat')}</span>
                     </label>
                     {formData.decat && (
                       <textarea
@@ -1027,14 +1029,14 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Additional Services */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Servicios Adicionales</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.additionalServices')}</h2>
             {loading ? (
               <div className="text-center py-4">
-                <p className="text-gray-500">Cargando servicios adicionales...</p>
+                <p className="text-gray-500">{t('messages.loadingAdditionalServices')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-4">
-                <p className="text-red-500">Error al cargar servicios adicionales: {error}</p>
+                <p className="text-red-500">{t('errors.loadingAdditionalServices')}: {error}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1059,14 +1061,14 @@ const ServiceConfiguration: React.FC = () => {
                         <span className="text-gray-900 font-medium">{service.title}</span>
                       </div>
                       <span className="text-blue-600 font-semibold">
-                        {service.price ? `€${service.price}` : 'Precio a consultar'}
+                        {service.price ? `€${service.price}` : t('pricing.priceOnRequest')}
                       </span>
                     </label>
                   ))
                 }
                 {additionalServices.filter(service => service.id !== selectedService?.id).length === 0 && (
                   <div className="text-center py-8">
-                    <p className="text-gray-500">No hay servicios adicionales disponibles en este momento.</p>
+                    <p className="text-gray-500">{t('messages.noAdditionalServices')}</p>
                   </div>
                 )}
               </div>
@@ -1075,18 +1077,18 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Extra Information */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Información Extra</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.extraInfo')}</h2>
             <div className="space-y-6">
 
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Cualquier información adicional sobre el coche (opcional)
+                  {t('labels.additionalCarInfo')}
                 </label>
                 <textarea
                   value={formData.additionalInfo}
                   onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
-                  placeholder="Por favor, proporciona más información sobre tu pedido para que podamos ayudarte más rápida y eficientemente sin preguntas adicionales de nuestros ingenieros"
+                  placeholder={t('placeholders.additionalInfoPlaceholder')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={4}
                 />
@@ -1098,44 +1100,44 @@ const ServiceConfiguration: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
               <User className="w-6 h-6 text-blue-600 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-900">Información Personal</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('headers.personalInfo')}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre Completo *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.fullName')} *</label>
                 <input
                   type="text"
                   value={personalInfo.full_name}
                   onChange={(e) => handlePersonalInfoChange('full_name', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ingresa tu nombre completo"
+                  placeholder={t('placeholders.enterFullName')}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.phone')} *</label>
                 <input
                   type="tel"
                   value={personalInfo.phone}
                   onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ej: +34 123456789"
+                  placeholder={t('placeholders.phoneExample')}
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">Incluye el prefijo de tu país (ej: +34 para España)</p>
+                <p className="text-xs text-gray-500 mt-1">{t('messages.includeCountryPrefix')}</p>
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Correo Electrónico *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.email')} *</label>
                 <input
                   type="email"
                   value={personalInfo.email}
                   readOnly
                   className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed focus:outline-none"
-                  placeholder="Correo de registro"
+                  placeholder={t('placeholders.registrationEmail')}
                 />
-                <p className="text-xs text-gray-500 mt-1">Correo de registro (no editable)</p>
+                <p className="text-xs text-gray-500 mt-1">{t('messages.registrationEmailNotEditable')}</p>
               </div>
             </div>
           </div>
@@ -1144,87 +1146,87 @@ const ServiceConfiguration: React.FC = () => {
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
               <CreditCard className="w-6 h-6 text-blue-600 mr-3" />
-              <h2 className="text-xl font-semibold text-gray-900">Información de Facturación</h2>
+              <h2 className="text-xl font-semibold text-gray-900">{t('headers.billingInfo')}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nombre/Empresa para Facturación *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.billingName')} *</label>
                 <input
                   type="text"
                   value={billingInfo.billing_name}
                   onChange={(e) => handleBillingInfoChange('billing_name', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nombre o empresa para la factura"
+                  placeholder={t('placeholders.billingNamePlaceholder')}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">NIF/VAT/Tax ID</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.taxId')}</label>
                 <input
                   type="text"
                   value={billingInfo.tax_id}
                   onChange={(e) => handleBillingInfoChange('tax_id', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Número de identificación fiscal"
+                  placeholder={t('placeholders.taxIdPlaceholder')}
                 />
               </div>
               
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Dirección *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.address')} *</label>
                 <input
                   type="text"
                   value={billingInfo.billing_address}
                   onChange={(e) => handleBillingInfoChange('billing_address', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Dirección completa"
+                  placeholder={t('placeholders.fullAddress')}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ciudad *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.city')} *</label>
                 <input
                   type="text"
                   value={billingInfo.billing_city}
                   onChange={(e) => handleBillingInfoChange('billing_city', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Ciudad"
+                  placeholder={t('placeholders.city')}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Estado/Provincia</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.state')}</label>
                 <input
                   type="text"
                   value={billingInfo.billing_state}
                   onChange={(e) => handleBillingInfoChange('billing_state', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Estado o provincia"
+                  placeholder={t('placeholders.stateProvince')}
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Código Postal *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.postalCode')} *</label>
                 <input
                   type="text"
                   value={billingInfo.billing_postal_code}
                   onChange={(e) => handleBillingInfoChange('billing_postal_code', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Código postal"
+                  placeholder={t('placeholders.postalCode')}
                   required
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">País *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.country')} *</label>
                 <input
                   type="text"
                   value={billingInfo.billing_country}
                   onChange={(e) => handleBillingInfoChange('billing_country', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="País"
+                  placeholder={t('placeholders.country')}
                   required
                 />
               </div>
@@ -1233,7 +1235,7 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* Terms and Conditions */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Términos y Condiciones</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.termsAndConditions')}</h2>
             <div className="space-y-4">
               <label className="flex items-start">
                 <input
@@ -1244,17 +1246,17 @@ const ServiceConfiguration: React.FC = () => {
                   required
                 />
                 <span className="text-gray-700">
-                  Acepto los{' '}
+                  {t('terms.acceptTerms')}{' '}
                   <a href="/terms-of-service" className="text-blue-600 hover:text-blue-800 underline">
-                    términos de servicio
+                    {t('terms.termsOfService')}
                   </a>
-                  , el{' '}
+                  , {t('terms.the')}{' '}
                   <a href="/disclaimer" className="text-blue-600 hover:text-blue-800 underline">
-                    descargo de responsabilidad
+                    {t('terms.disclaimer')}
                   </a>
-                  {' '}y las{' '}
+                  {' '}{t('terms.and')}{' '}
                   <a href="/refund-policy" className="text-blue-600 hover:text-blue-800 underline">
-                    políticas de devoluciones
+                    {t('terms.refundPolicies')}
                   </a>
                   .
                 </span>
@@ -1265,7 +1267,7 @@ const ServiceConfiguration: React.FC = () => {
           {/* Resumen de Precios */}
           {selectedService && (
             <div className="bg-gray-50 rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Resumen de Precios</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.pricingSummary')}</h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-700">{selectedService.title}:</span>
@@ -1279,7 +1281,7 @@ const ServiceConfiguration: React.FC = () => {
                 {formData.selectedAdditionalServices.length > 0 && (
                   <>
                     <div className="border-t pt-4">
-                      <h3 className="text-gray-700 font-medium mb-2">Servicios Adicionales:</h3>
+                      <h3 className="text-gray-700 font-medium mb-2">{t('headers.additionalServices')}:</h3>
                       {additionalServices
                         .filter(service => formData.selectedAdditionalServices.includes(service.id))
                         .map(service => (
@@ -1299,7 +1301,7 @@ const ServiceConfiguration: React.FC = () => {
                 
                 <div className="border-t pt-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold text-gray-900">Total:</span>
+                    <span className="text-lg font-semibold text-gray-900">{t('pricing.total')}:</span>
                     <span className="text-2xl font-bold text-gray-900">€{calculateTotal()}</span>
                   </div>
                 </div>
@@ -1314,7 +1316,7 @@ const ServiceConfiguration: React.FC = () => {
               onClick={() => navigate(-1)}
               className="px-6 py-3 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Cancelar
+              {t('buttons.cancel')}
             </button>
             <button
               type="submit"
@@ -1325,7 +1327,7 @@ const ServiceConfiguration: React.FC = () => {
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
-              {isSubmitting ? 'Procesando...' : 'Crear Pedido'}
+              {isSubmitting ? t('buttons.processing') : t('buttons.createOrder')}
             </button>
           </div>
         </form>

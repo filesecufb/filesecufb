@@ -334,7 +334,7 @@ const Home: React.FC = () => {
                     </p>
                     <div className="flex justify-between items-center mb-6">
                       <span className="text-3xl font-bold text-white">
-                        {servicePrice}
+                        {String(servicePrice).includes('€') ? servicePrice : `€${servicePrice}`}
                       </span>
                       {serviceBadge && (
                         <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-primary/30">

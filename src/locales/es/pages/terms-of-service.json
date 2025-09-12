@@ -1,0 +1,68 @@
+{
+  "title": "Términos y Condiciones",
+  "section1": {
+    "title": "1. Aceptación de los Términos",
+    "content": "Al acceder y utilizar este sitio web, usted acepta estar sujeto a estos términos y condiciones de uso. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestro sitio web."
+  },
+  "section2": {
+    "title": "2. Uso del Sitio Web",
+    "content": "Usted puede utilizar nuestro sitio web para fines legales únicamente. Está prohibido utilizar el sitio para cualquier propósito ilegal o no autorizado.",
+    "additionalContent": "No debe transmitir gusanos, virus o cualquier código de naturaleza destructiva. Cualquier violación de la seguridad del sistema o de la red puede resultar en responsabilidad civil o penal."
+  },
+  "section3": {
+    "title": "3. Política de Devoluciones",
+    "content": "No se aceptan devoluciones para servicios digitales completados.",
+    "noReturns": "Esta política se basa en las regulaciones de comercio electrónico aplicables.",
+    "legalBasis": "Al realizar una compra, usted acepta esta política de no devolución.",
+    "consent": ""
+  },
+  "section4": {
+    "title": "4. Limitación de Responsabilidad",
+    "disclaimer": "Los servicios se proporcionan 'tal como están' sin garantías de ningún tipo, ya sean expresas o implícitas.",
+    "content": "No seremos responsables de:",
+    "items": [
+      "Pérdida de beneficios o ingresos",
+      "Daños a la reputación comercial",
+      "Pérdida de datos o información",
+      "Interrupción del negocio",
+      "Daños consecuentes o indirectos"
+    ]
+  },
+  "section5": {
+    "title": "5. Modificaciones",
+    "content": "Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en el sitio web.",
+    "items": [
+      "Cambios en la legislación aplicable",
+      "Mejoras en nuestros servicios",
+      "Actualizaciones de seguridad",
+      "Modificaciones en las políticas de la empresa"
+    ]
+  },
+  "section6": {
+    "title": "6. Contacto",
+    "content": "Si tiene alguna pregunta sobre estos términos y condiciones, puede contactarnos a través de:",
+    "items": [
+      "Formulario de contacto en el sitio web",
+      "Correo electrónico de atención al cliente",
+      "Teléfono de soporte técnico",
+      "Dirección postal para consultas legales"
+    ]
+  },
+  "section7": {
+    "title": "7. Ley Aplicable",
+    "content": "Estos términos y condiciones se rigen por las leyes de España. Cualquier disputa relacionada con estos términos será sometida a la jurisdicción exclusiva de los tribunales españoles."
+  },
+  "section8": {
+    "title": "8. Divisibilidad",
+    "content": "Si alguna disposición de estos términos se considera inválida o inaplicable, las disposiciones restantes seguirán siendo válidas y aplicables en la máxima medida permitida por la ley."
+  },
+  "section9": {
+    "title": "9. Renuncia",
+    "content": "Ninguna renuncia por nuestra parte a cualquier término o condición establecido en estos términos se considerará una renuncia adicional o continua de dicho término o condición o una renuncia de cualquier otro término o condición."
+  },
+  "section10": {
+    "title": "10. Acuerdo Completo",
+    "content": "Estos términos constituyen el acuerdo completo entre usted y nosotros con respecto al uso del sitio web y reemplazan todos los acuerdos y entendimientos anteriores, ya sean escritos u orales."
+  },
+  "lastUpdated": "Última actualización: 15 de enero de 2025"
+}

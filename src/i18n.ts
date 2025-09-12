@@ -3,9 +3,51 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
 
-// Importar traducciones
+// Importar traducciones base
 import translationES from './locales/es/translation.json';
 import translationEN from './locales/en/translation.json';
+
+// Importar traducciones de páginas
+import homeES from './locales/es/pages/home.json';
+import homeEN from './locales/en/pages/home.json';
+
+// Importar traducciones de componentes
+import navbarES from './locales/es/components/navbar.json';
+import navbarEN from './locales/en/components/navbar.json';
+import footerES from './locales/es/components/footer.json';
+import footerEN from './locales/en/components/footer.json';
+import servicesES from './locales/es/components/services.json';
+import servicesEN from './locales/en/components/services.json';
+import serviceConfigurationES from './locales/es/components/service-configuration.json';
+import serviceConfigurationEN from './locales/en/components/service-configuration.json';
+import contactES from './locales/es/components/contact.json';
+import contactEN from './locales/en/components/contact.json';
+import clientDashboardES from './locales/es/components/client-dashboard.json';
+import clientDashboardEN from './locales/en/components/client-dashboard.json';
+
+// Importar traducciones de páginas específicas
+import orderDetailsES from './locales/es/pages/order-details.json';
+import orderDetailsEN from './locales/en/pages/order-details.json';
+import authES from './locales/es/pages/auth.json';
+import authEN from './locales/en/pages/auth.json';
+import termsOfServiceES from './locales/es/pages/terms-of-service.json';
+import termsOfServiceEN from './locales/en/pages/terms-of-service.json';
+import cookiePolicyES from './locales/es/pages/cookiePolicy.json';
+import cookiePolicyEN from './locales/en/pages/cookiePolicy.json';
+import refundPolicyES from './locales/es/pages/refundPolicy.json';
+import refundPolicyEN from './locales/en/pages/refundPolicy.json';
+import disclaimerES from './locales/es/pages/disclaimer.json';
+import disclaimerEN from './locales/en/pages/disclaimer.json';
+import privacyPolicyES from './locales/es/pages/privacy-policy.json';
+import privacyPolicyEN from './locales/en/pages/privacy-policy.json';
+
+// Importar traducciones SEO
+import seoES from './locales/es/seo.json';
+import seoEN from './locales/en/seo.json';
+
+// Importar traducciones comunes
+import commonES from './locales/es/common.json';
+import commonEN from './locales/en/common.json';
 
 // Lista de países hispanohablantes
 const SPANISH_COUNTRIES = [
@@ -51,14 +93,56 @@ const detectUserLanguage = (): string => {
   return 'en';
 };
 
+// Función para combinar traducciones
+const combineTranslations = (baseTranslations: any, pageTranslations: any) => {
+  return {
+    ...baseTranslations,
+    ...pageTranslations
+  };
+};
+
 const resources = {
   es: {
-    translation: translationES
+    translation: combineTranslations(translationES, { 
+      home: homeES, 
+      contact: contactES, 
+      clientDashboard: clientDashboardES,
+      orderDetails: orderDetailsES,
+      auth: authES,
+      termsOfService: termsOfServiceES,
+      ...cookiePolicyES,
+      ...refundPolicyES,
+      ...disclaimerES,
+      ...privacyPolicyES,
+      ...navbarES, 
+      ...footerES, 
+      ...servicesES,
+      common: commonES
+    }),
+    'service-configuration': serviceConfigurationES,
+    seo: seoES
   },
   en: {
-    translation: translationEN
+    translation: combineTranslations(translationEN, { 
+      home: homeEN, 
+      contact: contactEN, 
+      clientDashboard: clientDashboardEN,
+      orderDetails: orderDetailsEN,
+      auth: authEN,
+      termsOfService: termsOfServiceEN,
+      ...cookiePolicyEN,
+      ...refundPolicyEN,
+      ...disclaimerEN,
+      ...privacyPolicyEN,
+      ...navbarEN, 
+      ...footerEN, 
+      ...servicesEN,
+      common: commonEN
+    }),
+    'service-configuration': serviceConfigurationEN,
+    seo: seoEN
   }
-};
+}
 
 i18n
   .use(Backend)
@@ -93,32 +177,197 @@ export const changeLanguage = (language: string) => {
   updateMetaTagsForLanguage(language);
 };
 
-// Función para actualizar meta tags según el idioma
-const updateMetaTagsForLanguage = (language: string) => {
-  const isSpanish = language === 'es';
+// Function to update meta tags based on language and page
+export const updateMetaTagsForLanguage = (language: string, page: string = 'home') => {
+  const baseUrl = 'https://filesecufb.com';
   
-  // Actualizar title
-  document.title = isSpanish 
-    ? 'FILESECUFB | Modificación de Mapas ECU | Tuning Files Profesionales'
-    : 'FILESECUFB | ECU Map Modification | Professional Tuning Files';
+  // Get SEO translations from the dedicated SEO namespace
+  const seoTranslations = i18n.getResourceBundle(language, 'seo');
+  const seoData = seoTranslations?.[page] || seoTranslations?.home;
   
-  // Actualizar meta description
-  const metaDescription = document.querySelector('meta[name="description"]');
-  if (metaDescription) {
-    metaDescription.setAttribute('content', isSpanish
-      ? 'FILESECUFB - Especialistas en modificación de mapas de centralitas. Tuning files para Stage 1, Stage 2, solución DPF, EGR, AdBlue. Reprogramación profesional con garantía.'
-      : 'FILESECUFB - Specialists in ECU map modification. Tuning files for Stage 1, Stage 2, DPF, EGR, AdBlue solutions. Professional remapping with warranty.'
-    );
+  if (!seoData) {
+    // Silently return if SEO data is not found to avoid console warnings
+    return;
   }
   
-  // Actualizar meta keywords
-  const metaKeywords = document.querySelector('meta[name="keywords"]');
-  if (metaKeywords) {
-    metaKeywords.setAttribute('content', isSpanish
-      ? 'filesecufb, tuning files, mapas ecu, modificación centralita, reprogramación ecu, ficheros tuning, calibración ecu, remap files, chip tuning, stage 1, stage 2, dpf off, egr off'
-      : 'filesecufb, tuning files, ecu maps, ecu modification, ecu remapping, tuning files, ecu calibration, remap files, chip tuning, stage 1, stage 2, dpf off, egr off'
-    );
+  // Update basic meta tags
+  const titleElement = document.querySelector('title');
+  const descriptionElement = document.querySelector('meta[name="description"]');
+  const keywordsElement = document.querySelector('meta[name="keywords"]');
+  const languageElement = document.querySelector('meta[name="language"]');
+  const geoRegionElement = document.querySelector('meta[name="geo.region"]');
+  
+  if (titleElement) {
+    titleElement.textContent = seoData.title;
   }
+  
+  if (descriptionElement) {
+    descriptionElement.setAttribute('content', seoData.description);
+  }
+  
+  if (keywordsElement) {
+    keywordsElement.setAttribute('content', seoData.keywords);
+  }
+  
+  if (languageElement) {
+    languageElement.setAttribute('content', language);
+  }
+  
+  if (geoRegionElement) {
+    geoRegionElement.setAttribute('content', 'ES');
+  }
+  
+  // Update canonical URL
+  updateCanonicalUrl(language, baseUrl, page);
+  
+  // Update hreflang tags
+  updateHreflangTags(baseUrl, page);
+  
+  // Update OpenGraph tags
+  updateOpenGraphTags(language, baseUrl, seoData);
+  
+  // Update Twitter Card tags
+  updateTwitterCardTags(language, seoData);
+  
+  // Update structured data
+  updateStructuredData(language, baseUrl, seoData);
+};
+
+// Helper function to update canonical URL
+const updateCanonicalUrl = (language: string, baseUrl: string, page: string = 'home') => {
+  let canonicalElement = document.querySelector('link[rel="canonical"]');
+  if (!canonicalElement) {
+    canonicalElement = document.createElement('link');
+    canonicalElement.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonicalElement);
+  }
+  
+  const currentPath = window.location.pathname;
+  const canonicalUrl = language === 'es' 
+    ? `${baseUrl}${currentPath}`
+    : `${baseUrl}/en${currentPath}`;
+  
+  canonicalElement.setAttribute('href', canonicalUrl);
+};
+
+// Helper function to update hreflang tags
+const updateHreflangTags = (baseUrl: string, page: string = 'home') => {
+  // Remove existing hreflang tags
+  const existingHreflangTags = document.querySelectorAll('link[hreflang]');
+  existingHreflangTags.forEach(tag => tag.remove());
+  
+  const currentPath = window.location.pathname;
+  
+  // Add Spanish hreflang
+  const esHreflang = document.createElement('link');
+  esHreflang.setAttribute('rel', 'alternate');
+  esHreflang.setAttribute('hreflang', 'es');
+  esHreflang.setAttribute('href', `${baseUrl}${currentPath}`);
+  document.head.appendChild(esHreflang);
+  
+  // Add English hreflang
+  const enHreflang = document.createElement('link');
+  enHreflang.setAttribute('rel', 'alternate');
+  enHreflang.setAttribute('hreflang', 'en');
+  enHreflang.setAttribute('href', `${baseUrl}/en${currentPath}`);
+  document.head.appendChild(enHreflang);
+  
+  // Add x-default hreflang
+  const defaultHreflang = document.createElement('link');
+  defaultHreflang.setAttribute('rel', 'alternate');
+  defaultHreflang.setAttribute('hreflang', 'x-default');
+  defaultHreflang.setAttribute('href', `${baseUrl}${currentPath}`);
+  document.head.appendChild(defaultHreflang);
+};
+
+// Helper function to update OpenGraph tags
+const updateOpenGraphTags = (language: string, baseUrl: string, seoData: any) => {
+  const ogTags = [
+    { property: 'og:title', content: seoData.title },
+    { property: 'og:description', content: seoData.description },
+    { property: 'og:locale', content: language === 'es' ? 'es_ES' : 'en_US' },
+    { property: 'og:url', content: `${baseUrl}${window.location.pathname}` },
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'FILESECUFB' },
+    { property: 'og:image', content: `${baseUrl}/og-image.jpg` },
+    { property: 'og:image:width', content: '1200' },
+    { property: 'og:image:height', content: '630' }
+  ];
+  
+  ogTags.forEach(tag => {
+    let ogElement = document.querySelector(`meta[property="${tag.property}"]`);
+    if (!ogElement) {
+      ogElement = document.createElement('meta');
+      ogElement.setAttribute('property', tag.property);
+      document.head.appendChild(ogElement);
+    }
+    ogElement.setAttribute('content', tag.content);
+  });
+};
+
+// Helper function to update Twitter Card tags
+const updateTwitterCardTags = (language: string, seoData: any) => {
+  const twitterTags = [
+    { name: 'twitter:card', content: 'summary_large_image' },
+    { name: 'twitter:title', content: seoData.title },
+    { name: 'twitter:description', content: seoData.description },
+    { name: 'twitter:site', content: '@filesecufb' },
+    { name: 'twitter:image', content: 'https://filesecufb.com/twitter-image.jpg' }
+  ];
+  
+  twitterTags.forEach(tag => {
+    let twitterElement = document.querySelector(`meta[name="${tag.name}"]`);
+    if (!twitterElement) {
+      twitterElement = document.createElement('meta');
+      twitterElement.setAttribute('name', tag.name);
+      document.head.appendChild(twitterElement);
+    }
+    twitterElement.setAttribute('content', tag.content);
+  });
+};
+
+// Helper function to update structured data
+const updateStructuredData = (language: string, baseUrl: string, seoData: any) => {
+  // Remove existing structured data
+  const existingStructuredData = document.querySelector('script[type="application/ld+json"]');
+  if (existingStructuredData) {
+    existingStructuredData.remove();
+  }
+  
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "FILESECUFB",
+    "url": baseUrl,
+    "logo": `${baseUrl}/logo.png`,
+    "description": seoData.description,
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+34-630-84-10-47",
+      "contactType": "customer service",
+      "email": "info@filesecufb.com",
+      "availableLanguage": ["Spanish", "English"]
+    },
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "ES"
+    },
+    "sameAs": [
+      "https://www.facebook.com/filesecufb",
+      "https://www.instagram.com/filesecufb"
+    ],
+    "offers": {
+      "@type": "Offer",
+      "description": language === 'es' 
+        ? "Servicios de modificación de mapas ECU: Stage 1, Stage 2, DPF Off, EGR Off, AdBlue Off"
+        : "ECU map modification services: Stage 1, Stage 2, DPF Off, EGR Off, AdBlue Off"
+    }
+  };
+  
+  const script = document.createElement('script');
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(structuredData);
+  document.head.appendChild(script);
 };
 
 export default i18n;

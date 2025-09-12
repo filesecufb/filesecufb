@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSEO } from '../hooks/useSEO'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 
 const Register = () => {
   const { t } = useTranslation()
+  useSEO('register')
   const { signUp, signIn } = useAuth()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({

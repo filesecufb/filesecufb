@@ -1,0 +1,247 @@
+{
+  "hero": {
+    "title": "FILESECUFB",
+    "subtitle": "Professional Tuning Files",
+    "description": "Specialists in ECU map modification and calibration with guaranteed results",
+    "cta": {
+      "services": "View Services",
+      "login": "Sign In"
+    },
+    "stats": {
+      "files": "Files Delivered",
+      "delivery": "Delivery Time",
+      "experience": "Years of Experience"
+    }
+  },
+  "features": {
+    "title": {
+      "part1": "Why Choose",
+      "part2": "Us?"
+    },
+    "subtitle": "Leaders in ECU remapping with cutting-edge professional software",
+    "items": {
+      "calibration": {
+        "title": "Precise Calibration",
+        "description": "Engine maps optimized and verified on dyno bench"
+      },
+      "guaranteed": {
+        "title": "Guaranteed Files",
+        "description": "Every tuning file is thoroughly tested before delivery"
+      },
+      "express": {
+        "title": "Express Delivery",
+        "description": "Modifications ready in 30 minutes thanks to our extensive database"
+      }
+    }
+  },
+  "services": {
+    "title": {
+      "part1": "Our",
+      "part2": "Services"
+    },
+    "subtitle": "Professional catalog of tuning files for all makes and models",
+    "viewAll": "View All Files",
+    "viewDetails": "View Details",
+    "items": [
+      {
+        "name": "Stage 1 Remap",
+        "description": "Optimal calibration for stock vehicles",
+        "badge": "Most Popular"
+      },
+      {
+        "name": "Stage 2 Performance",
+        "description": "Tuning files for vehicles with upgraded hardware",
+        "badge": "Advanced"
+      },
+      {
+        "name": "DPF/EGR Solutions",
+        "description": "Specialized modifications for emission systems",
+        "badge": "Technical"
+      }
+    ],
+    "servicesList": [
+      {
+        "name": "Stage 1 Tuning Files",
+        "description": "Professional ECU modification service to optimize your vehicle's performance"
+      },
+      {
+        "name": "Stage 2 Tuning Files",
+        "description": "Advanced ECU modifications to get the maximum potential from your engine"
+      },
+      {
+        "name": "DPF/EGR Delete",
+        "description": "Professional removal of restrictive systems to improve performance"
+      }
+    ]
+  },
+  "process": {
+    "title": {
+      "part1": "Our",
+      "part2": "Process"
+    },
+    "subtitle": "Technical and professional process in tuning file development",
+    "steps": {
+      "reception": {
+        "title": "Reception",
+        "description": "We receive the original file from your ECU"
+      },
+      "analysis": {
+        "title": "Analysis",
+        "description": "We study the parameters with specialized software"
+      },
+      "optimization": {
+        "title": "Optimization",
+        "description": "We modify the maps according to technical specifications"
+      },
+      "delivery": {
+        "title": "Delivery",
+        "description": "We send the tuning file ready to program"
+      }
+    },
+    "professional": "Professional service guaranteed"
+  },
+  "support": {
+    "title": {
+      "part1": "After-Sales",
+      "part2": "Support"
+    },
+    "subtitle": "Specialized technical assistance and engine map updates",
+    "badge": "Complete Service",
+    "contact": "Contact Support",
+    "question": "Need assistance with tuning files? Contact us for professional support",
+    "complete": "Complete Service",
+    "services": {
+      "reversion": {
+        "title": "Stock Reversion",
+        "description": "We have original files available to restore factory configuration when needed."
+      },
+      "updates": {
+        "title": "Updates",
+        "description": "Continuous updates with the latest calibrations and tuning file improvements."
+      },
+      "maintenance": {
+        "title": "Maintenance",
+        "description": "Specialized technical support for remapping implementation."
+      }
+    }
+  },
+  "testimonials": {
+    "title": {
+      "part1": "What our",
+      "part2": "clients say"
+    },
+    "subtitle": "Real testimonials from satisfied drivers",
+    "reviews": "reviews",
+    "items": {
+      "carlos": {
+        "name": "Carlos M.",
+        "car": "BMW 320i",
+        "text": "Excellent FILESECUFB service. Stage 1 for my BMW works perfectly."
+      },
+      "ana": {
+        "name": "Ana L.",
+        "car": "Audi A4",
+        "text": "Professional quality maps. FILESECUFB delivers on fast delivery promise."
+      },
+      "miguel": {
+        "name": "Miguel R.",
+        "car": "Golf GTI",
+        "text": "The best tuning files on the market. FILESECUFB transformed my Golf GTI."
+      }
+    }
+  },
+  "faq": {
+    "title": {
+      "part1": "Frequently",
+      "part2": "Asked Questions"
+    },
+    "subtitle": {
+      "part1": "We resolve all your doubts about",
+      "part2": "our professional services"
+    },
+    "items": {
+      "types": {
+        "question": "What types of mapping files do you offer?",
+        "answer": "We offer Stage 1, Stage 2, Pop & Bang, DPF/EGR Delete, and custom maps for all brands. Each file is specifically optimized for your vehicle and needs."
+      },
+      "delivery": {
+        "question": "How long does delivery take?",
+        "answer": "Delivery is immediate after payment confirmation. You receive your optimized file in less than 30 minutes, ready to install."
+      },
+      "warranty": {
+        "question": "Do you offer warranty on the files?",
+        "answer": "Yes, all our files include complete warranty. If you have any problem, we provide technical support and revisions at no additional cost."
+      },
+      "ecus": {
+        "question": "What ECUs are compatible?",
+        "answer": "We work with all major ECUs: Bosch, Continental, Siemens, Delphi, Marelli, and more. Guaranteed compatibility with your vehicle."
+      },
+      "safety": {
+        "question": "Is it safe for my engine?",
+        "answer": "Absolutely. Our maps respect the engine's safety limits, maintaining reliability while optimizing performance."
+      },
+      "request": {
+        "question": "How do I request a custom file?",
+        "answer": "Contact us with your vehicle details and objectives. Our technical team will create a custom map specific to your needs."
+      }
+    }
+  },
+  "whatsapp": {
+    "title": {
+      "part1": "Join our",
+      "part2": "WhatsApp community"
+    },
+    "description": {
+      "part1": "Professional community of",
+      "part2": "engine mapping specialists",
+      "part3": "Technical support and",
+      "part4": "immediate assistance"
+    },
+    "button": "Join the Group"
+  },
+  "results": {
+    "title": {
+      "part1": "Proven",
+      "part2": "Results"
+    },
+    "subtitle": "Verified dyno results from our professional ECU remapping services",
+    "power": "Power",
+    "torque": "Torque",
+    "contact": "Contact Us",
+    "powerIncrease": "Power",
+    "torqueIncrease": "Torque",
+    "bmw": {
+      "model": "BMW 320i",
+      "originalPower": "184 HP",
+      "tunedPower": "245 HP",
+      "originalTorque": "300 Nm",
+      "tunedTorque": "420 Nm",
+      "powerGain": "+33%",
+      "torqueGain": "+40%",
+      "powerIncrease": "+61 HP",
+      "torqueIncrease": "+120 Nm"
+    },
+    "audi": {
+      "model": "Audi A4 2.0T",
+      "originalPower": "190 HP",
+      "tunedPower": "265 HP",
+      "originalTorque": "320 Nm",
+      "tunedTorque": "450 Nm",
+      "powerGain": "+39%",
+      "torqueGain": "+41%",
+      "powerIncrease": "+75 HP",
+      "torqueIncrease": "+130 Nm"
+    },
+    "golf": {
+      "model": "Golf GTI Mk7",
+      "originalPower": "220 HP",
+      "tunedPower": "290 HP",
+      "originalTorque": "350 Nm",
+      "tunedTorque": "480 Nm",
+      "powerGain": "+32%",
+      "torqueGain": "+37%",
+      "powerIncrease": "+70 HP",
+      "torqueIncrease": "+130 Nm"
+    }
+  }
+}

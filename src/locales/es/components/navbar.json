@@ -1,0 +1,23 @@
+{
+  "navbar": {
+    "links": {
+      "home": "INICIO",
+      "services": "SERVICIOS",
+      "contact": "CONTACTO",
+      "admin": "ADMIN",
+      "client": "CLIENTE"
+    },
+    "buttons": {
+      "account": "MI CUENTA",
+      "logout": "SALIR",
+      "closing": "CERRANDO..."
+    },
+    "authenticated": {
+      "dashboard": "DASHBOARD",
+      "myOrders": "MIS PEDIDOS",
+      "myDashboard": "Mi Dashboard",
+      "myProfile": "Mi Perfil",
+      "logout": "Cerrar Sesión"
+    }
+  }
+}

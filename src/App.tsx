@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import CookieBanner from './components/CookieBanner';
 import ThirdPartyScripts from './components/ThirdPartyScripts';
 import { useCookieConsent } from './hooks/useCookieConsent';
+import { useSEO } from './hooks/useSEO';
 import { Settings } from 'lucide-react';
 import { AuthProvider } from './contexts/AuthContext';
 import Home from './pages/Home';
@@ -56,71 +57,82 @@ const CookieFloatingButton: React.FC = () => {
   );
 };
 
+// Componente interno para usar hooks de React Router
+const AppContent: React.FC = () => {
+  // Hook para actualizar SEO automáticamente
+  useSEO();
+  
+  return (
+    <div className="min-h-screen bg-dark-primary flex flex-col">
+      <Navbar />
+      <main className="flex-grow pt-16">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          {/* Placeholder routes for other pages */}
+          <Route path="/services" element={<Services />} />
+          <Route path="/service-configuration/:serviceId?" element={<ServiceConfiguration />} />
+          <Route path="/gallery" element={<div className="min-h-screen bg-dark-primary flex items-center justify-center"><h1 className="text-white text-2xl">Galería - En construcción</h1></div>} />
+          <Route path="/about" element={<div className="min-h-screen bg-dark-primary flex items-center justify-center"><h1 className="text-white text-2xl">Nosotros - En construcción</h1></div>} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/order-details/:orderId" element={<OrderDetails />} />
+          <Route path="/admin/client-details/:clientId" element={<ClientDetails />} />
+          <Route path="/client-dashboard" element={<ClientDashboard />} />
+          <Route path="/dashboard" element={<ClientDashboard />} />
+          <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/refund-policy" element={<RefundPolicy />} />
+          <Route path="/disclaimer" element={<Disclaimer />} />
+          <Route path="/cookie-policy" element={<CookiePolicy />} />
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Footer />
+      
+      {/* Sistema de cookies */}
+      <CookieBanner />
+      <CookieFloatingButton />
+      <ThirdPartyScripts />
+      
+      {/* Toaster para notificaciones */}
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+            border: '1px solid #374151'
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff'
+            }
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff'
+            }
+          }
+        }}
+      />
+    </div>
+  );
+};
+
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen bg-dark-primary flex flex-col">
-          <Navbar />
-          <main className="flex-grow pt-16">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              {/* Placeholder routes for other pages */}
-              <Route path="/services" element={<Services />} />
-              <Route path="/service-configuration/:serviceId?" element={<ServiceConfiguration />} />
-              <Route path="/gallery" element={<div className="min-h-screen bg-dark-primary flex items-center justify-center"><h1 className="text-white text-2xl">Galería - En construcción</h1></div>} />
-              <Route path="/about" element={<div className="min-h-screen bg-dark-primary flex items-center justify-center"><h1 className="text-white text-2xl">Nosotros - En construcción</h1></div>} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/order-details/:orderId" element={<OrderDetails />} />
-              <Route path="/admin/client-details/:clientId" element={<ClientDetails />} />
-              <Route path="/client-dashboard" element={<ClientDashboard />} />
-              <Route path="/dashboard" element={<ClientDashboard />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/disclaimer" element={<Disclaimer />} />
-              <Route path="/cookie-policy" element={<CookiePolicy />} />
-              {/* Catch-all route for 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-          
-          {/* Sistema de cookies */}
-          <CookieBanner />
-          <CookieFloatingButton />
-          <ThirdPartyScripts />
-          
-          {/* Toaster para notificaciones */}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#1f2937',
-                color: '#fff',
-                border: '1px solid #374151'
-              },
-              success: {
-                iconTheme: {
-                  primary: '#10b981',
-                  secondary: '#fff'
-                }
-              },
-              error: {
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff'
-                }
-              }
-            }}
-          />
-        </div>
+        <AppContent />
+
       </AuthProvider>
     </Router>
   );

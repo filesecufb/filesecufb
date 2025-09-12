@@ -1,11 +1,15 @@
 import React from 'react'
 import { Phone, MessageCircle, Mail, MapPin, Clock } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSEO } from '../hooks/useSEO'
 
 const Contact: React.FC = () => {
   const { t } = useTranslation();
+  
+  // Usar el hook useSEO para gestionar metadatos dinámicos
+  useSEO('contact');
 
-  // Agregar datos estructurados para SEO de contacto
+  // Agregar datos estructurados para SEO de contacto con traducciones dinámicas
   React.useEffect(() => {
     const script = document.createElement('script');
     script.type = 'application/ld+json';
@@ -13,7 +17,7 @@ const Contact: React.FC = () => {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
       "name": "FILESECUFB",
-      "description": "Servicio profesional de tuning files y reprogramación ECU",
+      "description": t('contact.header.subtitle'),
       "url": "https://filesecufb.com",
       "telephone": "+34630841047",
       "email": "info@filesecufb.com",
@@ -48,25 +52,6 @@ const Contact: React.FC = () => {
 
     return () => {
       document.head.removeChild(script);
-    };
-  }, []);
-
-  // Actualizar meta tags para la página de contacto
-  React.useEffect(() => {
-    const originalTitle = document.title;
-    const originalDescription = document.querySelector('meta[name="description"]')?.getAttribute('content');
-    
-    document.title = t('contact.header.title') + ' - FILESECUFB';
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', t('contact.header.subtitle') + ' | Teléfono: +34 630 84 10 47 | Email: info@filesecufb.com');
-    }
-
-    return () => {
-      document.title = originalTitle;
-      if (metaDescription && originalDescription) {
-        metaDescription.setAttribute('content', originalDescription);
-      }
     };
   }, [t]);
   const scheduleData = [
@@ -214,7 +199,7 @@ const Contact: React.FC = () => {
               
               <div className="mt-6 pt-4 border-t border-gray-700/50">
                 <p className="text-sm text-gray-400 text-center italic">
-                  Horarios confirmados por la empresa
+                  {t('contact.schedule.scheduleConfirmation')}
                 </p>
               </div>
             </div>

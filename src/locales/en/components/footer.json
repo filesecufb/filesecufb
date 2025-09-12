@@ -1,0 +1,40 @@
+{
+  "footer": {
+    "company": {
+      "name": "FILESECUFB",
+      "description": "Specialists in extreme ECU remapping with cutting-edge professional software"
+    },
+    "navigation": {
+      "title": "Navigation",
+      "links": {
+        "home": "Home",
+        "process": "Our Process",
+        "services": "Services",
+        "contact": "Contact"
+      }
+    },
+    "services": {
+      "title": "Services",
+      "links": {
+        "carTuning": "CAR TUNING",
+        "trucks": "TRUCKS & AGRICULTURE",
+        "tcuTuning": "TCU TUNING",
+        "others": "OTHER SERVICES"
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "phone": "+34 630 84 10 47",
+      "email": "info@filesecufb.com",
+      "address": "Paraje Narcisos, 21, MEDIALEGUA"
+    },
+    "legal": {
+      "copyright": "© 2024 FILESECUFB. All rights reserved.",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy",
+      "refund": "Refund Policy",
+      "disclaimer": "Disclaimer"
+    }
+  }
+}

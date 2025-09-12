@@ -1,0 +1,67 @@
+{
+  "home": {
+    "title": "FILESECUFB | Tuning Files Profesionales | Modificación ECU",
+    "description": "Especialistas en modificación de mapas ECU y calibración de centralitas. Stage 1, Stage 2, DPF Off, EGR Off, AdBlue Off. Resultados garantizados y entrega rápida.",
+    "keywords": "tuning files, modificación ecu, stage 1, stage 2, dpf off, egr off, adblue off, calibración centralitas, filesecufb"
+  },
+  "services": {
+    "title": "Servicios de Tuning | FILESECUFB | Modificación ECU Profesional",
+    "description": "Catálogo completo de servicios de tuning ECU. Stage 1, Stage 2, DPF Delete, EGR Off, AdBlue Delete. Modificaciones profesionales para todas las marcas.",
+    "keywords": "servicios tuning, stage 1, stage 2, dpf delete, egr off, adblue delete, modificación ecu profesional"
+  },
+  "contact": {
+    "title": "Contacto | FILESECUFB | Soporte Técnico Tuning",
+    "description": "Contacta con FILESECUFB para consultas sobre tuning files y modificaciones ECU. Soporte técnico especializado y asesoramiento profesional.",
+    "keywords": "contacto filesecufb, soporte técnico, consultas tuning, asesoramiento ecu"
+  },
+  "login": {
+    "title": "Iniciar Sesión | FILESECUFB | Área de Cliente",
+    "description": "Accede a tu área de cliente FILESECUFB. Gestiona tus pedidos de tuning files, consulta el estado de tus modificaciones ECU y descarga tus archivos.",
+    "keywords": "login filesecufb, área cliente, pedidos tuning, gestión archivos ecu"
+  },
+  "register": {
+    "title": "Registro | FILESECUFB | Crear Cuenta Cliente",
+    "description": "Regístrate en FILESECUFB para acceder a nuestros servicios de tuning ECU. Crea tu cuenta y comienza a solicitar modificaciones profesionales de mapas.",
+    "keywords": "registro filesecufb, crear cuenta, cliente tuning, servicios ecu"
+  },
+  "forgotPassword": {
+    "title": "Recuperar Contraseña | FILESECUFB | Restablecer Acceso",
+    "description": "Recupera el acceso a tu cuenta de FILESECUFB para continuar con tus servicios de tuning. Restablece tu contraseña de forma segura.",
+    "keywords": "recuperar contraseña, restablecer acceso, cuenta filesecufb, tuning files"
+  },
+  "dashboard": {
+    "title": "Panel de Cliente | FILESECUFB | Mis Pedidos de Tuning",
+    "description": "Panel de control del cliente FILESECUFB. Consulta tus pedidos de tuning files, estado de modificaciones ECU y descarga tus archivos personalizados.",
+    "keywords": "panel cliente, pedidos tuning, estado modificaciones, descarga archivos ecu"
+  },
+  "privacy": {
+    "title": "Política de Privacidad | FILESECUFB | Protección de Datos",
+    "description": "Política de privacidad de FILESECUFB. Información sobre el tratamiento de datos personales, cookies y derechos del usuario según RGPD.",
+    "keywords": "política privacidad, protección datos, rgpd, cookies, filesecufb"
+  },
+  "terms": {
+    "title": "Términos y Condiciones | FILESECUFB | Condiciones de Uso",
+    "description": "Términos y condiciones de uso de los servicios FILESECUFB. Condiciones legales para la modificación de mapas ECU y tuning files.",
+    "keywords": "términos condiciones, condiciones uso, servicios tuning, modificación ecu legal"
+  },
+  "cookies": {
+    "title": "Política de Cookies | FILESECUFB | Gestión de Cookies",
+    "description": "Política de cookies de FILESECUFB. Información sobre el uso de cookies, tipos de cookies utilizadas y gestión de preferencias.",
+    "keywords": "política cookies, gestión cookies, preferencias cookies, filesecufb"
+  },
+  "disclaimer": {
+    "title": "Aviso Legal | FILESECUFB | Modificaciones ECU",
+    "description": "Aviso legal sobre modificaciones ECU y tuning files. Información importante sobre riesgos, responsabilidades y uso legal de nuestros servicios.",
+    "keywords": "aviso legal, modificaciones ecu, responsabilidades tuning, uso legal filesecufb"
+  },
+  "refundPolicy": {
+    "title": "Política de Reembolso | FILESECUFB | Condiciones de Devolución",
+    "description": "Política de reembolso de FILESECUFB. Condiciones y procedimientos para solicitar devoluciones de servicios de tuning files.",
+    "keywords": "política reembolso, devoluciones, condiciones reembolso, filesecufb"
+  },
+  "termsOfService": {
+    "title": "Términos de Servicio | FILESECUFB | Condiciones Generales",
+    "description": "Términos de servicio de FILESECUFB. Condiciones generales de uso de la plataforma y servicios de modificación ECU.",
+    "keywords": "términos servicio, condiciones generales, plataforma tuning, servicios ecu"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "refundPolicy": {
+    "title": "Refund Policy",
+    "lastUpdated": "Last updated: January 15, 2025",
+    "overview": {
+      "title": "1. GENERAL POLICY",
+      "content": "⚠️ NO RETURNS OR REFUNDS ACCEPTED\n\nDue to the digital nature of our products (ECU reprogramming files), NO RETURNS OR REFUNDS ARE ACCEPTED once the file download is completed."
+    },
+    "digitalServices": {
+      "title": "2. LEGAL BASIS",
+      "content": "This policy is based on current Spanish legislation:\n\nArticle 103.m) of Royal Legislative Decree 1/2007:",
+      "noReturns": "The right of withdrawal shall not apply to contracts for the supply of digital content which is not supplied on a tangible medium where performance has begun with the consumer's prior express consent and acknowledgment that they lose their right of withdrawal."
+    },
+    "expressConsent": {
+      "title": "3. EXPRESS CONSENT",
+      "content": "By proceeding with the purchase and download of our digital files, you:",
+      "list": [
+        "Grant your express consent for immediate delivery of digital content",
+        "Acknowledge that you lose your right of withdrawal once download begins",
+        "Accept that you cannot request a return or refund for any reason",
+        "Confirm having read and understood this policy before purchase"
+      ]
+    },
+    "exceptionalCircumstances": {
+      "title": "4. AFFECTED PRODUCTS",
+      "content": "This policy applies to ALL our digital products, including:",
+      "list": [
+        "ECU reprogramming files (Stage 1, Stage 2, etc.)",
+        "System deletion files (DPF, EGR, AdBlue, etc.)",
+        "TCU optimization files",
+        "Any other digital tuning files",
+        "File customization services"
+      ]
+    },
+    "refundProcess": {
+      "title": "5. INVALID REASONS FOR RETURN",
+      "content": "The following reasons do NOT constitute grounds for requesting a return:",
+      "steps": [
+        "Change of mind after download",
+        "Vehicle incompatibility (customer's responsibility to verify)",
+        "Unexpected performance results",
+        "Technical problems during installation",
+        "Vehicle damage resulting from file use",
+        "Loss of manufacturer warranty",
+        "Legal issues in your jurisdiction",
+        "User technical difficulties"
+      ]
+    },
+    "partialRefunds": {
+      "title": "6. PRE-PURCHASE VERIFICATION",
+      "content": "It is the customer's sole responsibility to verify before purchase:\n\n• File compatibility with their specific vehicle\n• Required technical specifications\n• Legality of use in their country/region\n• Technical capability for installation\n• Acceptance of associated risks",
+      "calculation": "7. TECHNICAL SUPPORT\n\nAlthough we do not offer refunds, we do provide:\n\n• Basic technical support for installation\n• Compatibility information (before purchase)\n• Installation guides when available\n• Response to reasonable technical inquiries\n\nImportant: Technical support does not include performance guarantee or liability for damages."
+    },
+    "paymentDisputes": {
+      "title": "8. EXCEPTIONAL CASES",
+      "content": "In very exceptional cases, we might consider:\n\n• Technical error in delivering the correct file\n• Corrupt or damaged file (replacement will be provided, not refund)\n• Double charge due to payment system error\n\nThese cases will be evaluated individually and the final decision is at our discretion."
+    },
+    "modifications": {
+      "title": "9. CLAIM PROCESS",
+      "content": "If you believe your case falls under the mentioned exceptions:\n\n• Contact us within 24 hours after purchase\n• Provide clear evidence of the technical problem\n• Include all transaction details\n• Await our evaluation (maximum 5 business days)"
+    },
+    "contact": {
+      "title": "Contact for Claims",
+      "content": "For exceptional cases, contact us through our official support channels.",
+      "methods": [
+        "Contact form on our website",
+        "Customer service email",
+        "Phone support during business hours"
+      ]
+    },
+    "consent": {
+      "title": "10. ACCEPTANCE OF TERMS",
+      "content": "By making a purchase on our website, you confirm that you have read, understood, and completely accept this Refund Policy, as well as our Terms of Service."
+    }
+  }
+}

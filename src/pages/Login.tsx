@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useSEO } from '../hooks/useSEO'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'react-hot-toast'
 
 const Login = () => {
   const { t } = useTranslation()
+  useSEO('login')
   const { signIn, profile } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -167,7 +169,7 @@ const Login = () => {
 
           <div className="mt-6 text-center">
             <Link to="/forgot-password" className="text-primary hover:text-blue-dark font-medium transition-colors uppercase tracking-wider text-sm">
-              {t('auth.login.forgotPassword')}
+              {t('auth.login.form.forgotPassword')}
             </Link>
           </div>
 

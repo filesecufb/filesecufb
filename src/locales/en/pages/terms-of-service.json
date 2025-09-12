@@ -1,0 +1,68 @@
+{
+  "title": "Terms and Conditions",
+  "section1": {
+    "title": "1. Acceptance of Terms",
+    "content": "By accessing and using this website, you agree to be bound by these terms and conditions of use. If you do not agree with any part of these terms, you should not use our website."
+  },
+  "section2": {
+    "title": "2. Website Usage",
+    "content": "You may use our website for legal purposes only. It is prohibited to use the site for any illegal or unauthorized purpose.",
+    "additionalContent": "You must not transmit worms, viruses or any code of a destructive nature. Any violation of system or network security may result in civil or criminal liability."
+  },
+  "section3": {
+    "title": "3. Refund Policy",
+    "content": "No refunds are accepted for completed digital services.",
+    "noReturns": "This policy is based on applicable e-commerce regulations.",
+    "legalBasis": "By making a purchase, you accept this no-refund policy.",
+    "consent": ""
+  },
+  "section4": {
+    "title": "4. Limitation of Liability",
+    "disclaimer": "Services are provided 'as is' without warranties of any kind, whether express or implied.",
+    "content": "We will not be responsible for:",
+    "items": [
+      "Loss of profits or income",
+      "Damage to business reputation",
+      "Loss of data or information",
+      "Business interruption",
+      "Consequential or indirect damages"
+    ]
+  },
+  "section5": {
+    "title": "5. Modifications",
+    "content": "We reserve the right to modify these terms at any time. Modifications will take effect immediately after publication on the website.",
+    "items": [
+      "Changes in applicable legislation",
+      "Improvements to our services",
+      "Security updates",
+      "Company policy modifications"
+    ]
+  },
+  "section6": {
+    "title": "6. Contact",
+    "content": "If you have any questions about these terms and conditions, you can contact us through:",
+    "items": [
+      "Contact form on the website",
+      "Customer service email",
+      "Technical support phone",
+      "Postal address for legal inquiries"
+    ]
+  },
+  "section7": {
+    "title": "7. Applicable Law",
+    "content": "These terms and conditions are governed by the laws of Spain. Any dispute related to these terms will be subject to the exclusive jurisdiction of Spanish courts."
+  },
+  "section8": {
+    "title": "8. Severability",
+    "content": "If any provision of these terms is deemed invalid or unenforceable, the remaining provisions will continue to be valid and enforceable to the maximum extent permitted by law."
+  },
+  "section9": {
+    "title": "9. Waiver",
+    "content": "No waiver by us of any term or condition set forth in these terms shall be deemed a further or continuing waiver of such term or condition or a waiver of any other term or condition."
+  },
+  "section10": {
+    "title": "10. Complete Agreement",
+    "content": "These terms constitute the complete agreement between you and us regarding the use of the website and replace all previous agreements and understandings, whether written or oral."
+  },
+  "lastUpdated": "Last updated: January 15, 2025"
+}

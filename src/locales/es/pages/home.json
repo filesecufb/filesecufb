@@ -1,0 +1,247 @@
+{
+  "hero": {
+    "title": "FILESECUFB",
+    "subtitle": "Tuning Files Profesionales",
+    "description": "Especialistas en modificación de mapas y calibración de centralitas con resultados garantizados",
+    "cta": {
+      "services": "Ver Servicios",
+      "login": "Iniciar Sesión"
+    },
+    "stats": {
+      "files": "Ficheros Entregados",
+      "delivery": "Tiempo de Entrega",
+      "experience": "Años de Experiencia"
+    }
+  },
+  "features": {
+    "title": {
+      "part1": "¿Por qué",
+      "part2": "elegirnos?"
+    },
+    "subtitle": "Líderes en reprogramación de centralitas con software profesional de última generación",
+    "items": {
+      "calibration": {
+        "title": "Calibración Precisa",
+        "description": "Mapas motor optimizados y verificados en banco de potencia"
+      },
+      "guaranteed": {
+        "title": "Ficheros Garantizados",
+        "description": "Cada tuning file es testado exhaustivamente antes de su entrega"
+      },
+      "express": {
+        "title": "Entrega Express",
+        "description": "Modificaciones listas en 30 minutos gracias a nuestra extensa base de datos"
+      }
+    }
+  },
+  "services": {
+    "title": {
+      "part1": "Nuestros",
+      "part2": "Servicios"
+    },
+    "subtitle": "Catálogo profesional de tuning files para todas las marcas y modelos",
+    "viewAll": "Ver Todos los Ficheros",
+    "viewDetails": "Ver Detalles",
+    "items": [
+      {
+        "name": "Stage 1 Remap",
+        "description": "Calibración óptima para vehículos de serie",
+        "badge": "Más Popular"
+      },
+      {
+        "name": "Stage 2 Performance",
+        "description": "Ficheros tuning para vehículos con hardware mejorado",
+        "badge": "Avanzado"
+      },
+      {
+        "name": "Soluciones DPF/EGR",
+        "description": "Modificaciones especializadas para sistemas de emisiones",
+        "badge": "Técnico"
+      }
+    ],
+    "servicesList": [
+      {
+        "name": "Archivos Stage 1 Tuning",
+        "description": "Servicio profesional de modificación ECU para optimizar el rendimiento de tu vehículo"
+      },
+      {
+        "name": "Archivos Stage 2 Tuning",
+        "description": "Modificaciones ECU avanzadas para obtener el máximo potencial de tu motor"
+      },
+      {
+        "name": "DPF/EGR Delete",
+        "description": "Eliminación profesional de sistemas restrictivos para mejorar el rendimiento"
+      }
+    ]
+  },
+  "results": {
+    "title": {
+      "part1": "Resultados",
+      "part2": "Comprobados"
+    },
+    "subtitle": "Resultados verificados en banco de potencia de nuestras reprogramaciones profesionales",
+    "power": "Potencia",
+    "torque": "Torque",
+    "contact": "Contáctanos",
+    "powerIncrease": "Potencia",
+    "torqueIncrease": "Torque",
+    "bmw": {
+      "model": "BMW 320i",
+      "originalPower": "184 CV",
+      "tunedPower": "245 CV",
+      "originalTorque": "300 Nm",
+      "tunedTorque": "420 Nm",
+      "powerGain": "+33%",
+      "torqueGain": "+40%",
+      "powerIncrease": "+61 CV",
+      "torqueIncrease": "+120 Nm"
+    },
+    "audi": {
+      "model": "Audi A4 2.0T",
+      "originalPower": "190 CV",
+      "tunedPower": "265 CV",
+      "originalTorque": "320 Nm",
+      "tunedTorque": "450 Nm",
+      "powerGain": "+39%",
+      "torqueGain": "+41%",
+      "powerIncrease": "+75 CV",
+      "torqueIncrease": "+130 Nm"
+    },
+    "golf": {
+      "model": "Golf GTI Mk7",
+      "originalPower": "220 CV",
+      "tunedPower": "290 CV",
+      "originalTorque": "350 Nm",
+      "tunedTorque": "480 Nm",
+      "powerGain": "+32%",
+      "torqueGain": "+37%",
+      "powerIncrease": "+70 CV",
+      "torqueIncrease": "+130 Nm"
+    }
+  },
+  "process": {
+    "title": {
+      "part1": "Nuestro",
+      "part2": "Proceso"
+    },
+    "subtitle": "Proceso técnico y profesional en el desarrollo de tuning files",
+    "steps": {
+      "reception": {
+        "title": "Recepción",
+        "description": "Recibimos el fichero original de tu centralita"
+      },
+      "analysis": {
+        "title": "Análisis",
+        "description": "Estudiamos los parámetros con software especializado"
+      },
+      "optimization": {
+        "title": "Optimización",
+        "description": "Modificamos los mapas según especificaciones técnicas"
+      },
+      "delivery": {
+        "title": "Entrega",
+        "description": "Enviamos el tuning file listo para programar"
+      }
+    },
+    "professional": "Servicio profesional garantizado"
+  },
+  "support": {
+    "title": {
+      "part1": "Soporte",
+      "part2": "Postventa"
+    },
+    "subtitle": "Asistencia técnica especializada y actualizaciones de mapas motor",
+    "badge": "Servicio Completo",
+    "contact": "Contactar Soporte",
+    "question": "¿Necesitas asistencia con tuning files? Contáctanos para soporte profesional",
+    "complete": "Servicio Completo",
+    "services": {
+      "reversion": {
+        "title": "Reversión a Stock",
+        "description": "Disponemos de ficheros originales para restaurar la configuración de serie cuando lo necesites."
+      },
+      "updates": {
+        "title": "Actualizaciones",
+        "description": "Actualizaciones continuas con las últimas calibraciones y mejoras en tuning files."
+      },
+      "maintenance": {
+        "title": "Mantenimiento",
+        "description": "Soporte técnico especializado para la implementación de reprogramaciones."
+      }
+    }
+  },
+  "testimonials": {
+    "title": {
+      "part1": "Lo que dicen",
+      "part2": "nuestros clientes"
+    },
+    "subtitle": "Testimonios reales de conductores satisfechos",
+    "reviews": "reseñas",
+    "items": {
+      "carlos": {
+        "name": "Carlos M.",
+        "car": "BMW 320i",
+        "text": "Excelente servicio de FILESECUFB. El Stage 1 para mi BMW funciona perfectamente."
+      },
+      "ana": {
+        "name": "Ana L.",
+        "car": "Audi A4",
+        "text": "Mapas de calidad profesional. FILESECUFB cumple con la promesa de entrega rápida."
+      },
+      "miguel": {
+        "name": "Miguel R.",
+        "car": "Golf GTI",
+        "text": "Los mejores archivos de tuning del mercado. FILESECUFB transformó mi Golf GTI."
+      }
+    }
+  },
+  "faq": {
+    "title": {
+      "part1": "Preguntas",
+      "part2": "Frecuentes"
+    },
+    "subtitle": {
+      "part1": "Resolvemos todas tus dudas sobre",
+      "part2": "nuestros servicios profesionales"
+    },
+    "items": {
+      "types": {
+        "question": "¿Qué tipos de archivos de mapeo ofrecen?",
+        "answer": "Ofrecemos Stage 1, Stage 2, Pop & Bang, DPF/EGR Delete, y mapas personalizados para todas las marcas. Cada archivo está optimizado específicamente para tu vehículo y necesidades."
+      },
+      "delivery": {
+        "question": "¿Cuánto tiempo tarda la entrega?",
+        "answer": "La entrega es inmediata tras la confirmación del pago. Recibes tu archivo optimizado en menos de 30 minutos, listo para instalar."
+      },
+      "warranty": {
+        "question": "¿Ofrecen garantía en los archivos?",
+        "answer": "Sí, todos nuestros archivos incluyen garantía completa. Si tienes algún problema, te proporcionamos soporte técnico y revisiones sin costo adicional."
+      },
+      "ecus": {
+        "question": "¿Qué ECUs son compatibles?",
+        "answer": "Trabajamos con todas las ECUs principales: Bosch, Continental, Siemens, Delphi, Marelli, y más. Compatibilidad garantizada con tu vehículo."
+      },
+      "safety": {
+        "question": "¿Es seguro para mi motor?",
+        "answer": "Absolutamente. Nuestros mapas respetan los límites de seguridad del motor, manteniendo la fiabilidad mientras optimizan el rendimiento."
+      },
+      "request": {
+        "question": "¿Cómo solicito un archivo personalizado?",
+        "answer": "Contáctanos con los detalles de tu vehículo y objetivos. Nuestro equipo técnico creará un mapa personalizado específico para tus necesidades."
+      }
+    }
+  },
+  "whatsapp": {
+    "title": {
+      "part1": "Únete a nuestra",
+      "part2": "comunidad de WhatsApp"
+    },
+    "description": {
+      "part1": "Comunidad profesional de",
+      "part2": "especialistas en mapas motor",
+      "part3": "Soporte técnico y",
+      "part4": "asistencia inmediata"
+    },
+    "button": "Unirse al Grupo"
+  }
+}

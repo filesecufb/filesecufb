@@ -1,0 +1,121 @@
+{
+  "title": "Order Details",
+  "backToOrders": "Back to Orders",
+  "orderNumber": "Order #",
+  "customerInfo": {
+    "title": "Customer Information",
+    "fullName": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "clientId": "Client ID"
+  },
+  "serviceInfo": {
+    "title": "Requested Service",
+    "totalPrice": "Total Price",
+    "additionalServices": "Additional Services"
+  },
+  "vehicleInfo": {
+    "title": "Vehicle Information",
+    "brandModel": "Brand & Model",
+    "generation": "Generation",
+    "year": "Year",
+    "engine": "Engine",
+    "ecu": "ECU",
+    "transmission": "Transmission",
+    "power": "Power",
+    "readingMethod": "Reading Method",
+    "hardwareNumber": "Hardware Number",
+    "vin": "VIN",
+    "softwareNumber": "Software Number"
+  },
+  "modifications": {
+    "title": "Vehicle Modifications",
+    "aftermarketExhaust": "Aftermarket Exhaust",
+    "aftermarketIntakeManifold": "Aftermarket Intake Manifold",
+    "coldAirIntake": "Cold Air Intake",
+    "decat": "Decat"
+  },
+  "additionalInfo": {
+    "title": "Additional Information"
+  },
+  "actions": {
+    "title": "Actions",
+    "downloadInfo": "Download Information",
+    "downloadAll": "Download All"
+  },
+  "files": {
+    "title": "Files",
+    "mainFile": {
+      "title": "Customer Main File",
+      "ecuFile": "ECU File",
+      "noFiles": "No main files",
+      "noFilesDescription": "Customer hasn't uploaded ECU files yet"
+    },
+    "additionalFiles": {
+      "title": "Customer Additional Files",
+      "noFiles": "No additional files",
+      "noFilesDescription": "Customer hasn't uploaded additional documents"
+    },
+    "tunedMaps": {
+      "title": "Tuned Maps (Admin)",
+      "uploaded": "Uploaded",
+      "adminComments": "Admin Comments:",
+      "addComments": "Add comments about this map...",
+      "noMaps": "No tuned maps",
+      "noMapsDescription": "No tuned maps have been uploaded yet",
+      "save": "Save",
+      "cancel": "Cancel",
+      "deleteConfirm": "Delete this map?",
+      "deleteDescription": "This action cannot be undone. The file will be permanently deleted.",
+      "confirm": "Confirm",
+      "deleting": "Deleting..."
+    },
+    "invoices": {
+      "title": "Invoices (Admin)",
+      "addComments": "Add comments about this invoice...",
+      "noComments": "No comments",
+      "edit": "Edit",
+      "deleteConfirm": "Delete this invoice?",
+      "deleteDescription": "This action cannot be undone. The file will be permanently deleted.",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "deleting": "Deleting...",
+      "noInvoices": "No invoices",
+      "noInvoicesDescription": "No invoices have been uploaded yet"
+    }
+  },
+  "upload": {
+    "tunedMap": {
+      "title": "Upload Tuned Map",
+      "comments": "Comments about the tuned map...",
+      "uploadText": "Upload tuned map",
+      "formatText": "Any format",
+      "uploading": "Uploading map..."
+    },
+    "invoice": {
+      "title": "Upload Invoice",
+      "comments": "Comments about the invoice...",
+      "uploadText": "Upload invoice",
+      "formatText": "PDF, JPG, PNG, DOC",
+      "uploading": "Uploading invoice..."
+    }
+  },
+  "orderStatus": {
+    "title": "Order Status",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "summary": {
+    "title": "Summary",
+    "orderDate": "Order date:",
+    "lastUpdate": "Last update:",
+    "total": "Total:"
+  },
+  "common": {
+    "download": "Download",
+    "notProvided": "Not provided",
+    "na": "N/A"
+  }
+}

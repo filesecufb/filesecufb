@@ -1,0 +1,120 @@
+{
+  "errors": {
+    "noServiceSpecified": "No service specified",
+    "serviceNotFound": "Service not found",
+    "selectedServiceNotFound": "Selected service not found",
+    "sessionCheckError": "Error checking session",
+    "orderCreationError": "Error creating order",
+    "loadingAdditionalServices": "Error loading additional services"
+  },
+  "navigation": {
+    "back": "Back"
+  },
+  "headers": {
+    "serviceConfiguration": "Service Configuration",
+    "vehicleInfo": "Vehicle Information",
+    "additionalInfo": "Additional Information",
+    "modifiedParts": "Modified Parts",
+    "additionalServices": "Additional Services",
+    "extraInfo": "Extra Information",
+    "personalInfo": "Personal Information",
+    "billingInfo": "Billing Information",
+    "termsAndConditions": "Terms and Conditions",
+    "pricingSummary": "Pricing Summary",
+    "completeInformation": "Complete your vehicle and service information",
+    "fileToModify": "File to Modify"
+  },
+  "fileUpload": {
+    "dragFileHere": "Drag your file here, or browse files on your device",
+    "browseFiles": "browse files",
+    "noFileSelected": "No file selected",
+    "hasOptionalAttachments": "Do you have optional attachments?",
+    "optionalAttachmentsLabel": "Optional attachments (files under 20MB only)",
+    "dragOptionalFiles": "Drag your files here, or browse files on your device",
+    "noOptionalFiles": "No files selected"
+  },
+  "labels": {
+    "make": "Make",
+    "model": "Model",
+    "generation": "Generation",
+    "engine": "Engine",
+    "ecu": "ECU",
+    "year": "Year",
+    "gearbox": "Gearbox",
+    "engineHp": "Engine Power (HP) (optional)",
+    "engineKw": "or kW (optional)",
+    "vin": "VIN (Vehicle Identification Number) (optional)",
+    "readMethod": "Read Method",
+    "hardwareNumber": "Hardware Number (optional)",
+    "softwareNumber": "Software Number",
+    "additionalCarInfo": "Any additional information about the car (optional)",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "email": "Email",
+    "billingName": "Name/Company for Billing",
+    "taxId": "NIF/VAT/Tax ID",
+    "address": "Address",
+    "city": "City",
+    "state": "State/Province",
+    "postalCode": "Postal Code",
+    "country": "Country"
+  },
+  "placeholders": {
+    "enterMake": "Enter make",
+    "enterModel": "Enter model",
+    "enterGeneration": "Enter generation",
+    "enterEngine": "Enter engine",
+    "enterEcu": "Enter ECU",
+    "enterYear": "Enter year",
+    "enterGearbox": "Enter gearbox type",
+    "engineHpExample": "Ex: 150",
+    "engineKwExample": "Ex: 110",
+    "vinExample": "Ex: WVWZZZ1JZ3W386752",
+    "readMethodExample": "Ex: OBD, Bench, Boot",
+    "optionalRemarks": "Remarks (optional)",
+    "additionalInfoPlaceholder": "Please provide more information about your order so we can help you faster and more efficiently without additional questions from our engineers",
+    "enterFullName": "Enter your full name",
+    "phoneExample": "Ex: +34 123456789",
+    "registrationEmail": "Registration email",
+    "billingNamePlaceholder": "Name or company for invoice",
+    "taxIdPlaceholder": "Tax identification number",
+    "fullAddress": "Full address",
+    "city": "City",
+    "stateProvince": "State or province",
+    "postalCode": "Postal code",
+    "country": "Country"
+  },
+  "modifiedParts": {
+    "hasModifiedParts": "Does the car have modified parts?",
+    "detailsRequest": "If so, please provide details about the modifications:",
+    "aftermarketExhaust": "Aftermarket Exhaust",
+    "aftermarketIntakeManifold": "Aftermarket Intake Manifold",
+    "coldAirIntake": "Cold Air Intake",
+    "decat": "Decat"
+  },
+  "messages": {
+    "loadingService": "Loading service...",
+    "orderSuccess": "Order created successfully!",
+    "loadingAdditionalServices": "Loading additional services...",
+    "noAdditionalServices": "No additional services available at this time",
+    "includeCountryPrefix": "Include your country prefix (ex: +34 for Spain)",
+    "registrationEmailNotEditable": "Registration email (not editable)"
+  },
+  "pricing": {
+    "priceOnRequest": "Price on request",
+    "total": "Total"
+  },
+  "terms": {
+    "acceptTerms": "I accept the",
+    "termsOfService": "terms of service",
+    "the": "the",
+    "disclaimer": "disclaimer",
+    "and": "and the",
+    "refundPolicies": "refund policies"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "createOrder": "Create Order"
+  }
+}

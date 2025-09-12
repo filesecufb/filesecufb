@@ -1,0 +1,104 @@
+{
+  "privacyPolicy": {
+    "title": "POLÍTICA DE PRIVACIDAD",
+    "lastUpdated": "Última actualización:",
+    "sections": {
+      "generalInfo": {
+        "title": "1. INFORMACIÓN GENERAL",
+        "content": "En cumplimiento del Reglamento General de Protección de Datos (RGPD) y la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía de los derechos digitales, informamos sobre el tratamiento de sus datos personales."
+      },
+      "dataController": {
+        "title": "2. RESPONSABLE DEL TRATAMIENTO",
+        "content": "Los datos personales recogidos a través de este sitio web son tratados bajo la responsabilidad de nuestra empresa, con domicilio en España y sujeta a la legislación española y europea en materia de protección de datos."
+      },
+      "dataCollection": {
+        "title": "3. DATOS QUE RECOPILAMOS",
+        "intro": "Recopilamos los siguientes tipos de datos:",
+        "items": {
+          "identification": "Datos de identificación: Nombre, apellidos, email",
+          "contact": "Datos de contacto: Dirección de correo electrónico, teléfono",
+          "navigation": "Datos de navegación: Dirección IP, cookies, datos de uso del sitio web",
+          "transaction": "Datos de transacción: Información de compra y descarga de archivos",
+          "technical": "Datos técnicos: Información del vehículo para personalización de archivos"
+        }
+      },
+      "purpose": {
+        "title": "4. FINALIDAD DEL TRATAMIENTO",
+        "intro": "Tratamos sus datos personales para las siguientes finalidades:",
+        "items": {
+          "orders": "Gestión de pedidos y entrega de archivos digitales",
+          "communication": "Comunicación comercial y atención al cliente",
+          "legal": "Cumplimiento de obligaciones legales y fiscales",
+          "improvement": "Mejora de nuestros servicios y experiencia de usuario",
+          "security": "Prevención de fraude y seguridad"
+        }
+      },
+      "legalBasis": {
+        "title": "5. BASE LEGAL",
+        "intro": "El tratamiento de sus datos se basa en:",
+        "items": {
+          "contract": "Ejecución contractual: Para la prestación de nuestros servicios",
+          "consent": "Consentimiento: Para comunicaciones comerciales",
+          "interest": "Interés legítimo: Para la mejora de servicios y prevención de fraude",
+          "obligation": "Obligación legal: Para el cumplimiento de normativas fiscales"
+        }
+      },
+      "retention": {
+        "title": "6. CONSERVACIÓN DE DATOS",
+        "content": "Conservaremos sus datos personales durante el tiempo necesario para cumplir con las finalidades para las que fueron recogidos y, en todo caso, durante los plazos establecidos por la legislación aplicable (mínimo 6 años para datos fiscales y contables)."
+      },
+      "recipients": {
+        "title": "7. DESTINATARIOS DE LOS DATOS",
+        "intro": "Sus datos pueden ser comunicados a:",
+        "items": {
+          "providers": "Proveedores de servicios tecnológicos (hosting, email, etc.)",
+          "financial": "Entidades financieras para el procesamiento de pagos",
+          "authorities": "Autoridades competentes cuando sea legalmente requerido",
+          "advisors": "Asesores legales y fiscales"
+        },
+        "confidentiality": "Todos los destinatarios están sujetos a estrictas obligaciones de confidencialidad."
+      },
+      "transfers": {
+        "title": "8. TRANSFERENCIAS INTERNACIONALES",
+        "content": "En caso de transferencias de datos fuera del Espacio Económico Europeo, garantizamos que se realizan con las debidas garantías y salvaguardas apropiadas conforme al RGPD."
+      },
+      "rights": {
+        "title": "9. SUS DERECHOS",
+        "intro": "Conforme al RGPD, usted tiene derecho a:",
+        "items": {
+          "access": "Acceso: Conocer qué datos tratamos sobre usted",
+          "rectification": "Rectificación: Corregir datos inexactos o incompletos",
+          "erasure": "Supresión: Solicitar la eliminación de sus datos",
+          "restriction": "Limitación: Restringir el tratamiento de sus datos",
+          "portability": "Portabilidad: Recibir sus datos en formato estructurado",
+          "objection": "Oposición: Oponerse al tratamiento de sus datos",
+          "withdrawal": "Retirada del consentimiento: En cualquier momento"
+        },
+        "contact": "Para ejercer estos derechos, puede contactarnos a través de los medios proporcionados en nuestro sitio web."
+      },
+      "cookies": {
+        "title": "10. COOKIES",
+        "intro": "Utilizamos cookies y tecnologías similares para:",
+        "items": {
+          "functionality": "Funcionamiento básico del sitio web",
+          "analytics": "Análisis de uso y mejora de la experiencia",
+          "personalization": "Personalización de contenidos",
+          "measurement": "Medición de efectividad de campañas"
+        },
+        "management": "Puede gestionar sus preferencias de cookies a través de la configuración de su navegador."
+      },
+      "security": {
+        "title": "11. SEGURIDAD",
+        "content": "Implementamos medidas técnicas y organizativas apropiadas para proteger sus datos personales contra el acceso, alteración, divulgación o destrucción no autorizados."
+      },
+      "authority": {
+        "title": "12. AUTORIDAD DE CONTROL",
+        "content": "Tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD) si considera que el tratamiento de sus datos no se ajusta a la normativa vigente."
+      },
+      "modifications": {
+        "title": "13. MODIFICACIONES",
+        "content": "Nos reservamos el derecho de modificar esta política de privacidad. Las modificaciones serán comunicadas a través de nuestro sitio web con la debida antelación."
+      }
+    }
+  }
+}

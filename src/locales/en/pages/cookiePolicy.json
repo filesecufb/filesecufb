@@ -1,0 +1,52 @@
+{
+  "cookiePolicy": {
+    "title": "Cookie Policy",
+    "lastUpdated": "Last updated: January 15, 2025",
+    "whatAreCookies": {
+      "title": "What are cookies?",
+      "content": "Cookies are small text files that are stored on your device when you visit a website. They help us improve your browsing experience and provide personalized functionality."
+    },
+    "typesOfCookies": {
+      "title": "Types of cookies we use",
+      "functional": {
+        "title": "Functional cookies",
+        "content": "These cookies are essential for the website to function and cannot be disabled. They include session cookies and user preferences."
+      },
+      "analytics": {
+        "title": "Analytics cookies",
+        "content": "We use these cookies to understand how visitors interact with our website, which helps us improve it."
+      },
+      "marketing": {
+        "title": "Marketing cookies",
+        "content": "These cookies are used to display relevant advertisements and measure the effectiveness of our advertising campaigns."
+      }
+    },
+    "howToManage": {
+      "title": "How to manage cookies",
+      "content": "You can control and/or delete cookies as you wish. You can delete all cookies that are already on your device and set most browsers to prevent them from being placed.",
+      "browserSettings": "Most web browsers allow some control of cookies through browser settings.",
+      "moreInfo": "For more information about cookies, including how to see what cookies have been set and how to manage and delete them, visit www.aboutcookies.org or www.allaboutcookies.org."
+    },
+    "thirdPartyCookies": {
+      "title": "Third-party cookies",
+      "content": "Some of our business partners may use cookies on our site (for example, advertisers). However, we have no access to or control over these cookies."
+    },
+    "cookieDuration": {
+      "title": "Cookie duration",
+      "session": "Session cookies: Deleted when you close your browser.",
+      "persistent": "Persistent cookies: Remain on your device for a set period or until you manually delete them."
+    },
+    "consent": {
+      "title": "Your consent",
+      "content": "By using our website, you consent to the use of cookies in accordance with this cookie policy."
+    },
+    "rights": {
+      "title": "Your rights",
+      "content": "You have the right to withdraw your consent at any time. You can also request information about what personal data we have about you and how we process it."
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "If you have any questions about this cookie policy, you can contact us through our contact form."
+    }
+  }
+}

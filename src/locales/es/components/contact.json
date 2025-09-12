@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "CONTACTA CON <span class='text-primary'>NOSOTROS</span>",
+    "subtitle": "Estamos aquí para ayudarte con tus proyectos de tuning"
+  },
+  "methods": {
+    "phone": {
+      "title": "Teléfono",
+      "description": "Llámanos directamente para consultas inmediatas"
+    },
+    "whatsapp": {
+      "title": "WhatsApp",
+      "description": "Envíanos un mensaje y te responderemos al instante"
+    },
+    "email": {
+      "title": "Email",
+      "description": "Escríbenos para consultas detalladas"
+    },
+    "address": {
+      "title": "Dirección",
+      "description": "Visítanos en nuestras instalaciones"
+    },
+    "schedule": {
+      "title": "Horarios de Atención",
+      "description": "Consulta nuestros horarios de servicio"
+    }
+  },
+  "schedule": {
+    "days": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    },
+    "closed": "Cerrado",
+    "hours": {
+      "morning": "9:00 - 14:00",
+      "afternoon": "16:00 - 20:00"
+    },
+    "scheduleConfirmation": "Horarios confirmados por la empresa"
+  },
+  "map": {
+    "title": "Nuestra Ubicación",
+    "button": "Ver en Google Maps"
+  },
+  "cta": {
+    "title": "¿Listo para optimizar tu vehículo?",
+    "subtitle": "Contáctanos hoy mismo y descubre el verdadero potencial de tu motor",
+    "button": "Solicitar Presupuesto"
+  }
+}

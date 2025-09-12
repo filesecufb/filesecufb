@@ -1,0 +1,76 @@
+{
+  "refundPolicy": {
+    "title": "POLÍTICA DE DEVOLUCIONES",
+    "lastUpdated": "Última actualización: 12/9/2025",
+    "overview": {
+      "title": "1. POLÍTICA GENERAL",
+      "content": "⚠️ NO SE ADMITEN DEVOLUCIONES NI REEMBOLSOS\n\nDebido a la naturaleza digital de nuestros productos (archivos de reprogramación ECU), NO SE ADMITEN DEVOLUCIONES NI REEMBOLSOS una vez completada la descarga del archivo."
+    },
+    "digitalServices": {
+      "title": "2. FUNDAMENTO LEGAL",
+      "content": "Esta política se basa en la legislación española vigente:\n\nArtículo 103.m) del Real Decreto Legislativo 1/2007:",
+      "noReturns": "El derecho de desistimiento no será aplicable a los contratos de suministro de contenido digital que no se preste en un soporte material cuando la ejecución haya comenzado con el previo consentimiento expreso del consumidor y usuario con el reconocimiento por su parte de que pierde su derecho de desistimiento."
+    },
+    "expressConsent": {
+      "title": "3. CONSENTIMIENTO EXPRESO",
+      "content": "Al proceder con la compra y descarga de nuestros archivos digitales, usted:",
+      "list": [
+        "Otorga su consentimiento expreso para la entrega inmediata del contenido digital",
+        "Reconoce que pierde su derecho de desistimiento una vez iniciada la descarga",
+        "Acepta que no podrá solicitar devolución ni reembolso por ningún motivo",
+        "Confirma haber leído y entendido esta política antes de la compra"
+      ]
+    },
+    "exceptionalCircumstances": {
+      "title": "4. PRODUCTOS AFECTADOS",
+      "content": "Esta política se aplica a TODOS nuestros productos digitales, incluyendo:",
+      "list": [
+        "Archivos de reprogramación ECU (Stage 1, Stage 2, etc.)",
+        "Archivos de eliminación de sistemas (DPF, EGR, AdBlue, etc.)",
+        "Archivos de optimización TCU",
+        "Cualquier otro archivo digital de tuning",
+        "Servicios de personalización de archivos"
+      ]
+    },
+    "refundProcess": {
+      "title": "5. MOTIVOS NO VÁLIDOS PARA DEVOLUCIÓN",
+      "content": "Los siguientes motivos NO constituyen base para solicitar devolución:",
+      "steps": [
+        "Cambio de opinión después de la descarga",
+        "Incompatibilidad con el vehículo (responsabilidad del cliente verificar)",
+        "Resultados de rendimiento no esperados",
+        "Problemas técnicos durante la instalación",
+        "Daños en el vehículo derivados del uso del archivo",
+        "Pérdida de garantía del fabricante",
+        "Problemas con la legalidad en su jurisdicción",
+        "Dificultades técnicas del usuario"
+      ]
+    },
+    "partialRefunds": {
+      "title": "6. VERIFICACIÓN PREVIA A LA COMPRA",
+      "content": "Es responsabilidad exclusiva del cliente verificar antes de la compra:\n\n• Compatibilidad del archivo con su vehículo específico\n• Especificaciones técnicas requeridas\n• Legalidad del uso en su país/región\n• Capacidad técnica para la instalación\n• Aceptación de los riesgos asociados",
+      "calculation": "7. SOPORTE TÉCNICO\n\nAunque no ofrecemos devoluciones, sí proporcionamos:\n\n• Soporte técnico básico para la instalación\n• Información sobre compatibilidad (antes de la compra)\n• Guías de instalación cuando estén disponibles\n• Respuesta a consultas técnicas razonables\n\nImportante: El soporte técnico no incluye garantía de funcionamiento ni responsabilidad por daños."
+    },
+    "paymentDisputes": {
+      "title": "8. CASOS EXCEPCIONALES",
+      "content": "En casos muy excepcionales, podríamos considerar:\n\n• Error técnico en la entrega del archivo correcto\n• Archivo corrupto o dañado (se proporcionará reenvío, no reembolso)\n• Doble cobro por error del sistema de pago\n\nEstos casos serán evaluados individualmente y la decisión final será a nuestra discreción."
+    },
+    "modifications": {
+      "title": "9. PROCESO DE RECLAMACIÓN",
+      "content": "Si considera que su caso entra en las excepciones mencionadas:\n\n• Contacte con nosotros dentro de las 24 horas posteriores a la compra\n• Proporcione evidencia clara del problema técnico\n• Incluya todos los detalles de la transacción\n• Aguarde nuestra evaluación (máximo 5 días laborables)"
+    },
+    "contact": {
+      "title": "Contacto para Reclamaciones",
+      "content": "Para casos excepcionales, contáctenos a través de nuestros canales oficiales de soporte.",
+      "methods": [
+        "Formulario de contacto en nuestro sitio web",
+        "Correo electrónico de atención al cliente",
+        "Soporte telefónico durante horario comercial"
+      ]
+    },
+    "consent": {
+      "title": "10. ACEPTACIÓN DE TÉRMINOS",
+      "content": "Al realizar una compra en nuestro sitio web, usted confirma que ha leído, entendido y acepta completamente esta Política de Devoluciones, así como nuestros Términos de Servicio."
+    }
+  }
+}

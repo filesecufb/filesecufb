@@ -32,6 +32,9 @@ const TermsOfService: React.FC = () => {
             <section>
               <h2 className="text-2xl font-semibold mb-4 text-primary">{t('termsOfService.section3.title')}</h2>
               <p className="text-gray-300 leading-relaxed mb-4">
+                {t('termsOfService.section3.content')}
+              </p>
+              <p className="text-gray-300 leading-relaxed mb-4">
                 <strong>{t('termsOfService.section3.noReturns')}</strong>
               </p>
               <p className="text-gray-300 leading-relaxed mb-4">
@@ -47,10 +50,15 @@ const TermsOfService: React.FC = () => {
               <p className="text-gray-300 leading-relaxed mb-4">
                 <strong>{t('termsOfService.section4.disclaimer')}</strong>
               </p>
+              <p className="text-gray-300 leading-relaxed mb-4">
+                {t('termsOfService.section4.content')}
+              </p>
               <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-                {(t('termsOfService.section4.list', { returnObjects: true }) as string[]).map((item: string, index: number) => (
-                  <li key={index}>{item}</li>
-                ))}
+                <li>{t('termsOfService.section4.items.0')}</li>
+                <li>{t('termsOfService.section4.items.1')}</li>
+                <li>{t('termsOfService.section4.items.2')}</li>
+                <li>{t('termsOfService.section4.items.3')}</li>
+                <li>{t('termsOfService.section4.items.4')}</li>
               </ul>
             </section>
 
@@ -60,9 +68,10 @@ const TermsOfService: React.FC = () => {
                 {t('termsOfService.section5.content')}
               </p>
               <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-                {(t('termsOfService.section5.list', { returnObjects: true }) as string[]).map((item: string, index: number) => (
-                  <li key={index}>{item}</li>
-                ))}
+                <li>{t('termsOfService.section5.items.0')}</li>
+                <li>{t('termsOfService.section5.items.1')}</li>
+                <li>{t('termsOfService.section5.items.2')}</li>
+                <li>{t('termsOfService.section5.items.3')}</li>
               </ul>
             </section>
 
@@ -72,9 +81,10 @@ const TermsOfService: React.FC = () => {
                 {t('termsOfService.section6.content')}
               </p>
               <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-                {(t('termsOfService.section6.list', { returnObjects: true }) as string[]).map((item: string, index: number) => (
-                  <li key={index}>{item}</li>
-                ))}
+                <li>{t('termsOfService.section6.items.0')}</li>
+                <li>{t('termsOfService.section6.items.1')}</li>
+                <li>{t('termsOfService.section6.items.2')}</li>
+                <li>{t('termsOfService.section6.items.3')}</li>
               </ul>
             </section>
 

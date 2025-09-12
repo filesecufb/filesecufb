@@ -1,0 +1,80 @@
+{
+  "orderDetails": {
+    "title": "Detalles del Pedido",
+    "backToOrders": "← Volver a Pedidos",
+    "loading": "Cargando detalles del pedido...",
+    "notFound": "Pedido no encontrado",
+    "orderNumber": "Pedido #",
+    "customer": {
+      "title": "Información del Cliente",
+      "name": "Nombre",
+      "email": "Email",
+      "phone": "Teléfono"
+    },
+    "vehicle": {
+      "title": "Información del Vehículo",
+      "brand": "Marca",
+      "model": "Modelo",
+      "year": "Año",
+      "engine": "Motor",
+      "power": "Potencia",
+      "fuel": "Combustible",
+      "transmission": "Transmisión",
+      "vin": "VIN",
+      "license": "Matrícula"
+    },
+    "service": {
+      "title": "Servicio Solicitado",
+      "type": "Tipo de servicio",
+      "description": "Descripción",
+      "price": "Precio"
+    },
+    "files": {
+      "mainFiles": "Archivos Principales",
+      "noMainFiles": "No hay archivos principales",
+      "noMainFilesDesc": "El cliente aún no ha subido archivos de ECU",
+      "additionalFiles": "Archivos Adicionales del Cliente",
+      "attachedDocument": "Documento adjunto",
+      "noAdditionalFiles": "No hay archivos adicionales",
+      "noAdditionalFilesDesc": "El cliente no ha subido documentos adicionales",
+      "tunedMaps": "Mapas Tuneados (Admin)",
+      "uploaded": "Subido",
+      "download": "Descargar",
+      "deleting": "Eliminando...",
+      "delete": "Eliminar",
+      "adminComments": "Comentarios del Admin:",
+      "addMapComments": "Añadir comentarios sobre este mapa...",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "noComments": "Sin comentarios",
+      "edit": "Editar",
+      "deleteMapConfirm": "¿Eliminar este mapa?",
+      "deleteWarning": "Esta acción no se puede deshacer. El archivo se eliminará permanentemente.",
+      "confirm": "Confirmar",
+      "noTunedMaps": "No hay mapas tuneados",
+      "noTunedMapsDesc": "Aún no se han subido mapas tuneados",
+      "invoices": "Facturas (Admin)",
+      "addInvoiceComments": "Añadir comentarios sobre esta factura...",
+      "deleteInvoiceConfirm": "¿Eliminar esta factura?",
+      "noInvoices": "No hay facturas",
+      "noInvoicesDesc": "Aún no se han subido facturas",
+      "uploadTunedMap": "Subir Mapa Tuneado",
+      "mapComments": "Comentarios sobre el mapa tuneado...",
+      "anyFormat": "Cualquier formato",
+      "uploadingMap": "Subiendo mapa...",
+      "uploadInvoice": "Subir Factura",
+      "invoiceComments": "Comentarios sobre la factura...",
+      "invoiceFormats": "PDF, JPG, PNG, DOC",
+      "uploadingInvoice": "Subiendo factura..."
+    },
+    "status": {
+      "title": "Estado del Pedido"
+    },
+    "summary": {
+      "title": "Resumen",
+      "orderDate": "Fecha de pedido",
+      "lastUpdate": "Última actualización",
+      "total": "Total"
+    }
+  }
+}

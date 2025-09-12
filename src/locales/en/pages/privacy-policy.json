@@ -1,0 +1,104 @@
+{
+  "privacyPolicy": {
+    "title": "PRIVACY POLICY",
+    "lastUpdated": "Last updated:",
+    "sections": {
+      "generalInfo": {
+        "title": "1. GENERAL INFORMATION",
+        "content": "In compliance with the General Data Protection Regulation (GDPR) and Organic Law 3/2018 on Personal Data Protection and guarantee of digital rights, we inform you about the processing of your personal data."
+      },
+      "dataController": {
+        "title": "2. DATA CONTROLLER",
+        "content": "Personal data collected through this website is processed under the responsibility of our company, domiciled in Spain and subject to Spanish and European legislation on data protection."
+      },
+      "dataCollection": {
+        "title": "3. DATA WE COLLECT",
+        "intro": "We collect the following types of data:",
+        "items": {
+          "identification": "Identification data: Name, surname, email",
+          "contact": "Contact data: Email address, telephone",
+          "navigation": "Navigation data: IP address, cookies, website usage data",
+          "transaction": "Transaction data: Purchase information and file downloads",
+          "technical": "Technical data: Vehicle information for file customization"
+        }
+      },
+      "purpose": {
+        "title": "4. PURPOSE OF PROCESSING",
+        "intro": "We process your personal data for the following purposes:",
+        "items": {
+          "orders": "Order management and delivery of digital files",
+          "communication": "Commercial communication and customer service",
+          "legal": "Compliance with legal and tax obligations",
+          "improvement": "Improvement of our services and user experience",
+          "security": "Fraud prevention and security"
+        }
+      },
+      "legalBasis": {
+        "title": "5. LEGAL BASIS",
+        "intro": "The processing of your data is based on:",
+        "items": {
+          "contract": "Contractual execution: For the provision of our services",
+          "consent": "Consent: For commercial communications",
+          "interest": "Legitimate interest: For service improvement and fraud prevention",
+          "obligation": "Legal obligation: For compliance with tax regulations"
+        }
+      },
+      "retention": {
+        "title": "6. DATA RETENTION",
+        "content": "We will retain your personal data for the time necessary to fulfill the purposes for which they were collected and, in any case, for the periods established by applicable legislation (minimum 6 years for tax and accounting data)."
+      },
+      "recipients": {
+        "title": "7. DATA RECIPIENTS",
+        "intro": "Your data may be communicated to:",
+        "items": {
+          "providers": "Technology service providers (hosting, email, etc.)",
+          "financial": "Financial entities for payment processing",
+          "authorities": "Competent authorities when legally required",
+          "advisors": "Legal and tax advisors"
+        },
+        "confidentiality": "All recipients are subject to strict confidentiality obligations."
+      },
+      "transfers": {
+        "title": "8. INTERNATIONAL TRANSFERS",
+        "content": "In case of data transfers outside the European Economic Area, we guarantee that they are carried out with due guarantees and appropriate safeguards in accordance with the GDPR."
+      },
+      "rights": {
+        "title": "9. YOUR RIGHTS",
+        "intro": "In accordance with the GDPR, you have the right to:",
+        "items": {
+          "access": "Access: Know what data we process about you",
+          "rectification": "Rectification: Correct inaccurate or incomplete data",
+          "erasure": "Erasure: Request the deletion of your data",
+          "restriction": "Restriction: Restrict the processing of your data",
+          "portability": "Portability: Receive your data in structured format",
+          "objection": "Objection: Object to the processing of your data",
+          "withdrawal": "Withdrawal of consent: At any time"
+        },
+        "contact": "To exercise these rights, you can contact us through the means provided on our website."
+      },
+      "cookies": {
+        "title": "10. COOKIES",
+        "intro": "We use cookies and similar technologies for:",
+        "items": {
+          "functionality": "Basic website functionality",
+          "analytics": "Usage analysis and experience improvement",
+          "personalization": "Content personalization",
+          "measurement": "Campaign effectiveness measurement"
+        },
+        "management": "You can manage your cookie preferences through your browser settings."
+      },
+      "security": {
+        "title": "11. SECURITY",
+        "content": "We implement appropriate technical and organizational measures to protect your personal data against unauthorized access, alteration, disclosure or destruction."
+      },
+      "authority": {
+        "title": "12. SUPERVISORY AUTHORITY",
+        "content": "You have the right to file a complaint with the Spanish Data Protection Agency (AEPD) if you consider that the processing of your data does not comply with current regulations."
+      },
+      "modifications": {
+        "title": "13. MODIFICATIONS",
+        "content": "We reserve the right to modify this privacy policy. Modifications will be communicated through our website with due notice."
+      }
+    }
+  }
+}

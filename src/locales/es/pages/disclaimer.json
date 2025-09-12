@@ -1,0 +1,72 @@
+{
+  "disclaimer": {
+    "title": "⚠️ ADVERTENCIA IMPORTANTE",
+    "lastUpdated": "Última actualización: 15 de enero de 2025",
+    "generalDisclaimer": {
+      "title": "ADVERTENCIA IMPORTANTE",
+      "content": "La modificación de la ECU de su vehículo conlleva riesgos significativos. Al utilizar nuestros archivos, usted asume TODA LA RESPONSABILIDAD por cualquier consecuencia que pueda derivarse."
+    },
+    "professionalAdvice": {
+      "title": "1. NATURALEZA DE LOS RIESGOS",
+      "content": "La reprogramación ECU implica modificar los parámetros de funcionamiento del motor y otros sistemas del vehículo. Esto puede resultar en:",
+      "list": [
+        "Daños mecánicos: Rotura de motor, turbo, embrague, transmisión",
+        "Daños eléctricos: Fallos en la ECU, sensores, actuadores",
+        "Pérdida de garantía: Anulación completa de la garantía del fabricante",
+        "Problemas de emisiones: Incumplimiento de normativas ambientales",
+        "Fallos de seguridad: Comportamiento impredecible del vehículo",
+        "Problemas legales: Infracciones de tráfico o normativas locales"
+      ]
+    },
+    "accuracyOfInformation": {
+      "title": "2. EXENCIÓN TOTAL DE RESPONSABILIDAD",
+      "content": "DECLARAMOS EXPRESAMENTE que NO nos hacemos responsables de:",
+      "noGuarantee": "Cualquier daño directo, indirecto, incidental o consecuencial, pérdidas económicas de cualquier naturaleza, daños a personas o bienes, accidentes de tráfico o incidentes relacionados, multas, sanciones o procedimientos legales, costes de reparación o reemplazo de componentes, pérdida de tiempo, beneficios o oportunidades, daños a terceros o sus propiedades."
+    },
+    "externalLinks": {
+      "title": "3. SIN GARANTÍAS DE RENDIMIENTO",
+      "content": "NO GARANTIZAMOS:",
+      "noResponsibility": "Incrementos específicos de potencia o par motor, mejoras en el consumo de combustible, funcionamiento correcto en todos los vehículos, compatibilidad con modificaciones existentes, durabilidad a largo plazo del motor, cumplimiento de normativas de emisiones, mantenimiento de la fiabilidad original."
+    },
+    "limitationOfLiability": {
+      "title": "4. RESPONSABILIDAD DEL USUARIO",
+      "content": "Al utilizar nuestros archivos, usted acepta que es su EXCLUSIVA RESPONSABILIDAD:",
+      "exclusions": [
+        "Verificar la compatibilidad con su vehículo específico",
+        "Realizar copias de seguridad de la programación original",
+        "Contratar instalación profesional cualificada",
+        "Verificar el cumplimiento de normativas locales",
+        "Asumir todos los riesgos asociados",
+        "Informar a su seguro sobre las modificaciones",
+        "Realizar mantenimiento adicional si es necesario",
+        "Monitorizar el funcionamiento del vehículo tras la instalación"
+      ]
+    },
+    "technicalIssues": {
+      "title": "5. INSTALACIÓN PROFESIONAL RECOMENDADA",
+      "content": "RECOMENDAMOS ENCARECIDAMENTE que la instalación sea realizada por profesionales con experiencia en reprogramación ECU, talleres especializados en tuning, técnicos con equipamiento adecuado, personas con conocimientos de mecánica avanzada. ADVERTENCIA: La instalación incorrecta puede causar daños irreversibles y peligrosos."
+    },
+    "userResponsibility": {
+      "title": "6. LIMITACIONES LEGALES",
+      "content": "IMPORTANTE: El uso de nuestros archivos puede ser ilegal en ciertas jurisdicciones, violar normativas de emisiones locales, incumplir regulaciones de tráfico, afectar la homologación del vehículo, invalidar permisos de circulación.",
+      "responsibilities": [
+        "Es su responsabilidad verificar y cumplir con todas las leyes aplicables en su ubicación",
+        "Nuestros archivos están diseñados para USO EXCLUSIVO EN COMPETICIÓN Y CIRCUITOS CERRADOS",
+        "El uso en vía pública puede ser ilegal y peligroso",
+        "El usuario asume toda responsabilidad por el uso que haga de los archivos"
+      ]
+    },
+    "modifications": {
+      "title": "8. MODIFICACIONES DEL VEHÍCULO",
+      "content": "Las modificaciones realizadas con nuestros archivos son IRREVERSIBLES en algunos casos, pueden requerir modificaciones físicas adicionales, pueden afectar otros sistemas del vehículo, pueden requerir combustibles específicos, pueden alterar el comportamiento de conducción."
+    },
+    "governingLaw": {
+      "title": "9. SEGURO Y COBERTURA",
+      "content": "ADVERTENCIA: Las modificaciones ECU pueden anular su póliza de seguro. Es su responsabilidad informar a su compañía de seguros sobre cualquier modificación y verificar que mantiene cobertura adecuada."
+    },
+    "contact": {
+      "title": "10. ACEPTACIÓN DE RIESGOS",
+      "content": "Al descargar y utilizar nuestros archivos, usted declara expresamente que: Ha leído y comprendido completamente este descargo de responsabilidad, acepta todos los riesgos asociados con las modificaciones ECU, renuncia a cualquier reclamación contra nuestra empresa, asume toda responsabilidad por las consecuencias de su uso, tiene la capacidad legal para asumir estos riesgos. RECORDATORIO FINAL: Si no está dispuesto a asumir TODOS los riesgos mencionados en este documento, NO UTILICE NUESTROS ARCHIVOS. Su uso implica aceptación total de estos términos."
+    }
+  }
+}

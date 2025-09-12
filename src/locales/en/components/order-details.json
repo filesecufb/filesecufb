@@ -1,0 +1,80 @@
+{
+  "orderDetails": {
+    "title": "Order Details",
+    "backToOrders": "← Back to Orders",
+    "loading": "Loading order details...",
+    "notFound": "Order not found",
+    "orderNumber": "Order #",
+    "customer": {
+      "title": "Customer Information",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "vehicle": {
+      "title": "Vehicle Information",
+      "brand": "Brand",
+      "model": "Model",
+      "year": "Year",
+      "engine": "Engine",
+      "power": "Power",
+      "fuel": "Fuel",
+      "transmission": "Transmission",
+      "vin": "VIN",
+      "license": "License Plate"
+    },
+    "service": {
+      "title": "Requested Service",
+      "type": "Service type",
+      "description": "Description",
+      "price": "Price"
+    },
+    "files": {
+      "mainFiles": "Main Files",
+      "noMainFiles": "No main files",
+      "noMainFilesDesc": "Customer hasn't uploaded ECU files yet",
+      "additionalFiles": "Customer Additional Files",
+      "attachedDocument": "Attached document",
+      "noAdditionalFiles": "No additional files",
+      "noAdditionalFilesDesc": "Customer hasn't uploaded additional documents",
+      "tunedMaps": "Tuned Maps (Admin)",
+      "uploaded": "Uploaded",
+      "download": "Download",
+      "deleting": "Deleting...",
+      "delete": "Delete",
+      "adminComments": "Admin Comments:",
+      "addMapComments": "Add comments about this map...",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noComments": "No comments",
+      "edit": "Edit",
+      "deleteMapConfirm": "Delete this map?",
+      "deleteWarning": "This action cannot be undone. The file will be permanently deleted.",
+      "confirm": "Confirm",
+      "noTunedMaps": "No tuned maps",
+      "noTunedMapsDesc": "No tuned maps have been uploaded yet",
+      "invoices": "Invoices (Admin)",
+      "addInvoiceComments": "Add comments about this invoice...",
+      "deleteInvoiceConfirm": "Delete this invoice?",
+      "noInvoices": "No invoices",
+      "noInvoicesDesc": "No invoices have been uploaded yet",
+      "uploadTunedMap": "Upload Tuned Map",
+      "mapComments": "Comments about the tuned map...",
+      "anyFormat": "Any format",
+      "uploadingMap": "Uploading map...",
+      "uploadInvoice": "Upload Invoice",
+      "invoiceComments": "Comments about the invoice...",
+      "invoiceFormats": "PDF, JPG, PNG, DOC",
+      "uploadingInvoice": "Uploading invoice..."
+    },
+    "status": {
+      "title": "Order Status"
+    },
+    "summary": {
+      "title": "Summary",
+      "orderDate": "Order date",
+      "lastUpdate": "Last update",
+      "total": "Total"
+    }
+  }
+}

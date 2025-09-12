@@ -72,7 +72,7 @@ const ClientDashboard: React.FC = () => {
 
         if (error) {
           console.error('Error loading full profile:', error);
-          toast.error('Error al cargar información del perfil');
+          toast.error(t('clientDashboard.messages.errors.loadingProfile'));
         } else {
           setFullProfile(data);
         }
@@ -248,7 +248,7 @@ const ClientDashboard: React.FC = () => {
       } catch (err: any) {
         console.error('Error loading orders:', err);
         setOrdersError(err.message);
-        toast.error('Error al cargar pedidos');
+        toast.error(t('clientDashboard.messages.errors.loadingOrders'));
       } finally {
         setOrdersLoading(false);
       }
@@ -535,9 +535,9 @@ const ClientDashboard: React.FC = () => {
                   <Car className="w-4 h-4 text-blue-400" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Vehículo</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.vehicle')}</p>
                   <p className="text-white font-medium break-words">{order.vehicle || `${order.vehicle_make || ''} ${order.vehicle_model || ''}`.trim()}</p>
-                  {order.vehicle_year && <p className="text-sm text-gray-400 mt-1">Año {order.vehicle_year}</p>}
+                  {order.vehicle_year && <p className="text-sm text-gray-400 mt-1">{t('clientDashboard.orders.card.year')} {order.vehicle_year}</p>}
                 </div>
               </div>
             </div>
@@ -547,11 +547,11 @@ const ClientDashboard: React.FC = () => {
                   <Wrench className="w-4 h-4 text-purple-400" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Servicio</p>
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.service')}</p>
                   <p className="text-white font-medium break-words">{order.services?.title || order.service_name || order.service_type || 'Servicio no especificado'}</p>
                   {order.additional_services_details && order.additional_services_details.length > 0 && (
                     <div className="mt-2">
-                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Servicios Adicionales</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.additionalServices')}</p>
                       <div className="space-y-1">
                         {order.additional_services_details.map((service, index) => (
                           <div key={index} className="flex justify-between items-center text-sm">
@@ -609,7 +609,7 @@ const ClientDashboard: React.FC = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-medium break-words">{file.file_name}</p>
                             <p className="text-gray-400 text-sm break-words">
-                              Subido: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                              {t('clientDashboard.orders.files.uploaded')}: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.orders.files.unknownSize')}
                             </p>
                           </div>
                           <button
@@ -617,7 +617,7 @@ const ClientDashboard: React.FC = () => {
                             className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
                           >
                             <Download className="w-4 h-4" />
-                            Descargar
+                            {t('clientDashboard.common.download')}
                           </button>
                         </div>
                         {file.admin_comments && (
@@ -642,7 +642,7 @@ const ClientDashboard: React.FC = () => {
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-medium break-words">{file.file_name}</p>
                             <p className="text-gray-400 text-sm break-words">
-                              Procesado: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                              {t('clientDashboard.orders.files.processed')}: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.orders.files.unknownSize')}
                             </p>
                           </div>
                           <button
@@ -650,7 +650,7 @@ const ClientDashboard: React.FC = () => {
                             className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
                           >
                             <Download className="w-4 h-4" />
-                            Descargar
+                            {t('clientDashboard.common.download')}
                           </button>
                         </div>
                         {file.admin_comments && (
@@ -720,7 +720,7 @@ const ClientDashboard: React.FC = () => {
               className="bg-transparent hover:bg-gray-700/50 text-primary hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
             >
               <Eye className="w-4 h-4" />
-              Ver más
+              {t('clientDashboard.orders.card.viewMore')}
             </button>
           </div>
           </div>
@@ -803,7 +803,7 @@ const ClientDashboard: React.FC = () => {
         });
       }
 
-      toast.success('Perfil actualizado correctamente');
+      toast.success(t('clientDashboard.messages.success.profileUpdated'));
       setShowProfileEdit(false);
     } catch (error: any) {
       console.error('Error updating profile:', error);
@@ -820,13 +820,13 @@ const ClientDashboard: React.FC = () => {
     const confirmPassword = formData.get('confirmPassword') as string;
     
     if (newPassword !== confirmPassword) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error(t('clientDashboard.messages.validation.passwordMismatch'));
       return;
     }
     
     // TODO: Implementar lógica de cambio de contraseña
     // Password change logic removed
-    toast.success('Contraseña cambiada correctamente');
+    toast.success(t('clientDashboard.messages.success.passwordChanged'));
     setShowPasswordChange(false);
   };
 
@@ -834,7 +834,7 @@ const ClientDashboard: React.FC = () => {
     try {
       // Validar que la URL no esté vacía
       if (!fileUrl || fileUrl.trim() === '') {
-        toast.error('URL de archivo no válida');
+        toast.error(t('clientDashboard.messages.errors.invalidFileUrl'));
         return;
       }
 
@@ -900,7 +900,7 @@ const ClientDashboard: React.FC = () => {
       toast.success(`Descargando ${fileName}...`);
     } catch (error: any) {
       console.error('Error downloading file:', error);
-      toast.error(`Error al descargar archivo: ${error.message || 'Error desconocido'}`);
+      toast.error(`${t('clientDashboard.messages.errors.downloadError')}: ${error.message || t('clientDashboard.messages.errors.unknownError')}`);
     }
   };
 
@@ -1101,13 +1101,13 @@ const ClientDashboard: React.FC = () => {
         doc.setFont('helvetica', 'normal');
         
         const clientData = [
-          { label: 'Nombre Completo:', value: order.profiles?.full_name || 'N/A' },
-          { label: 'Email:', value: order.profiles?.email || 'N/A' },
-          { label: 'Teléfono:', value: order.profiles?.phone || 'N/A' },
-          { label: 'Dirección:', value: order.profiles?.billing_address || 'N/A' },
-          { label: 'Ciudad:', value: order.profiles?.billing_city || 'N/A' },
-          { label: 'Código Postal:', value: order.profiles?.billing_postal_code || 'N/A' },
-          { label: 'País:', value: order.profiles?.billing_country || 'N/A' }
+          { label: `${t('clientDashboard.profile.fullName')}:`, value: order.profiles?.full_name || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.email')}:`, value: order.profiles?.email || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.phone')}:`, value: order.profiles?.phone || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.address')}:`, value: order.profiles?.billing_address || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.city')}:`, value: order.profiles?.billing_city || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.postalCode')}:`, value: order.profiles?.billing_postal_code || t('clientDashboard.common.na') },
+          { label: `${t('clientDashboard.profile.country')}:`, value: order.profiles?.billing_country || t('clientDashboard.common.na') }
         ];
         
         clientData.forEach((item, index) => {
@@ -1127,17 +1127,17 @@ const ClientDashboard: React.FC = () => {
         doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
         
         const vehicleData = [
-          { label: 'Marca:', value: order.vehicle_make },
-          { label: 'Modelo:', value: order.vehicle_model },
-          { label: 'Generación:', value: order.vehicle_generation },
-          { label: 'Motor:', value: order.vehicle_engine },
-          { label: 'Año:', value: order.vehicle_year },
-          { label: 'ECU:', value: order.vehicle_ecu },
-          { label: 'Transmisión:', value: order.vehicle_gearbox },
-          { label: 'Potencia:', value: order.engine_hp ? `${order.engine_hp} HP${order.engine_kw ? ` (${order.engine_kw} kW)` : ''}` : null },
-          { label: 'Lectura:', value: order.read_method },
-          { label: 'Hardware:', value: order.hardware_number },
-          { label: 'Software:', value: order.software_number }
+          { label: `${t('clientDashboard.modal.vehicle.make')}:`, value: order.vehicle_make },
+          { label: `${t('clientDashboard.modal.vehicle.model')}:`, value: order.vehicle_model },
+          { label: `${t('clientDashboard.modal.vehicle.generation')}:`, value: order.vehicle_generation },
+          { label: `${t('clientDashboard.modal.vehicle.engine')}:`, value: order.vehicle_engine },
+          { label: `${t('clientDashboard.modal.vehicle.year')}:`, value: order.vehicle_year },
+          { label: `${t('clientDashboard.modal.vehicle.ecu')}:`, value: order.vehicle_ecu },
+          { label: `${t('clientDashboard.modal.vehicle.transmission')}:`, value: order.vehicle_gearbox },
+          { label: `${t('clientDashboard.modal.vehicle.power')}:`, value: order.engine_hp ? `${order.engine_hp} HP${order.engine_kw ? ` (${order.engine_kw} kW)` : ''}` : null },
+          { label: `${t('clientDashboard.modal.vehicle.reading')}:`, value: order.read_method },
+          { label: `${t('clientDashboard.modal.vehicle.hardware')}:`, value: order.hardware_number },
+          { label: `${t('clientDashboard.modal.vehicle.software')}:`, value: order.software_number }
         ];
         
         let col1Y = yPosition;
@@ -1169,10 +1169,10 @@ const ClientDashboard: React.FC = () => {
       // Función para agregar modificaciones del vehículo
       const addVehicleModifications = () => {
         const modifications = [
-          { key: 'aftermarket_exhaust', label: 'Escape Aftermarket', remarks: 'aftermarket_exhaust_remarks' },
-          { key: 'aftermarket_intake_manifold', label: 'Colector de Admisión Aftermarket', remarks: 'aftermarket_intake_manifold_remarks' },
-          { key: 'cold_air_intake', label: 'Admisión de Aire Frío', remarks: 'cold_air_intake_remarks' },
-          { key: 'decat', label: 'Decat', remarks: 'decat_remarks' }
+          { key: 'aftermarket_exhaust', label: t('clientDashboard.modal.modifications.aftermarketExhaust'), remarks: 'aftermarket_exhaust_remarks' },
+          { key: 'aftermarket_intake_manifold', label: t('clientDashboard.modal.modifications.aftermarketIntake'), remarks: 'aftermarket_intake_manifold_remarks' },
+          { key: 'cold_air_intake', label: t('clientDashboard.modal.modifications.coldAirIntake'), remarks: 'cold_air_intake_remarks' },
+          { key: 'decat', label: t('clientDashboard.modal.modifications.decat'), remarks: 'decat_remarks' }
         ];
         
         const hasAnyModification = modifications.some(({ key }) => order[key as keyof any]);
@@ -1181,7 +1181,7 @@ const ClientDashboard: React.FC = () => {
           doc.setFontSize(11);
           doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
           doc.setFont('helvetica', 'italic');
-          doc.text('No se han reportado modificaciones en el vehículo.', margin, yPosition);
+          doc.text(t('clientDashboard.modal.modifications.noModifications'), margin, yPosition);
           yPosition += 8;
           return;
         }
@@ -1202,7 +1202,7 @@ const ClientDashboard: React.FC = () => {
             if (remarkText && remarkText.trim()) {
               doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
               doc.setFont('helvetica', 'italic');
-              const lines = doc.splitTextToSize(`  Observaciones: ${remarkText}`, pageWidth - 2 * margin - 10);
+              const lines = doc.splitTextToSize(`  ${t('clientDashboard.modal.modifications.observations')}: ${remarkText}`, pageWidth - 2 * margin - 10);
               lines.forEach((line: string) => {
                 doc.text(line, margin + 5, yPosition);
                 yPosition += 7;
@@ -1244,7 +1244,7 @@ const ClientDashboard: React.FC = () => {
           
           doc.setFont('helvetica', 'bold');
           doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-          doc.text('Total Servicios Adicionales:', margin, yPosition);
+          doc.text(t('clientDashboard.modal.additionalServices.total'), margin, yPosition);
           doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
         }
       };
@@ -1272,7 +1272,7 @@ const ClientDashboard: React.FC = () => {
         
         if (mainFileUrls.length > 0) {
           doc.setFont('helvetica', 'bold');
-          doc.text('Archivos Principales:', margin, yPosition);
+          doc.text(t('clientDashboard.modal.files.mainFiles'), margin, yPosition);
           yPosition += 8;
           
           doc.setFont('helvetica', 'normal');
@@ -1288,7 +1288,7 @@ const ClientDashboard: React.FC = () => {
         
         if (additionalFiles.length > 0) {
           doc.setFont('helvetica', 'bold');
-          doc.text('Archivos Adicionales:', margin, yPosition);
+          doc.text(t('clientDashboard.modal.files.additionalFiles'), margin, yPosition);
           yPosition += 8;
           
           doc.setFont('helvetica', 'normal');
@@ -1329,7 +1329,7 @@ const ClientDashboard: React.FC = () => {
         doc.setFontSize(14);
         doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         doc.setFont('helvetica', 'bold');
-        doc.text('RESUMEN FINANCIERO', margin + 5, yPosition + 8);
+        doc.text(t('clientDashboard.modal.financial.title'), margin + 5, yPosition + 8);
         
         yPosition += 20;
         
@@ -1344,13 +1344,13 @@ const ClientDashboard: React.FC = () => {
         doc.setFont('helvetica', 'normal');
         
         if (basePrice > 0) {
-          doc.text('Precio Base:', margin + 5, yPosition);
+          doc.text(`${t('clientDashboard.modal.financial.basePrice')}:`, margin + 5, yPosition);
           doc.text(`€${basePrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
           yPosition += 8;
         }
         
         if (additionalPrice > 0) {
-          doc.text('Servicios Adicionales:', margin + 5, yPosition);
+          doc.text(`${t('clientDashboard.modal.financial.additionalServices')}:`, margin + 5, yPosition);
           doc.text(`€${additionalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
           yPosition += 8;
         }
@@ -1365,7 +1365,7 @@ const ClientDashboard: React.FC = () => {
         doc.setFontSize(14);
         doc.setFont('helvetica', 'bold');
         doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.text('TOTAL:', margin + 5, yPosition);
+        doc.text(`${t('clientDashboard.modal.financial.total')}:`, margin + 5, yPosition);
         doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
       };
 
@@ -1383,8 +1383,8 @@ const ClientDashboard: React.FC = () => {
         doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
         
         // Texto del footer
-        doc.text('Este documento ha sido generado automáticamente por FilesECUFB', pageWidth / 2, footerY, { align: 'center' });
-        doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, pageWidth / 2, footerY + 5, { align: 'center' });
+        doc.text(t('clientDashboard.pdf.footer.generated'), pageWidth / 2, footerY, { align: 'center' });
+        doc.text(`${t('clientDashboard.pdf.footer.generatedOn')}: ${new Date().toLocaleDateString('es-ES')} ${t('clientDashboard.pdf.footer.at')} ${new Date().toLocaleTimeString('es-ES')}`, pageWidth / 2, footerY + 5, { align: 'center' });
       };
 
       // Construir el PDF
@@ -1393,21 +1393,21 @@ const ClientDashboard: React.FC = () => {
       addDocumentTitle();
       addOrderBasicInfo();
       
-      addSection('INFORMACIÓN DEL CLIENTE', addClientInfo);
-      addSection('INFORMACIÓN DEL VEHÍCULO', addVehicleInfo);
-      addSection('MODIFICACIONES DEL VEHÍCULO', addVehicleModifications);
-      addSection('SERVICIOS ADICIONALES', addAdditionalServices);
-      addSection('ARCHIVOS DEL CLIENTE', addClientFiles);
-      addSection('INFORMACIÓN ADICIONAL', addAdditionalInfo);
+      addSection(t('clientDashboard.pdf.sections.clientInfo'), addClientInfo);
+      addSection(t('clientDashboard.pdf.sections.vehicleInfo'), addVehicleInfo);
+      addSection(t('clientDashboard.pdf.sections.vehicleModifications'), addVehicleModifications);
+      addSection(t('clientDashboard.pdf.sections.additionalServices'), addAdditionalServices);
+      addSection(t('clientDashboard.pdf.sections.clientFiles'), addClientFiles);
+      addSection(t('clientDashboard.pdf.sections.additionalInfo'), addAdditionalInfo);
       addFinancialSummary();
       addFooter();
 
       // Guardar el PDF
       doc.save(`pedido-${order.id.slice(-8)}-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF generado correctamente');
+      toast.success(t('clientDashboard.messages.pdfGenerated'));
     } catch (error) {
       console.error('Error al generar PDF:', error);
-      toast.error('Error al generar el PDF');
+      toast.error(t('clientDashboard.messages.pdfError'));
     }
   };
 
@@ -1432,17 +1432,17 @@ const ClientDashboard: React.FC = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-2">Pedidos Totales</h3>
+          <h3 className="text-lg font-semibold text-white mb-2">{t('clientDashboard.orders.stats.total')}</h3>
           <p className="text-3xl font-bold text-primary">{stats?.totalOrders || 0}</p>
         </div>
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-2">Completados</h3>
+          <h3 className="text-lg font-semibold text-white mb-2">{t('clientDashboard.orders.stats.completed')}</h3>
           <p className="text-3xl font-bold text-green-400">
             {stats?.completedOrders || 0}
           </p>
         </div>
         <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-lg font-semibold text-white mb-2">En Proceso</h3>
+          <h3 className="text-lg font-semibold text-white mb-2">{t('clientDashboard.orders.stats.inProgress')}</h3>
           <p className="text-3xl font-bold text-yellow-400">
             {stats?.pendingOrders || 0}
           </p>
@@ -1458,7 +1458,7 @@ const ClientDashboard: React.FC = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
-                placeholder="Buscar por ID, vehículo o servicio..."
+                placeholder={t('clientDashboard.orders.filters.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -1473,10 +1473,10 @@ const ClientDashboard: React.FC = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="all">Todos los estados</option>
-              <option value="pending">Pendiente</option>
-              <option value="in_progress">En Progreso</option>
-              <option value="completed">Completado</option>
+              <option value="all">{t('clientDashboard.orders.filters.allStatuses')}</option>
+              <option value="pending">{t('clientDashboard.orders.filters.pending')}</option>
+              <option value="in_progress">{t('clientDashboard.orders.filters.inProgress')}</option>
+              <option value="completed">{t('clientDashboard.orders.filters.completed')}</option>
             </select>
           </div>
           
@@ -1498,7 +1498,7 @@ const ClientDashboard: React.FC = () => {
                value={dateTo}
                onChange={(e) => setDateTo(e.target.value)}
                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
-               placeholder="Hasta"
+               placeholder={t('clientDashboard.orders.filters.dateTo')}
              />
            </div>
            
@@ -1509,10 +1509,10 @@ const ClientDashboard: React.FC = () => {
                onChange={(e) => setSortBy(e.target.value)}
                className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-primary focus:border-transparent"
              >
-               <option value="newest">Más reciente</option>
-               <option value="oldest">Más antiguo</option>
-               <option value="price_high">Precio mayor</option>
-               <option value="price_low">Precio menor</option>
+               <option value="newest">{t('clientDashboard.orders.filters.newest')}</option>
+               <option value="oldest">{t('clientDashboard.orders.filters.oldest')}</option>
+               <option value="price_high">{t('clientDashboard.orders.filters.priceHigh')}</option>
+               <option value="price_low">{t('clientDashboard.orders.filters.priceLow')}</option>
              </select>
            </div>
           
@@ -1523,7 +1523,7 @@ const ClientDashboard: React.FC = () => {
              <button
                onClick={clearFilters}
                className="px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-               title="Limpiar filtros"
+               title={t('clientDashboard.orders.filters.clearFilters')}
              >
                <X className="h-4 w-4" />
              </button>
@@ -1532,8 +1532,8 @@ const ClientDashboard: React.FC = () => {
         
         {/* Contador de resultados */}
         <div className="mt-4 text-sm text-gray-400">
-          Mostrando {paginatedOrders.length} de {filteredOrders.length} pedidos
-          {filteredOrders.length !== orders.length && ` (filtrados de ${orders.length} total)`}
+          {t('clientDashboard.orders.showing')} {paginatedOrders.length} {t('clientDashboard.orders.of')} {filteredOrders.length} {t('clientDashboard.orders.orders')}
+          {filteredOrders.length !== orders.length && ` (${t('clientDashboard.orders.filteredFrom')} ${orders.length} ${t('clientDashboard.orders.total')})`}
         </div>
       </div>
       
@@ -1541,36 +1541,36 @@ const ClientDashboard: React.FC = () => {
       {ordersLoading ? (
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="text-gray-400 mt-4">Cargando pedidos...</p>
+          <p className="text-gray-400 mt-4">{t('clientDashboard.orders.loading')}</p>
         </div>
       ) : ordersError ? (
         <div className="text-center py-8">
-          <p className="text-red-400">Error al cargar los pedidos: {ordersError}</p>
+          <p className="text-red-400">{t('clientDashboard.orders.error')}: {ordersError}</p>
         </div>
       ) : filteredOrders.length === 0 ? (
         orders.length === 0 ? (
           <div className="text-center py-12">
             <div className="bg-gray-800/30 rounded-xl p-8 border border-gray-700">
               <ShoppingCart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay pedidos aún</h3>
-              <p className="text-gray-500 mb-6">Cuando realices tu primer pedido, aparecerá aquí.</p>
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">{t('clientDashboard.orders.empty.title')}</h3>
+              <p className="text-gray-500 mb-6">{t('clientDashboard.orders.empty.description')}</p>
               <button
                 onClick={() => navigate('/services')}
                 className="bg-primary hover:bg-primary/80 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
               >
-                Ver Servicios
+                {t('clientDashboard.orders.empty.viewServices')}
               </button>
             </div>
           </div>
         ) : (
           <div className="text-center py-12">
             <div className="bg-gray-800/30 rounded-xl p-8 border border-gray-700">
-              <p className="text-gray-400 mb-4">No se encontraron pedidos con los filtros aplicados.</p>
+              <p className="text-gray-400 mb-4">{t('clientDashboard.orders.noResults')}</p>
               <button
                 onClick={clearFilters}
                 className="text-primary hover:text-primary/80 font-semibold"
               >
-                Limpiar filtros
+                {t('clientDashboard.orders.filters.clearFilters')}
               </button>
             </div>
           </div>
@@ -1649,118 +1649,118 @@ const ClientDashboard: React.FC = () => {
 {showProfileEdit ? (
           <form onSubmit={handleProfileUpdate} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Nombre completo</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.fullName')}</label>
               <input
                 type="text"
                 name="full_name"
                 defaultValue={fullProfile?.full_name || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Ingresa tu nombre completo"
+                placeholder={t('clientDashboard.profile.fullNamePlaceholder')}
                 required
               />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Email</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.email')}</label>
               <input
                 type="email"
                 name="email"
                 defaultValue={fullProfile?.email || user?.email || ''}
                 className="w-full bg-gray-600/30 border border-gray-500 rounded-lg px-4 py-2 text-gray-300 cursor-not-allowed"
-                placeholder="Correo de registro"
+                placeholder={t('clientDashboard.profile.emailPlaceholder')}
                 readOnly
               />
-              <p className="text-xs text-gray-400 mt-1">Correo de registro (no editable)</p>
+              <p className="text-xs text-gray-400 mt-1">{t('clientDashboard.profile.emailNote')}</p>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-gray-300 mb-2">Teléfono</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.phone')}</label>
               <input
                 type="tel"
                 name="phone"
                 defaultValue={fullProfile?.phone || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="+34 123 456 789"
+                placeholder={t('clientDashboard.profile.phonePlaceholder')}
               />
             </div>
             
             {/* Información de Facturación */}
             <div className="sm:col-span-2 border-t border-gray-600 pt-6 mt-6">
-              <h4 className="text-xl font-semibold text-white mb-4">Información de Facturación</h4>
+              <h4 className="text-xl font-semibold text-white mb-4">{t('clientDashboard.profile.billingInfo')}</h4>
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">Nombre/Empresa para Facturación</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.billingName')}</label>
               <input
                 type="text"
                 name="billing_name"
                 defaultValue={fullProfile?.billing_name || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Nombre o empresa para la factura"
+                placeholder={t('clientDashboard.profile.billingNamePlaceholder')}
               />
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">NIF/VAT/Tax ID</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.taxId')}</label>
               <input
                 type="text"
                 name="tax_id"
                 defaultValue={fullProfile?.tax_id || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Número de identificación fiscal"
+                placeholder={t('clientDashboard.profile.taxIdPlaceholder')}
               />
             </div>
             
             <div className="sm:col-span-2">
-              <label className="block text-gray-300 mb-2">Dirección</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.address')}</label>
               <input
                 type="text"
                 name="billing_address"
                 defaultValue={fullProfile?.billing_address || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Dirección completa"
+                placeholder={t('clientDashboard.profile.addressPlaceholder')}
               />
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">Ciudad</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.city')}</label>
               <input
                 type="text"
                 name="billing_city"
                 defaultValue={fullProfile?.billing_city || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Ciudad"
+                placeholder={t('clientDashboard.profile.cityPlaceholder')}
               />
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">Estado/Provincia</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.state')}</label>
               <input
                 type="text"
                 name="billing_state"
                 defaultValue={fullProfile?.billing_state || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Estado o provincia"
+                placeholder={t('clientDashboard.profile.statePlaceholder')}
               />
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">Código Postal</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.postalCode')}</label>
               <input
                 type="text"
                 name="billing_postal_code"
                 defaultValue={fullProfile?.billing_postal_code || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="Código postal"
+                placeholder={t('clientDashboard.profile.postalCodePlaceholder')}
               />
             </div>
             
             <div>
-              <label className="block text-gray-300 mb-2">País</label>
+              <label className="block text-gray-300 mb-2">{t('clientDashboard.profile.country')}</label>
               <input
                 type="text"
                 name="billing_country"
                 defaultValue={fullProfile?.billing_country || ''}
                 className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
-                placeholder="País"
+                placeholder={t('clientDashboard.profile.countryPlaceholder')}
               />
             </div>
             <div className="sm:col-span-2 flex flex-col sm:flex-row gap-4">
@@ -1782,68 +1782,68 @@ const ClientDashboard: React.FC = () => {
         ) : (
           <div className="space-y-6">
             <div className="bg-gray-700/30 rounded-lg p-6">
-              <h4 className="text-white text-lg font-semibold mb-4">Información Personal</h4>
+              <h4 className="text-white text-lg font-semibold mb-4">{t('clientDashboard.profile.personalInfo')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Nombre completo</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.full_name || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.fullName')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.full_name || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Email</p>
-                  <p className="text-white text-base break-all font-semibold">{fullProfile?.email || user?.email || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.email')}</p>
+                  <p className="text-white text-base break-all font-semibold">{fullProfile?.email || user?.email || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <p className="text-gray-400 text-sm font-medium">Teléfono</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.phone || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.phone')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.phone || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
               </div>
             </div>
             
             {/* Información de Facturación */}
             <div className="bg-gray-700/30 rounded-lg p-6">
-              <h4 className="text-white text-lg font-semibold mb-4">Información de Facturación</h4>
+              <h4 className="text-white text-lg font-semibold mb-4">{t('clientDashboard.profile.billingInfo')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Nombre/Empresa para Facturación</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_name || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.billingName')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_name || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">NIF/VAT/Tax ID</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.tax_id || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.taxId')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.tax_id || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2 sm:col-span-2">
-                  <p className="text-gray-400 text-sm font-medium">Dirección</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_address || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.address')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_address || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Ciudad</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_city || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.city')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_city || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Estado/Provincia</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_state || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.state')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_state || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Código Postal</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_postal_code || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.postalCode')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_postal_code || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">País</p>
-                  <p className="text-white text-base font-semibold">{fullProfile?.billing_country || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.country')}</p>
+                  <p className="text-white text-base font-semibold">{fullProfile?.billing_country || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
               </div>
             </div>
             
             <div className="bg-gray-700/30 rounded-lg p-6">
-              <h4 className="text-white text-lg font-semibold mb-4">Información de la cuenta</h4>
+              <h4 className="text-white text-lg font-semibold mb-4">{t('clientDashboard.profile.accountInfo')}</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">ID de Usuario</p>
-                  <p className="text-white text-base font-mono text-sm">{fullProfile?.id || user?.id || 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.userId')}</p>
+                  <p className="text-white text-base font-mono text-sm">{fullProfile?.id || user?.id || t('clientDashboard.profile.notSpecified')}</p>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-gray-400 text-sm font-medium">Fecha de Registro</p>
-                  <p className="text-white text-base">{fullProfile?.created_at ? new Date(fullProfile.created_at).toLocaleDateString() : 'No especificado'}</p>
+                  <p className="text-gray-400 text-sm font-medium">{t('clientDashboard.profile.registrationDate')}</p>
+                  <p className="text-white text-base">{fullProfile?.created_at ? new Date(fullProfile.created_at).toLocaleDateString() : t('clientDashboard.profile.notSpecified')}</p>
                 </div>
               </div>
             </div>
@@ -1902,7 +1902,7 @@ const ClientDashboard: React.FC = () => {
                 onClick={() => setShowPasswordChange(false)}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 text-sm sm:text-base touch-manipulation"
               >
-                Cancelar
+                {t('clientDashboard.common.cancel')}
               </button>
             </div>
           </form>
@@ -1930,7 +1930,7 @@ const ClientDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <div className="text-white text-xl">Cargando dashboard...</div>
+          <div className="text-white text-xl">{t('clientDashboard.messages.loadingDashboard')}</div>
         </div>
       </div>
     );
@@ -2015,7 +2015,7 @@ const ClientDashboard: React.FC = () => {
           <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             {/* Header del Modal */}
             <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">Información Completa - Pedido #{selectedOrderForModal.id}</h2>
+              <h2 className="text-2xl font-bold text-white">{t('clientDashboard.modal.completeInfo')} - {t('clientDashboard.modal.orderNumber', { id: selectedOrderForModal.id })}</h2>
               <button
                 onClick={() => setSelectedOrderForModal(null)}
                 className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
@@ -2030,19 +2030,19 @@ const ClientDashboard: React.FC = () => {
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Información del Pedido
+                  {t('clientDashboard.modal.orderInfo')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-400 text-sm">ID del Pedido</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.orderId')}</p>
                     <p className="text-white font-medium">#{selectedOrderForModal.id}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Fecha del Pedido</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.orderDate')}</p>
                     <p className="text-white font-medium">{new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Estado</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.status')}</p>
                     <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
                       selectedOrderForModal.status === 'completed' ? 'bg-green-500/20 text-green-400' :
                       selectedOrderForModal.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400' :
@@ -2052,12 +2052,12 @@ const ClientDashboard: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Precio Total</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.totalPrice')}</p>
                     <p className="text-white font-bold text-lg">€{parseFloat(selectedOrderForModal.total_price || '0').toFixed(2)}</p>
                   </div>
                   {selectedOrderForModal.estimated_delivery && (
                     <div className="md:col-span-2">
-                      <p className="text-gray-400 text-sm">Entrega Estimada</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.estimatedDelivery')}</p>
                       <p className="text-white font-medium">{new Date(selectedOrderForModal.estimated_delivery).toLocaleDateString('es-ES')}</p>
                     </div>
                   )}
@@ -2068,24 +2068,24 @@ const ClientDashboard: React.FC = () => {
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" />
-                  Información del Cliente
+                  {t('clientDashboard.modal.clientInfo')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Nombre</p>
-                    <p className="text-white font-medium">{fullProfile?.full_name || user?.email || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.name')}</p>
+                    <p className="text-white font-medium">{fullProfile?.full_name || user?.email || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Email</p>
-                    <p className="text-white font-medium">{user?.email || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.email')}</p>
+                    <p className="text-white font-medium">{user?.email || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Teléfono</p>
-                    <p className="text-white font-medium">{fullProfile?.phone || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.phone')}</p>
+                    <p className="text-white font-medium">{fullProfile?.phone || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Dirección</p>
-                    <p className="text-white font-medium">{fullProfile?.billing_address || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.address')}</p>
+                    <p className="text-white font-medium">{fullProfile?.billing_address || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                 </div>
               </div>
@@ -2094,40 +2094,40 @@ const ClientDashboard: React.FC = () => {
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Car className="w-5 h-5" />
-                  Información del Vehículo
+                  {t('clientDashboard.modal.vehicleInfo')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Marca</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_make || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.brand')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_make || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Modelo</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_model || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.model')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_model || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Generación</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_generation || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.generation')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_generation || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Motor</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_engine || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.engine')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_engine || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">ECU</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_ecu || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.ecu')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_ecu || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Año</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_year || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.year')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_year || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Caja de cambios</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_gearbox || 'No especificado'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.gearbox')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_gearbox || t('clientDashboard.profile.notSpecified')}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">Servicio</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.service_name || selectedOrderForModal.service_type || selectedOrderForModal.services?.title || 'Servicio'}</p>
+                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.service')}</p>
+                    <p className="text-white font-medium">{selectedOrderForModal.service_name || selectedOrderForModal.service_type || selectedOrderForModal.services?.title || t('clientDashboard.modal.service')}</p>
                   </div>
                 </div>
               </div>
@@ -2136,12 +2136,12 @@ const ClientDashboard: React.FC = () => {
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Información Adicional
+                  {t('clientDashboard.modal.additionalInfo')}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(selectedOrderForModal.engine_hp || selectedOrderForModal.engine_kw) && (
                     <div>
-                      <p className="text-gray-400 text-sm">Potencia del motor</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.enginePower')}</p>
                       <p className="text-white font-medium">
                         {selectedOrderForModal.engine_hp && `${selectedOrderForModal.engine_hp} HP`}
                         {selectedOrderForModal.engine_hp && selectedOrderForModal.engine_kw && ' / '}
@@ -2151,25 +2151,25 @@ const ClientDashboard: React.FC = () => {
                   )}
                   {selectedOrderForModal.vin && (
                     <div>
-                      <p className="text-gray-400 text-sm">VIN</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.vin')}</p>
                       <p className="text-white font-medium break-all">{selectedOrderForModal.vin}</p>
                     </div>
                   )}
                   {selectedOrderForModal.read_method && (
                     <div>
-                      <p className="text-gray-400 text-sm">Método de lectura</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.readMethod')}</p>
                       <p className="text-white font-medium">{selectedOrderForModal.read_method}</p>
                     </div>
                   )}
                   {selectedOrderForModal.hardware_number && (
                     <div>
-                      <p className="text-gray-400 text-sm">Número de hardware</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.hardwareNumber')}</p>
                       <p className="text-white font-medium">{selectedOrderForModal.hardware_number}</p>
                     </div>
                   )}
                   {selectedOrderForModal.software_number && (
                     <div>
-                      <p className="text-gray-400 text-sm">Número de software</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.softwareNumber')}</p>
                       <p className="text-white font-medium">{selectedOrderForModal.software_number}</p>
                     </div>
                   )}
@@ -2181,12 +2181,12 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <Wrench className="w-5 h-5" />
-                    Piezas Modificadas
+                    {t('clientDashboard.modal.modifiedParts')}
                   </h3>
                   <div className="space-y-3">
                     {selectedOrderForModal.aftermarket_exhaust && (
                       <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">Escape aftermarket</p>
+                        <p className="text-white font-medium">{t('clientDashboard.modal.aftermarketExhaust')}</p>
                         {selectedOrderForModal.aftermarket_exhaust_remarks && (
                           <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_exhaust_remarks}</p>
                         )}
@@ -2194,7 +2194,7 @@ const ClientDashboard: React.FC = () => {
                     )}
                     {selectedOrderForModal.aftermarket_intake_manifold && (
                       <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">Colector de admisión aftermarket</p>
+                        <p className="text-white font-medium">{t('clientDashboard.modal.aftermarketIntakeManifold')}</p>
                         {selectedOrderForModal.aftermarket_intake_manifold_remarks && (
                           <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_intake_manifold_remarks}</p>
                         )}
@@ -2202,7 +2202,7 @@ const ClientDashboard: React.FC = () => {
                     )}
                     {selectedOrderForModal.cold_air_intake && (
                       <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">Admisión de aire frío</p>
+                        <p className="text-white font-medium">{t('clientDashboard.modal.coldAirIntake')}</p>
                         {selectedOrderForModal.cold_air_intake_remarks && (
                           <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.cold_air_intake_remarks}</p>
                         )}
@@ -2210,7 +2210,7 @@ const ClientDashboard: React.FC = () => {
                     )}
                     {selectedOrderForModal.decat && (
                       <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">Decat</p>
+                        <p className="text-white font-medium">{t('clientDashboard.modal.decat')}</p>
                         {selectedOrderForModal.decat_remarks && (
                           <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.decat_remarks}</p>
                         )}
@@ -2225,7 +2225,7 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <Wrench className="w-5 h-5" />
-                    Servicios Adicionales
+                    {t('clientDashboard.modal.additionalServices')}
                   </h3>
                   <div className="space-y-3">
                     {selectedOrderForModal.additional_services_details.map((service, index) => (
@@ -2248,10 +2248,10 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Información Adicional
+                    {t('clientDashboard.modal.additionalInfo')}
                   </h3>
                   <div>
-                    <p className="text-gray-400 text-sm mb-2">Comentarios adicionales</p>
+                    <p className="text-gray-400 text-sm mb-2">{t('clientDashboard.modal.additionalComments')}</p>
                     <p className="text-white whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
                   </div>
                 </div>
@@ -2261,24 +2261,24 @@ const ClientDashboard: React.FC = () => {
               <div className="bg-gray-800/50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <FileText className="w-5 h-5" />
-                  Información de Precios
+                  {t('clientDashboard.modal.priceInfo')}
                 </h3>
                 <div className="space-y-3">
                   {selectedOrderForModal.base_price && (
                     <div className="flex justify-between">
-                      <p className="text-gray-400 text-sm">Precio base del servicio</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.basePrice')}</p>
                       <p className="text-white font-medium">€{selectedOrderForModal.base_price}</p>
                     </div>
                   )}
                   {selectedOrderForModal.additional_services_price && selectedOrderForModal.additional_services_price > 0 && (
                     <div className="flex justify-between">
-                      <p className="text-gray-400 text-sm">Servicios adicionales</p>
+                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.additionalServicesPrice')}</p>
                       <p className="text-white font-medium">€{selectedOrderForModal.additional_services_price}</p>
                     </div>
                   )}
                   {selectedOrderForModal.total_price && (
                     <div className="flex justify-between border-t border-gray-600 pt-3">
-                      <p className="text-white font-semibold">Total</p>
+                      <p className="text-white font-semibold">{t('clientDashboard.modal.total')}</p>
                       <p className="text-white font-bold text-lg">€{selectedOrderForModal.total_price}</p>
                     </div>
                   )}
@@ -2290,13 +2290,13 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Documentos del Cliente
+                    {t('clientDashboard.modal.clientDocuments')}
                   </h3>
                   
                   {/* Archivo Principal */}
                   {selectedOrderForModal.main_file_url && (
                     <div className="mb-4">
-                      <h4 className="text-md font-medium text-blue-300 mb-3">Archivo Principal</h4>
+                      <h4 className="text-md font-medium text-blue-300 mb-3">{t('clientDashboard.modal.mainFile')}</h4>
                       <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
                         <div>
                           <p className="text-white font-medium">
@@ -2311,7 +2311,7 @@ const ClientDashboard: React.FC = () => {
                           className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                         >
                           <Download className="w-4 h-4" />
-                          Descargar
+                          {t('clientDashboard.common.download')}
                         </button>
                       </div>
                     </div>
@@ -2320,7 +2320,7 @@ const ClientDashboard: React.FC = () => {
                   {/* Archivos Adicionales */}
                   {selectedOrderForModal.optional_attachments_urls && selectedOrderForModal.optional_attachments_urls.length > 0 && (
                     <div>
-                      <h4 className="text-md font-medium text-gray-300 mb-3">Archivos Adicionales</h4>
+                      <h4 className="text-md font-medium text-gray-300 mb-3">{t('clientDashboard.modal.additionalFiles')}</h4>
                       <div className="space-y-2">
                         {selectedOrderForModal.optional_attachments_urls.map((url, index) => (
                           <div key={index} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
@@ -2337,7 +2337,7 @@ const ClientDashboard: React.FC = () => {
                               className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                             >
                               <Download className="w-4 h-4" />
-                              Descargar
+                              {t('clientDashboard.common.download')}
                             </button>
                           </div>
                         ))}
@@ -2353,13 +2353,13 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Archivos del Pedido
+                    {t('clientDashboard.modal.orderFiles')}
                   </h3>
                   
                   {/* Archivos del Cliente */}
                   {orderFiles[selectedOrderForModal.id] && orderFiles[selectedOrderForModal.id].length > 0 && (
                     <div className="mb-4">
-                      <h4 className="text-md font-medium text-gray-300 mb-3">Archivos Originales</h4>
+                      <h4 className="text-md font-medium text-gray-300 mb-3">{t('clientDashboard.modal.originalFiles')}</h4>
                       <div className="space-y-2">
                         {orderFiles[selectedOrderForModal.id].map((file) => (
                           <div key={file.id} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
@@ -2367,7 +2367,7 @@ const ClientDashboard: React.FC = () => {
                               <p className="text-white font-medium">{file.file_name}</p>
                               <p className="text-gray-400 text-sm">
                                 {new Date(file.created_at).toLocaleDateString('es-ES')} • 
-                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.modal.unknownSize')}
                               </p>
                             </div>
                             <button
@@ -2375,7 +2375,7 @@ const ClientDashboard: React.FC = () => {
                               className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                             >
                               <Download className="w-4 h-4" />
-                              Descargar
+                              {t('clientDashboard.common.download')}
                             </button>
                           </div>
                         ))}
@@ -2386,7 +2386,7 @@ const ClientDashboard: React.FC = () => {
                   {/* Archivos del Admin */}
                   {adminFiles[selectedOrderForModal.id] && adminFiles[selectedOrderForModal.id].length > 0 && (
                     <div>
-                      <h4 className="text-md font-medium text-green-300 mb-3">Archivos Tuneados</h4>
+                      <h4 className="text-md font-medium text-green-300 mb-3">{t('clientDashboard.modal.tunedFiles')}</h4>
                       <div className="space-y-2">
                         {adminFiles[selectedOrderForModal.id].map((file) => (
                           <div key={file.id} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
@@ -2394,7 +2394,7 @@ const ClientDashboard: React.FC = () => {
                               <p className="text-white font-medium">{file.file_name}</p>
                               <p className="text-gray-400 text-sm">
                                 {new Date(file.created_at).toLocaleDateString('es-ES')} • 
-                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : 'Tamaño desconocido'}
+                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.modal.unknownSize')}
                               </p>
                               {file.admin_comments && (
                                 <p className="text-green-200 text-sm mt-2 italic">{file.admin_comments}</p>
@@ -2420,7 +2420,7 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <CreditCard className="w-5 h-5" />
-                    Facturas
+                    {t('clientDashboard.modal.invoices')}
                   </h3>
                   <div className="space-y-2">
                     {orderInvoices[selectedOrderForModal.id].map((invoice) => (
@@ -2437,12 +2437,12 @@ const ClientDashboard: React.FC = () => {
                         </div>
                         {invoice.file_url && (
                           <button
-                            onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
-                            className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                          >
-                            <Download className="w-4 h-4" />
-                            Descargar
-                          </button>
+                              onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
+                              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
+                            >
+                              <Download className="w-4 h-4" />
+                              {t('clientDashboard.common.download')}
+                            </button>
                         )}
                       </div>
                     ))}
@@ -2455,7 +2455,7 @@ const ClientDashboard: React.FC = () => {
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                     <FileText className="w-5 h-5" />
-                    Información Extra
+                    {t('clientDashboard.modal.extraInfo')}
                   </h3>
                   <div className="bg-gray-700/30 rounded-lg p-4">
                     <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
@@ -2471,13 +2471,13 @@ const ClientDashboard: React.FC = () => {
                 className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
               >
                 <Printer className="w-5 h-5" />
-                Imprimir PDF
+                {t('clientDashboard.common.printPDF')}
               </button>
               <button
                 onClick={() => setSelectedOrderForModal(null)}
                 className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
               >
-                Cerrar
+                {t('clientDashboard.common.close')}
               </button>
             </div>
           </div>

@@ -1,0 +1,40 @@
+{
+  "footer": {
+    "company": {
+      "name": "FILESECUFB",
+      "description": "Especialistas en reprogramación extrema de centralitas ECU con software profesional de última generación"
+    },
+    "navigation": {
+      "title": "Navegación",
+      "links": {
+        "home": "Inicio",
+        "process": "Nuestro Proceso",
+        "services": "Servicios",
+        "contact": "Contacto"
+      }
+    },
+    "services": {
+      "title": "Servicios",
+      "links": {
+        "carTuning": "CAR TUNING",
+        "trucks": "CAMIONES Y AGRICULTURA",
+        "tcuTuning": "TCU TUNING",
+        "others": "OTROS SERVICIOS"
+      }
+    },
+    "contact": {
+      "title": "Contacto",
+      "phone": "+34 630 84 10 47",
+      "email": "info@filesecufb.com",
+      "address": "Paraje Narcisos, 21, MEDIALEGUA"
+    },
+    "legal": {
+      "copyright": "© 2024 FILESECUFB. Todos los derechos reservados.",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio",
+      "cookies": "Cookies",
+      "refund": "Política de Devoluciones",
+      "disclaimer": "Descargo de Responsabilidad"
+    }
+  }
+}

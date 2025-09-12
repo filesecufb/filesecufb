@@ -1,0 +1,52 @@
+{
+  "cookiePolicy": {
+    "title": "Política de Cookies",
+    "lastUpdated": "Última actualización: 15 de enero de 2025",
+    "whatAreCookies": {
+      "title": "¿Qué son las cookies?",
+      "content": "Las cookies son pequeños archivos de texto que se almacenan en su dispositivo cuando visita un sitio web. Nos ayudan a mejorar su experiencia de navegación y a proporcionar funcionalidades personalizadas."
+    },
+    "typesOfCookies": {
+      "title": "Tipos de cookies que utilizamos",
+      "functional": {
+        "title": "Cookies funcionales",
+        "content": "Estas cookies son esenciales para el funcionamiento del sitio web y no se pueden desactivar. Incluyen cookies de sesión y preferencias de usuario."
+      },
+      "analytics": {
+        "title": "Cookies de análisis",
+        "content": "Utilizamos estas cookies para entender cómo los visitantes interactúan con nuestro sitio web, lo que nos ayuda a mejorarlo."
+      },
+      "marketing": {
+        "title": "Cookies de marketing",
+        "content": "Estas cookies se utilizan para mostrar anuncios relevantes y medir la efectividad de nuestras campañas publicitarias."
+      }
+    },
+    "howToManage": {
+      "title": "Cómo gestionar las cookies",
+      "content": "Puede controlar y/o eliminar las cookies como desee. Puede eliminar todas las cookies que ya están en su dispositivo y configurar la mayoría de los navegadores para evitar que se coloquen.",
+      "browserSettings": "La mayoría de los navegadores web permiten cierto control de las cookies a través de la configuración del navegador.",
+      "moreInfo": "Para obtener más información sobre las cookies, incluido cómo ver qué cookies se han configurado y cómo administrarlas y eliminarlas, visite www.aboutcookies.org o www.allaboutcookies.org."
+    },
+    "thirdPartyCookies": {
+      "title": "Cookies de terceros",
+      "content": "Algunos de nuestros socios comerciales pueden usar cookies en nuestro sitio (por ejemplo, anunciantes). Sin embargo, no tenemos acceso ni control sobre estas cookies."
+    },
+    "cookieDuration": {
+      "title": "Duración de las cookies",
+      "session": "Cookies de sesión: Se eliminan cuando cierra su navegador.",
+      "persistent": "Cookies persistentes: Permanecen en su dispositivo durante un período determinado o hasta que las elimine manualmente."
+    },
+    "consent": {
+      "title": "Su consentimiento",
+      "content": "Al utilizar nuestro sitio web, usted consiente el uso de cookies de acuerdo con esta política de cookies."
+    },
+    "rights": {
+      "title": "Sus derechos",
+      "content": "Tiene derecho a retirar su consentimiento en cualquier momento. También puede solicitar información sobre qué datos personales tenemos sobre usted y cómo los procesamos."
+    },
+    "contact": {
+      "title": "Contacto",
+      "content": "Si tiene alguna pregunta sobre esta política de cookies, puede contactarnos a través de nuestro formulario de contacto."
+    }
+  }
+}

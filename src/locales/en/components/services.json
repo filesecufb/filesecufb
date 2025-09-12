@@ -1,0 +1,21 @@
+{
+  "services": {
+    "title": "TUNING <span class='text-primary'>SERVICES</span>",
+    "subtitle": "DISCOVER OUR COMPLETE RANGE OF EXTREME OPTIMIZATION SERVICES",
+    "searchPlaceholder": "SEARCH SERVICES...",
+    "carTuning": {
+      "title": "AUTOMOTIVE TUNING SERVICES"
+    },
+    "truckAgriculture": {
+      "title": "TRUCK & <span class='text-primary'>AGRICULTURE</span>",
+      "subtitle": "SPECIALIZED SERVICES FOR COMMERCIAL AND AGRICULTURAL VEHICLES"
+    },
+    "tcuTuning": {
+      "subtitle": "TRANSMISSION OPTIMIZATION WITH INTERNAL TORQUE AND SHIFT SPEED"
+    },
+    "otherServices": {
+      "title": "OTHER <span class='text-primary'>SERVICES</span>",
+      "subtitle": "ADDITIONAL SPECIALIZED SERVICES"
+    }
+  }
+}

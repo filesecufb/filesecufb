@@ -1,0 +1,67 @@
+{
+  "home": {
+    "title": "FILESECUFB | Professional Tuning Files | ECU Modification",
+    "description": "Specialists in ECU map modification and calibration. Stage 1, Stage 2, DPF Off, EGR Off, AdBlue Off. Guaranteed results and fast delivery.",
+    "keywords": "tuning files, ecu modification, stage 1, stage 2, dpf off, egr off, adblue off, ecu calibration, filesecufb"
+  },
+  "services": {
+    "title": "Tuning Services | FILESECUFB | Professional ECU Modification",
+    "description": "Complete catalog of ECU tuning services. Stage 1, Stage 2, DPF Delete, EGR Off, AdBlue Delete. Professional modifications for all brands.",
+    "keywords": "tuning services, stage 1, stage 2, dpf delete, egr off, adblue delete, professional ecu modification"
+  },
+  "contact": {
+    "title": "Contact | FILESECUFB | Technical Tuning Support",
+    "description": "Contact FILESECUFB for tuning files and ECU modification inquiries. Specialized technical support and professional consulting.",
+    "keywords": "filesecufb contact, technical support, tuning inquiries, ecu consulting"
+  },
+  "login": {
+    "title": "Login | FILESECUFB | Client Area",
+    "description": "Access your FILESECUFB client area. Manage your tuning file orders, check your ECU modification status and download your files.",
+    "keywords": "filesecufb login, client area, tuning orders, ecu file management"
+  },
+  "register": {
+    "title": "Register | FILESECUFB | Create Client Account",
+    "description": "Register at FILESECUFB to access our ECU tuning services. Create your account and start requesting professional map modifications.",
+    "keywords": "filesecufb register, create account, tuning client, ecu services"
+  },
+  "forgotPassword": {
+    "title": "Reset Password | FILESECUFB | Restore Access",
+    "description": "Recover access to your FILESECUFB account to continue with your tuning services. Reset your password securely.",
+    "keywords": "reset password, restore access, filesecufb account, tuning files"
+  },
+  "dashboard": {
+    "title": "Client Dashboard | FILESECUFB | My Tuning Orders",
+    "description": "FILESECUFB client control panel. Check your tuning file orders, ECU modification status and download your custom files.",
+    "keywords": "client panel, tuning orders, modification status, ecu file download"
+  },
+  "privacy": {
+    "title": "Privacy Policy | FILESECUFB | Data Protection",
+    "description": "FILESECUFB privacy policy. Information about personal data processing, cookies and user rights according to GDPR.",
+    "keywords": "privacy policy, data protection, gdpr, cookies, filesecufb"
+  },
+  "terms": {
+    "title": "Terms and Conditions | FILESECUFB | Terms of Use",
+    "description": "FILESECUFB terms and conditions of use. Legal conditions for ECU map modification and tuning files services.",
+    "keywords": "terms conditions, terms of use, tuning services, legal ecu modification"
+  },
+  "cookies": {
+    "title": "Cookie Policy | FILESECUFB | Cookie Management",
+    "description": "FILESECUFB cookie policy. Information about cookie usage, types of cookies used and preference management.",
+    "keywords": "cookie policy, cookie management, cookie preferences, filesecufb"
+  },
+  "disclaimer": {
+    "title": "Legal Notice | FILESECUFB | ECU Modifications",
+    "description": "Legal notice about ECU modifications and tuning files. Important information about risks, responsibilities and legal use of our services.",
+    "keywords": "legal notice, ecu modifications, tuning responsibilities, legal use filesecufb"
+  },
+  "refundPolicy": {
+    "title": "Refund Policy | FILESECUFB | Return Conditions",
+    "description": "FILESECUFB refund policy. Conditions and procedures for requesting refunds on tuning files services.",
+    "keywords": "refund policy, returns, refund conditions, filesecufb"
+  },
+  "termsOfService": {
+    "title": "Terms of Service | FILESECUFB | General Conditions",
+    "description": "FILESECUFB terms of service. General conditions for using the platform and ECU modification services.",
+    "keywords": "terms of service, general conditions, tuning platform, ecu services"
+  }
+}

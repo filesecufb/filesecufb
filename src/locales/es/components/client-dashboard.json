@@ -1,0 +1,251 @@
+{
+  "title": "PANEL <span class=\"text-primary\">CLIENTE</span>",
+  "sidebar": {
+    "orders": "Pedidos",
+    "profile": "Perfil",
+    "billing": "Facturación",
+    "account": "Cuenta"
+  },
+  "orders": {
+    "title": "Mis Pedidos",
+    "totalOrders": "Pedidos Totales",
+    "completedOrders": "Completados",
+    "inProgressOrders": "En Proceso",
+    "pendingOrders": "Pendientes",
+    "stats": {
+      "total": "Pedidos Totales",
+      "completed": "Completados",
+      "inProgress": "En Proceso"
+    },
+    "filters": {
+      "search": "Buscar por ID, vehículo o servicio...",
+      "searchPlaceholder": "Buscar por ID, vehículo o servicio...",
+      "sortBy": "Ordenar por",
+      "clearFilters": "Limpiar filtros",
+      "results": "Resultados",
+      "page": "Página",
+      "allStatuses": "Todos los estados",
+      "pending": "Pendiente",
+      "inProgress": "En Proceso",
+      "completed": "Completado",
+      "dateTo": "Fecha hasta",
+      "newest": "Más recientes",
+      "oldest": "Más antiguos",
+      "priceHigh": "Precio: Mayor a menor",
+      "priceLow": "Precio: Menor a mayor"
+    },
+    "showing": "Mostrando",
+    "of": "de",
+    "orders": "pedidos",
+    "empty": {
+      "title": "No tienes pedidos aún",
+      "description": "Cuando realices tu primer pedido, aparecerá aquí",
+      "viewServices": "Ver Servicios"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "inProgress": "En Proceso",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "actions": {
+      "download": "Descargar",
+      "viewMore": "Ver más",
+      "generatePdf": "Generar PDF"
+    },
+    "card": {
+      "vehicle": "Vehículo",
+      "year": "Año",
+      "service": "Servicio",
+      "additionalServices": "Servicios Adicionales",
+      "viewMore": "Ver más"
+    },
+    "files": {
+      "clientFiles": "Archivos del Cliente",
+      "adminFiles": "Archivos Procesados",
+      "invoices": "Facturas",
+      "uploaded": "Subido",
+      "processed": "Procesado",
+      "unknownSize": "Tamaño desconocido"
+    }
+  },
+  "profile": {
+    "title": "Mi Perfil",
+    "personalInfo": "Información Personal",
+    "fullName": "Nombre Completo",
+    "email": "Email",
+    "phone": "Teléfono",
+    "address": "Dirección",
+    "city": "Ciudad",
+    "postalCode": "Código Postal",
+    "country": "País",
+    "edit": "Editar",
+    "notSpecified": "No especificado",
+    "billingInfo": "Información de Facturación",
+    "billingName": "Nombre o empresa para la factura",
+    "billingNamePlaceholder": "Ingresa el nombre o empresa",
+    "taxId": "Número de identificación fiscal",
+    "taxIdPlaceholder": "Ingresa el número de identificación",
+    "state": "Estado o provincia",
+    "statePlaceholder": "Ingresa el estado o provincia",
+    "accountInfo": "Información de la Cuenta",
+    "userId": "ID de Usuario",
+    "registrationDate": "Fecha de Registro",
+    "changePassword": "Cambiar Contraseña",
+    "actions": {
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar"
+    }
+  },
+  "billing": {
+    "title": "Información de Facturación",
+    "companyName": "Nombre o empresa para la factura",
+    "taxId": "Número de identificación fiscal",
+    "address": "Dirección completa",
+    "city": "Ciudad",
+    "state": "Estado o provincia",
+    "postalCode": "Código postal",
+    "country": "País"
+  },
+  "account": {
+    "title": "Configuración de Cuenta",
+    "changePassword": "Cambiar Contraseña",
+    "currentPassword": "Contraseña Actual",
+    "newPassword": "Nueva Contraseña",
+    "confirmPassword": "Confirmar Contraseña"
+  },
+  "modal": {
+    "completeInfo": "Información Completa del Pedido",
+    "orderNumber": "Número de Pedido",
+    "orderId": "ID del Pedido",
+    "orderDate": "Fecha del Pedido",
+    "status": "Estado",
+    "totalPrice": "Precio Total",
+    "clientInfo": "Información del Cliente",
+    "name": "Nombre",
+    "email": "Email",
+    "phone": "Teléfono",
+    "address": "Dirección",
+    "vehicleInfo": "Información del Vehículo",
+    "brand": "Marca",
+    "model": "Modelo",
+    "generation": "Generación",
+    "engine": "Motor",
+    "ecu": "ECU",
+    "year": "Año",
+    "gearbox": "Caja de Cambios",
+    "service": "Servicio",
+    "additionalInfo": "Información Adicional",
+    "enginePower": "Potencia del Motor",
+    "vin": "VIN",
+    "readMethod": "Método de Lectura",
+    "hardwareNumber": "Número de Hardware",
+    "softwareNumber": "Número de Software",
+    "modifiedParts": "Piezas Modificadas",
+    "aftermarketExhaust": "Escape Aftermarket",
+    "aftermarketIntakeManifold": "Colector de Admisión Aftermarket",
+    "coldAirIntake": "Admisión de Aire Frío",
+    "decat": "Decat",
+    "additionalComments": "Comentarios Adicionales",
+    "priceInfo": "Información de Precios",
+    "basePrice": "Precio Base",
+    "additionalServicesPrice": "Precio Servicios Adicionales",
+    "total": "Total",
+    "clientDocuments": "Documentos del Cliente",
+    "mainFile": "Archivo Principal",
+    "additionalFiles": "Archivos Adicionales",
+    "extraInfo": "Información Extra",
+    "orderFiles": "Archivos del Pedido",
+    "originalFiles": "Archivos Originales",
+    "tunedFiles": "Archivos Tuneados",
+    "unknownSize": "Tamaño desconocido",
+    "invoices": "Facturas",
+    "orderInfo": "Información Completa del Pedido",
+    "vehicleModifications": "Modificaciones del Vehículo",
+    "additionalServices": "Servicios Adicionales",
+    "financialSummary": "Resumen Financiero",
+    "clientFiles": "Archivos del Cliente",
+    "vehicle": {
+      "make": "Marca",
+      "model": "Modelo",
+      "generation": "Generación",
+      "year": "Año",
+      "transmission": "Transmisión"
+    },
+    "modifications": {
+      "aftermarketIntakeManifold": "Colector de Admisión Aftermarket",
+      "coldAirIntake": "Admisión de Aire Frío",
+      "noModifications": "No se han reportado modificaciones en el vehículo."
+    },
+    "pricing": {
+      "basePrice": "Precio Base",
+      "additionalServices": "Servicios Adicionales",
+      "total": "TOTAL",
+      "totalAdditionalServices": "Total Servicios Adicionales"
+    },
+    "files": {
+      "mainFiles": "Archivos Principales",
+      "additionalFiles": "Archivos Adicionales"
+    }
+  },
+  "pdf": {
+    "sections": {
+      "clientInfo": "INFORMACIÓN DEL CLIENTE",
+      "vehicleInfo": "INFORMACIÓN DEL VEHÍCULO",
+      "vehicleModifications": "MODIFICACIONES DEL VEHÍCULO",
+      "additionalServices": "SERVICIOS ADICIONALES",
+      "clientFiles": "ARCHIVOS DEL CLIENTE",
+      "additionalInfo": "INFORMACIÓN ADICIONAL"
+    },
+    "footer": "Este documento ha sido generado automáticamente por FilesECUFB"
+  },
+  "messages": {
+    "loading": {
+      "verifyingSession": "Verificando sesión...",
+      "loadingDashboard": "Cargando dashboard...",
+      "loadingOrders": "Cargando pedidos..."
+    },
+    "errors": {
+      "loadingProfile": "Error al cargar información del perfil",
+      "loadingOrders": "Error al cargar pedidos",
+      "invalidFileUrl": "URL de archivo no válida",
+      "downloadError": "Error al descargar archivo",
+      "unknownError": "Error desconocido",
+      "connectionError": "Error de conexión al descargar el archivo",
+      "downloadRetry": "Error al descargar el archivo. Inténtalo de nuevo.",
+      "pdfGenerationError": "Error al generar el PDF",
+      "pdfError": "Error al generar PDF"
+    },
+    "success": {
+      "profileUpdated": "Perfil actualizado correctamente",
+      "passwordChanged": "Contraseña cambiada correctamente"
+    },
+    "validation": {
+      "passwordMismatch": "Las contraseñas no coinciden"
+    },
+    "empty": {
+      "noOrders": "No tienes pedidos aún",
+      "noFiles": "No hay archivos disponibles",
+      "noInvoices": "No hay facturas disponibles"
+    }
+  },
+  "common": {
+    "na": "N/A",
+    "yes": "Sí",
+    "no": "No",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "back": "Volver",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "change": "Cambiar",
+    "download": "Descargar",
+    "printPDF": "Imprimir PDF"
+  }
+}
