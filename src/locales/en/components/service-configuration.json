@@ -98,7 +98,9 @@
     "loadingAdditionalServices": "Loading additional services...",
     "noAdditionalServices": "No additional services available at this time",
     "includeCountryPrefix": "Include your country prefix (ex: +34 for Spain)",
-    "registrationEmailNotEditable": "Registration email (not editable)"
+    "registrationEmailNotEditable": "Registration email (not editable)",
+    "verifyingSession": "Verifying session...",
+    "redirectingToLogin": "Redirecting to login..."
   },
   "pricing": {
     "priceOnRequest": "Price on request",

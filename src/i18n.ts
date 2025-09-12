@@ -289,7 +289,7 @@ const updateOpenGraphTags = (language: string, baseUrl: string, seoData: any) =>
     { property: 'og:url', content: `${baseUrl}${window.location.pathname}` },
     { property: 'og:type', content: 'website' },
     { property: 'og:site_name', content: 'FILESECUFB' },
-    { property: 'og:image', content: `${baseUrl}/og-image.jpg` },
+    { property: 'og:image', content: `${baseUrl}/og-image.png` },
     { property: 'og:image:width', content: '1200' },
     { property: 'og:image:height', content: '630' }
   ];
@@ -312,7 +312,7 @@ const updateTwitterCardTags = (language: string, seoData: any) => {
     { name: 'twitter:title', content: seoData.title },
     { name: 'twitter:description', content: seoData.description },
     { name: 'twitter:site', content: '@filesecufb' },
-    { name: 'twitter:image', content: 'https://filesecufb.com/twitter-image.jpg' }
+    { name: 'twitter:image', content: 'https://filesecufb.com/social-image.png' }
   ];
   
   twitterTags.forEach(tag => {

@@ -10,6 +10,17 @@
     <meta name="theme-color" content="#2563eb" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
+    <!-- Optimizaciones para Core Web Vitals -->
+    <meta name="theme-color" content="#1f2937">
+    <meta name="color-scheme" content="light dark">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    
+    <!-- Resource hints para mejor rendimiento -->
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    
     <!-- SEO Meta Tags Principales -->
     <title>FILESECUFB | Modificación de Mapas ECU | Tuning Files Profesionales</title>
     <meta name="description" content="FILESECUFB - Especialistas en modificación de mapas de centralitas. Tuning files para Stage 1, Stage 2, solución DPF, EGR, AdBlue. Reprogramación profesional con garantía.">
@@ -35,12 +46,12 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="FILESECUFB | Professional ECU Tuning Files">
     <meta property="og:description" content="Professional ECU tuning and remapping service. Guaranteed reprogramming for all brands.">
-    <meta property="og:image" content="https://filesecufb.vercel.app/og-image.png">
+    <meta property="og:image" content="https://filesecufb.com/og-image.png">
     <meta property="og:image:width" content="1197">
     <meta property="og:image:height" content="629">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:alt" content="FILESECUFB - Professional ECU tuning files service">
-    <meta property="og:url" content="https://filesecufb.vercel.app/">
+    <meta property="og:url" content="https://filesecufb.com/">
     <meta property="og:site_name" content="FILESECUFB">
     <meta property="og:locale" content="es_ES">
     <meta property="og:locale:alternate" content="en_US">
@@ -51,7 +62,7 @@
     <meta name="twitter:creator" content="@filesecufb">
     <meta name="twitter:title" content="FILESECUFB | Professional Tuning Files">
     <meta name="twitter:description" content="Professional ECU map modification. Stage 1, Stage 2, DPF/EGR solutions. Express delivery.">
-    <meta name="twitter:image" content="https://filesecufb.vercel.app/og-image.png">
+    <meta name="twitter:image" content="https://filesecufb.com/og-image.png">
     <meta name="twitter:image:width" content="1197">
     <meta name="twitter:image:height" content="629">
     <meta name="twitter:image:alt" content="FILESECUFB - Professional tuning files service">
@@ -60,12 +71,14 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
+      "@type": "LocalBusiness",
+      "@id": "https://filesecufb.com/#organization",
       "name": "FILESECUFB",
       "alternateName": "FILES ECU FB",
       "url": "https://filesecufb.com",
       "logo": "https://filesecufb.com/logo.png",
-      "description": "Servicio profesional de modificación de mapas ECU y tuning files",
+      "image": "https://filesecufb.com/og-image.png",
+      "description": "Servicio profesional de modificación de mapas ECU y tuning files. Especialistas en reprogramación de centralitas automotrices con garantía.",
       "telephone": "+34630841047",
       "email": "info@filesecufb.com",
       "address": {
@@ -73,25 +86,123 @@
         "addressCountry": "ES",
         "addressRegion": "España"
       },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "40.4168",
+        "longitude": "-3.7038"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "España"
+      },
+      "serviceArea": {
+        "@type": "Country",
+        "name": "España"
+      },
       "sameAs": [
         "https://www.facebook.com/filesecufb",
         "https://www.instagram.com/filesecufb",
         "https://wa.me/34630841047"
       ],
-      "priceRange": "€€"
+      "priceRange": "€€",
+      "currenciesAccepted": "EUR",
+      "paymentAccepted": "Cash, Credit Card, Bank Transfer, PayPal",
+      "openingHours": "Mo-Fr 09:00-18:00",
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Servicios de Tuning ECU",
+        "itemListElement": [
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Stage 1 Tuning",
+              "description": "Optimización básica del mapa ECU para mejorar potencia y par motor"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "Stage 2 Tuning",
+              "description": "Reprogramación avanzada con modificaciones de hardware"
+            }
+          },
+          {
+            "@type": "Offer",
+            "itemOffered": {
+              "@type": "Service",
+              "name": "DPF/EGR/AdBlue Off",
+              "description": "Eliminación de sistemas anticontaminación"
+            }
+          }
+        ]
+      }
     }
     </script>
     
-    <!-- Preconnect para optimización de carga -->
+    <!-- Schema para Servicios Específicos -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "@id": "https://filesecufb.com/#service",
+      "name": "Modificación de Mapas ECU",
+      "description": "Servicio profesional de reprogramación y optimización de centralitas automotrices. Tuning files personalizados con garantía.",
+      "provider": {
+        "@id": "https://filesecufb.com/#organization"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "España"
+      },
+      "availableChannel": {
+        "@type": "ServiceChannel",
+        "serviceUrl": "https://filesecufb.com",
+        "serviceSmsNumber": "+34630841047",
+        "servicePhone": "+34630841047"
+      },
+      "category": "Automotive Services",
+      "serviceType": "ECU Tuning and Remapping",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "EUR",
+        "lowPrice": "50",
+        "highPrice": "500",
+        "offerCount": "3"
+      }
+    }
+    </script>
+    
+    <!-- Preconnect y DNS-prefetch para optimización de carga -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://images.unsplash.com">
+    <link rel="dns-prefetch" href="https://api.filesecufb.com">
+    <link rel="dns-prefetch" href="https://www.google-analytics.com">
+    
+    <!-- Cargar fuentes CSS -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    
+    <!-- Prefetch para navegación anticipada -->
+    <link rel="prefetch" href="/services">
+    <link rel="prefetch" href="/contact">
+    <link rel="prefetch" href="/login">
     <script type="module">
       if (import.meta.hot?.on) {
-        import.meta.hot.on('vite:error', (error) => {
-          if (error.err) {
-            console.error([error.err.message, error.err.frame].filter(Boolean).join('\n'));
-          }
+        import.meta.hot.on('vite:beforeUpdate', () => console.clear())
+      }
+      
+      // Registrar Service Worker para mejorar Core Web Vitals
+      if ('serviceWorker' in navigator && import.meta.env.PROD) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
         });
       }
     </script>

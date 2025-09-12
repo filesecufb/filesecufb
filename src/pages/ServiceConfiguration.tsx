@@ -239,6 +239,16 @@ const ServiceConfiguration: React.FC = () => {
     }
   }, [user, authLoading]);
 
+  // Handle navigation when user is not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      const timer = setTimeout(() => {
+        navigate('/login');
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, authLoading, navigate]);
+
   const handleInputChange = (field: keyof ServiceConfigurationData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -564,8 +574,14 @@ const ServiceConfiguration: React.FC = () => {
   }
 
   if (!user) {
-    navigate('/login');
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">{t('messages.redirectingToLogin')}</p>
+        </div>
+      </div>
+    );
   }
 
   // Loading state
@@ -761,7 +777,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.make}
                   onChange={(e) => handleInputChange('make', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterMake')}
                   required
                 />
@@ -773,7 +789,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.model}
                   onChange={(e) => handleInputChange('model', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterModel')}
                   required
                 />
@@ -785,7 +801,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.generation}
                   onChange={(e) => handleInputChange('generation', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterGeneration')}
                   required
                 />
@@ -797,7 +813,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.engine}
                   onChange={(e) => handleInputChange('engine', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterEngine')}
                   required
                 />
@@ -809,7 +825,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.ecu}
                   onChange={(e) => handleInputChange('ecu', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterEcu')}
                   required
                 />
@@ -821,7 +837,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.year}
                   onChange={(e) => handleInputChange('year', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterYear')}
                   required
                 />
@@ -833,7 +849,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.gearbox}
                   onChange={(e) => handleInputChange('gearbox', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterGearbox')}
                   required
                 />
@@ -851,7 +867,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="number"
                   value={formData.engineHp}
                   onChange={(e) => handleInputChange('engineHp', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.engineHpExample')}
                 />
               </div>
@@ -862,7 +878,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="number"
                   value={formData.engineKw}
                   onChange={(e) => handleInputChange('engineKw', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.engineKwExample')}
                 />
               </div>
@@ -873,7 +889,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.vin}
                   onChange={(e) => handleInputChange('vin', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.vinExample')}
                 />
               </div>
@@ -884,7 +900,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.readMethod}
                   onChange={(e) => handleInputChange('readMethod', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.readMethodExample')}
                   required
                 />
@@ -896,7 +912,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.hardwareNumber}
                   onChange={(e) => handleInputChange('hardwareNumber', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
@@ -906,7 +922,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={formData.softwareNumber}
                   onChange={(e) => handleInputChange('softwareNumber', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
@@ -954,7 +970,7 @@ const ServiceConfiguration: React.FC = () => {
                         value={formData.aftermarketExhaustRemarks}
                         onChange={(e) => handleInputChange('aftermarketExhaustRemarks', e.target.value)}
                         placeholder={t('placeholders.optionalRemarks')}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows={2}
                       />
                     )}
@@ -975,7 +991,7 @@ const ServiceConfiguration: React.FC = () => {
                         value={formData.aftermarketIntakeManifoldRemarks}
                         onChange={(e) => handleInputChange('aftermarketIntakeManifoldRemarks', e.target.value)}
                         placeholder="Observaciones (opcional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows={2}
                       />
                     )}
@@ -996,7 +1012,7 @@ const ServiceConfiguration: React.FC = () => {
                         value={formData.coldAirIntakeRemarks}
                         onChange={(e) => handleInputChange('coldAirIntakeRemarks', e.target.value)}
                         placeholder="Observaciones (opcional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows={2}
                       />
                     )}
@@ -1017,7 +1033,7 @@ const ServiceConfiguration: React.FC = () => {
                         value={formData.decatRemarks}
                         onChange={(e) => handleInputChange('decatRemarks', e.target.value)}
                         placeholder="Observaciones (opcional)"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         rows={2}
                       />
                     )}
@@ -1089,7 +1105,7 @@ const ServiceConfiguration: React.FC = () => {
                   value={formData.additionalInfo}
                   onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
                   placeholder={t('placeholders.additionalInfoPlaceholder')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={4}
                 />
               </div>
@@ -1109,7 +1125,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={personalInfo.full_name}
                   onChange={(e) => handlePersonalInfoChange('full_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterFullName')}
                   required
                 />
@@ -1121,7 +1137,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="tel"
                   value={personalInfo.phone}
                   onChange={(e) => handlePersonalInfoChange('phone', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.phoneExample')}
                   required
                 />
@@ -1155,7 +1171,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_name}
                   onChange={(e) => handleBillingInfoChange('billing_name', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.billingNamePlaceholder')}
                   required
                 />
@@ -1167,7 +1183,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.tax_id}
                   onChange={(e) => handleBillingInfoChange('tax_id', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.taxIdPlaceholder')}
                 />
               </div>
@@ -1178,7 +1194,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_address}
                   onChange={(e) => handleBillingInfoChange('billing_address', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.fullAddress')}
                   required
                 />
@@ -1190,7 +1206,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_city}
                   onChange={(e) => handleBillingInfoChange('billing_city', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.city')}
                   required
                 />
@@ -1202,7 +1218,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_state}
                   onChange={(e) => handleBillingInfoChange('billing_state', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.stateProvince')}
                 />
               </div>
@@ -1213,7 +1229,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_postal_code}
                   onChange={(e) => handleBillingInfoChange('billing_postal_code', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.postalCode')}
                   required
                 />
@@ -1225,7 +1241,7 @@ const ServiceConfiguration: React.FC = () => {
                   type="text"
                   value={billingInfo.billing_country}
                   onChange={(e) => handleBillingInfoChange('billing_country', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.country')}
                   required
                 />

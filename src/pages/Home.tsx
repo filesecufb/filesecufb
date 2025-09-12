@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowRight, Zap, Settings, Gauge, Shield, Clock, MessageCircle, ChevronDown, ChevronUp, RotateCcw, RefreshCw, Wrench, Star, Quote, TrendingUp, BarChart3 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
+import { useSEO } from '../hooks/useSEO'
 
 interface FAQItemProps {
   question: string
@@ -43,6 +44,9 @@ const Home: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  
+  // Usar el hook useSEO para gestionar metadatos dinámicos
+  useSEO('home');
   
   // State for popular services
   const [popularServices, setPopularServices] = useState<any[]>([]);
@@ -215,7 +219,7 @@ const Home: React.FC = () => {
             {t('home.hero.description')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center mb-16 animate-slide-in-left">
-            <Link to="/products" className="btn-primary px-10 py-4 btn-text-style inline-flex items-center group btn-hover-effect shadow-subtle hover:shadow-elegant">
+            <Link to="/services" className="btn-primary px-10 py-4 btn-text-style inline-flex items-center group btn-hover-effect shadow-subtle hover:shadow-elegant">
               <Zap className="mr-3 h-6 w-6 group-hover:animate-pulse" />{t('home.hero.cta.services')}<ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link to="/register" className="btn-secondary px-10 py-4 btn-text-style btn-hover-effect shadow-subtle hover:shadow-elegant">{t('home.hero.cta.login')}</Link>

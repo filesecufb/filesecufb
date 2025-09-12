@@ -1,55 +1,168 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Página principal -->
+  <!-- Página principal - Español -->
   <url>
     <loc>https://filesecufb.com/</loc>
-    <lastmod>2024-01-15</lastmod>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/" />
   </url>
 
-  <!-- Servicios/Productos -->
+  <!-- Página principal - Inglés -->
   <url>
-    <loc>https://filesecufb.com/products</loc>
-    <lastmod>2024-01-15</lastmod>
+    <loc>https://filesecufb.com/en/</loc>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/" />
   </url>
 
-  <!-- Servicios específicos -->
+  <!-- Servicios - Español -->
   <url>
     <loc>https://filesecufb.com/services</loc>
-    <lastmod>2024-01-15</lastmod>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/services" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/services" />
   </url>
 
-  <!-- Contacto -->
+  <!-- Servicios - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/services</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/services" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/services" />
+  </url>
+
+  <!-- Contacto - Español -->
   <url>
     <loc>https://filesecufb.com/contact</loc>
-    <lastmod>2024-01-15</lastmod>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/contact" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/contact" />
   </url>
 
-  <!-- Login -->
+  <!-- Contacto - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/contact</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/contact" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/contact" />
+  </url>
+
+  <!-- Login - Español -->
   <url>
     <loc>https://filesecufb.com/login</loc>
-    <lastmod>2024-01-15</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-
-  <!-- Registro -->
-  <url>
-    <loc>https://filesecufb.com/register</loc>
-    <lastmod>2024-01-15</lastmod>
+    <lastmod>2025-01-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/login" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/login" />
+  </url>
+
+  <!-- Login - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/login</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/login" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/login" />
+  </url>
+
+  <!-- Registro - Español -->
+  <url>
+    <loc>https://filesecufb.com/register</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/register" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/register" />
+  </url>
+
+  <!-- Registro - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/register</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/register" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/register" />
+  </url>
+
+  <!-- Política de Privacidad - Español -->
+  <url>
+    <loc>https://filesecufb.com/privacy-policy</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/privacy-policy" />
+  </url>
+
+  <!-- Política de Privacidad - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/privacy-policy</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/privacy-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/privacy-policy" />
+  </url>
+
+  <!-- Términos y Condiciones - Español -->
+  <url>
+    <loc>https://filesecufb.com/terms-of-service</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/terms-of-service" />
+  </url>
+
+  <!-- Términos y Condiciones - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/terms-of-service</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/terms-of-service" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/terms-of-service" />
+  </url>
+
+  <!-- Política de Cookies - Español -->
+  <url>
+    <loc>https://filesecufb.com/cookie-policy</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/cookie-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/cookie-policy" />
+  </url>
+
+  <!-- Política de Cookies - Inglés -->
+  <url>
+    <loc>https://filesecufb.com/en/cookie-policy</loc>
+    <lastmod>2025-01-20</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://filesecufb.com/en/cookie-policy" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://filesecufb.com/cookie-policy" />
   </url>
 
 </urlset>

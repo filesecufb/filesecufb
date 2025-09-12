@@ -98,7 +98,9 @@
     "loadingAdditionalServices": "Cargando servicios adicionales...",
     "noAdditionalServices": "No hay servicios adicionales disponibles en este momento",
     "includeCountryPrefix": "Incluye el prefijo de tu país (ej: +34 para España)",
-    "registrationEmailNotEditable": "Correo de registro (no editable)"
+    "registrationEmailNotEditable": "Correo de registro (no editable)",
+    "verifyingSession": "Verificando sesión...",
+    "redirectingToLogin": "Redirigiendo al login..."
   },
   "pricing": {
     "priceOnRequest": "Precio a consultar",

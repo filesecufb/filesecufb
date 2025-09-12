@@ -1,8 +1,12 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../hooks/useSEO';
 
 const PrivacyPolicy: React.FC = () => {
   const { t } = useTranslation();
+  
+  // Usar el hook useSEO para gestionar metadatos dinámicos
+  useSEO('privacy');
 
   return (
     <div className="min-h-screen bg-dark-primary text-white">

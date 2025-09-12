@@ -2,9 +2,13 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../hooks/useSEO';
 
 const CookiePolicy: React.FC = () => {
   const { t } = useTranslation();
+  
+  // Usar el hook useSEO para gestionar metadatos dinámicos
+  useSEO('cookies');
   return (
     <div className="min-h-screen bg-dark-primary text-white">
       <div className="container mx-auto px-4 py-16">

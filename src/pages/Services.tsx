@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useSEO } from '../hooks/useSEO';
 
 interface Service {
   id: string;
@@ -24,6 +25,9 @@ const Services = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Usar el hook useSEO para gestionar metadatos dinámicos
+  useSEO('services');
   
   // State for services from Supabase
   const [services, setServices] = useState<any[]>([]);
