@@ -685,15 +685,14 @@ const ClientDashboard: React.FC = () => {
                   <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium break-words">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
+                        <p className="text-white font-medium break-words">{invoice.file_name || `Factura ${invoice.id.slice(-8)}`}</p>
                         <p className="text-gray-400 text-sm break-words">
-                          Generada: {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
-                          <span className={getStatusColor(invoice.status)}>{getStatusText(invoice.status)}</span>
+                          Generada: {new Date(invoice.created_at).toLocaleDateString('es-ES')}
                         </p>
                       </div>
                       {invoice.file_url && (
                         <button
-                          onClick={() => onDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
+                          onClick={() => onDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.id.slice(-8)}.pdf`)}
                           className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
                         >
                           <Download className="w-4 h-4" />
@@ -2426,10 +2425,9 @@ const ClientDashboard: React.FC = () => {
                     {orderInvoices[selectedOrderForModal.id].map((invoice) => (
                       <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
                         <div>
-                          <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.invoice_number}`}</p>
+                          <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.id.slice(-8)}`}</p>
                           <p className="text-gray-400 text-sm">
-                            {new Date(invoice.created_at).toLocaleDateString('es-ES')} • €{invoice.amount} • 
-                            <span className={getStatusColor(invoice.status)}>{getStatusText(invoice.status)}</span>
+                            {new Date(invoice.created_at).toLocaleDateString('es-ES')}
                           </p>
                           {invoice.admin_comments && (
                             <p className="text-blue-200 text-sm mt-2 italic">{invoice.admin_comments}</p>
@@ -2437,7 +2435,7 @@ const ClientDashboard: React.FC = () => {
                         </div>
                         {invoice.file_url && (
                           <button
-                              onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.invoice_number}.pdf`)}
+                              onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.id.slice(-8)}.pdf`)}
                               className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                             >
                               <Download className="w-4 h-4" />

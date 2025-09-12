@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
 
 type AdminSection = 'overview' | 'services' | 'clients' | 'orders';
 
@@ -1775,6 +1776,24 @@ const OrdersSection: React.FC = () => {
               title,
               category,
               image_url
+            ),
+            order_files (
+              id,
+              file_name,
+              file_url,
+              file_type,
+              uploaded_by,
+              created_at
+            ),
+            invoices (
+              id,
+              order_id,
+              file_name,
+              file_url,
+              file_size,
+              file_type,
+              admin_comments,
+              created_at
             )
           `)
           .order('created_at', { ascending: false });
@@ -1842,6 +1861,9 @@ const OrdersSection: React.FC = () => {
         throw error;
       }
 
+      // Obtener datos completos del pedido para el email
+      const orderToUpdate = orders.find(order => order.id === orderId);
+      
       // Actualizar el estado local
       setOrders(prevOrders =>
         prevOrders.map(order =>
@@ -1858,6 +1880,29 @@ const OrdersSection: React.FC = () => {
       }));
 
       toast.success('Estado del pedido actualizado correctamente');
+
+      // Enviar email de cambio de estado
+      if (orderToUpdate) {
+        try {
+          const emailOrderData: EmailOrderData = {
+            id: orderToUpdate.id,
+            client_email: orderToUpdate.profiles?.email || '',
+            client_name: orderToUpdate.profiles?.full_name || 'Cliente',
+            service_name: orderToUpdate.services?.title || 'Servicio',
+            status: newStatus,
+            vehicle_info: `${orderToUpdate.vehicle_make || ''} ${orderToUpdate.vehicle_model || ''} ${orderToUpdate.vehicle_year || ''}`.trim(),
+            total_price: orderToUpdate.total_price || 0,
+            created_at: orderToUpdate.created_at,
+            order_files: orderToUpdate.order_files || [],
+            invoices: orderToUpdate.invoices || []
+          };
+
+          await sendStatusChangeEmail(emailOrderData);
+        } catch (emailError) {
+          console.warn('Error sending status change email:', emailError);
+          // No mostramos error al usuario para no interrumpir el flujo
+        }
+      }
     } catch (err: any) {
       console.error('Error updating order status:', err);
       toast.error(`Error al actualizar estado: ${err.message}`);

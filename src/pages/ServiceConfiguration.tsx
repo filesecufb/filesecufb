@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { handleNewOrder, OrderData } from '../services/emailService';
 
 interface ServiceConfigurationData {
   // Vehicle Information
@@ -540,12 +541,41 @@ const ServiceConfiguration: React.FC = () => {
         status: 'pending'
       };
 
-      const { error: orderError } = await supabase
+      const { data: insertedOrder, error: orderError } = await supabase
         .from('orders')
-        .insert(orderData);
+        .insert(orderData)
+        .select()
+        .single();
 
       if (orderError) {
         throw new Error(`${t('errors.orderCreationError')}: ${orderError.message}`);
+      }
+
+      // Enviar emails de notificación
+      try {
+        const emailOrderData: OrderData = {
+          id: insertedOrder.id,
+          client_name: personalInfo.full_name || personalInfo.email.split('@')[0],
+          client_email: personalInfo.email,
+          service_type: selectedService.title,
+          status: 'pending',
+          created_at: insertedOrder.created_at,
+          total_price: calculateTotal(),
+          description: formData.additionalInfo
+        };
+
+        const emailResults = await handleNewOrder(emailOrderData);
+        
+        // Log results but don't fail the order if emails fail
+        if (emailResults.adminEmail.status === 'rejected') {
+          console.warn('Failed to send admin notification email:', emailResults.adminEmail.reason);
+        }
+        if (emailResults.clientEmail.status === 'rejected') {
+          console.warn('Failed to send client confirmation email:', emailResults.clientEmail.reason);
+        }
+      } catch (emailError) {
+        console.error('Error sending notification emails:', emailError);
+        // Don't fail the order creation if emails fail
       }
 
       toast.success(t('messages.orderSuccess'));

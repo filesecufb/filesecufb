@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
 
 interface OrderData {
   id: string;
@@ -250,6 +251,27 @@ const OrderDetails: React.FC = () => {
       setOrder(prev => prev ? { ...prev, status: newStatus } : null);
       setIsStatusDropdownOpen(false);
       toast.success('Estado del pedido actualizado correctamente');
+
+      // Enviar email de cambio de estado
+      try {
+        const emailOrderData: EmailOrderData = {
+          id: order.id,
+          client_email: order.profiles?.email || '',
+          client_name: order.profiles?.full_name || 'Cliente',
+          service_name: order.services?.title || 'Servicio',
+          status: newStatus,
+          vehicle_info: `${order.vehicle_make || ''} ${order.vehicle_model || ''} ${order.vehicle_year || ''}`.trim(),
+          total_price: order.total_price || 0,
+          created_at: order.created_at,
+          order_files: order.order_files || [],
+          invoices: order.invoices || []
+        };
+
+        await sendStatusChangeEmail(emailOrderData);
+      } catch (emailError) {
+        console.warn('Error sending status change email:', emailError);
+        // No mostramos error al usuario para no interrumpir el flujo
+      }
     } catch (err: any) {
       console.error('Error updating order status:', err);
       toast.error(`Error al actualizar estado: ${err.message}`);
