@@ -557,11 +557,10 @@ const ServiceConfiguration: React.FC = () => {
           id: insertedOrder.id,
           client_name: personalInfo.full_name || personalInfo.email.split('@')[0],
           client_email: personalInfo.email,
-          service_type: selectedService.title,
+          service_name: selectedService.title,
           status: 'pending',
           created_at: insertedOrder.created_at,
-          total_price: calculateTotal(),
-          description: formData.additionalInfo
+          total_price: calculateTotal()
         };
 
         const emailResults = await handleNewOrder(emailOrderData);
