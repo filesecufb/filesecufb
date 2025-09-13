@@ -57,7 +57,8 @@
     "city": "City",
     "state": "State/Province",
     "postalCode": "Postal Code",
-    "country": "Country"
+    "country": "Country",
+    "needsInvoice": "Do you need an invoice?"
   },
   "placeholders": {
     "enterMake": "Enter make",

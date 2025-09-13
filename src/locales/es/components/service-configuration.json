@@ -57,7 +57,8 @@
     "city": "Ciudad",
     "state": "Estado/Provincia",
     "postalCode": "Código Postal",
-    "country": "País"
+    "country": "País",
+    "needsInvoice": "¿Necesitas factura?"
   },
   "placeholders": {
     "enterMake": "Ingresa la marca",

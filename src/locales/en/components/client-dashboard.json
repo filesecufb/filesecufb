@@ -67,7 +67,8 @@
       "uploaded": "Uploaded",
       "processed": "Processed",
       "unknownSize": "Unknown size"
-    }
+    },
+    "loading": "Loading orders..."
   },
   "profile": {
     "title": "My Profile",

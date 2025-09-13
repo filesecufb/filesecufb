@@ -64,10 +64,11 @@
       "clientFiles": "Archivos del Cliente",
       "adminFiles": "Archivos Procesados",
       "invoices": "Facturas",
-      "uploaded": "Subido",
-      "processed": "Procesado",
+      "uploaded": "Subidos",
+      "processed": "Procesados",
       "unknownSize": "Tamaño desconocido"
-    }
+    },
+    "loading": "Cargando pedidos..."
   },
   "profile": {
     "title": "Mi Perfil",

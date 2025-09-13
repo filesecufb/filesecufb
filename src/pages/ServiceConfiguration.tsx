@@ -22,8 +22,7 @@ interface ServiceConfigurationData {
   engineKw: string;
   vin: string;
   readMethod: string;
-  hardwareNumber: string;
-  softwareNumber: string;
+
 
   
 
@@ -131,8 +130,7 @@ const ServiceConfiguration: React.FC = () => {
     engineKw: '',
     vin: '',
     readMethod: '',
-    hardwareNumber: '',
-    softwareNumber: '',
+
 
 
     mainFile: [],
@@ -174,6 +172,8 @@ const ServiceConfiguration: React.FC = () => {
     billing_state: '',
     tax_id: ''
   });
+
+  const [needsInvoice, setNeedsInvoice] = useState(false);
 
   // Cargar datos completos del perfil desde la base de datos
   useEffect(() => {
@@ -366,7 +366,24 @@ const ServiceConfiguration: React.FC = () => {
       errors.push(t('errors.phoneRequired'));
     }
     
-    // Los campos de facturación son opcionales - no se validan como requeridos
+    // Validar campos de facturación solo si se requiere factura
+    if (needsInvoice) {
+      if (!billingInfo.billing_name.trim()) {
+        errors.push('El nombre de facturación es requerido');
+      }
+      if (!billingInfo.billing_address.trim()) {
+        errors.push('La dirección de facturación es requerida');
+      }
+      if (!billingInfo.billing_city.trim()) {
+        errors.push('La ciudad de facturación es requerida');
+      }
+      if (!billingInfo.billing_postal_code.trim()) {
+        errors.push('El código postal de facturación es requerido');
+      }
+      if (!billingInfo.billing_country.trim()) {
+        errors.push('El país de facturación es requerido');
+      }
+    }
     
     // Validar términos y condiciones
     if (!formData.agreeAllTerms) {
@@ -508,8 +525,7 @@ const ServiceConfiguration: React.FC = () => {
         engine_kw: formData.engineKw?.substring(0, 50) || '',
         vin: formData.vin,
         read_method: formData.readMethod,
-        hardware_number: formData.hardwareNumber,
-        software_number: formData.softwareNumber,
+
         
         // Modified Parts
         has_modified_parts: formData.hasModifiedParts,
@@ -705,10 +721,13 @@ const ServiceConfiguration: React.FC = () => {
 
           {/* File Upload */}
           <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.fileToModify')}</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">
+              {t('headers.fileToModify')} <span className="text-gray-600">*</span>
+            </h2>
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                dragActive ? 'border-blue-500 bg-blue-50' : 
+                formData.mainFile.length === 0 ? 'border-gray-300 bg-gray-50' : 'border-gray-300'
               }`}
               onDragEnter={(e) => handleDrag(e)}
               onDragLeave={(e) => handleDrag(e)}
@@ -740,6 +759,7 @@ const ServiceConfiguration: React.FC = () => {
                 <p className="text-gray-500 text-sm">{t('fileUpload.noFileSelected')}</p>
               )}
             </div>
+
 
             <div className="mt-6">
               <label className="flex items-center">
@@ -801,7 +821,9 @@ const ServiceConfiguration: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.vehicleInfo')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.make')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('labels.make')} <span className="text-gray-600">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.make}
@@ -810,10 +832,13 @@ const ServiceConfiguration: React.FC = () => {
                   placeholder={t('placeholders.enterMake')}
                   required
                 />
+
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.model')}</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {t('labels.model')} <span className="text-gray-600">*</span>
+                </label>
                 <input
                   type="text"
                   value={formData.model}
@@ -822,6 +847,7 @@ const ServiceConfiguration: React.FC = () => {
                   placeholder={t('placeholders.enterModel')}
                   required
                 />
+
               </div>
 
               <div>
@@ -863,7 +889,7 @@ const ServiceConfiguration: React.FC = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.year')}</label>
                 <input
-                  type="text"
+                  type="number"
                   value={formData.year}
                   onChange={(e) => handleInputChange('year', e.target.value)}
                   className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -881,7 +907,7 @@ const ServiceConfiguration: React.FC = () => {
                   className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder={t('placeholders.enterGearbox')}
                   required
-                />
+                />  
               </div>
             </div>
           </div>
@@ -935,26 +961,9 @@ const ServiceConfiguration: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.hardwareNumber')}</label>
-                <input
-                  type="text"
-                  value={formData.hardwareNumber}
-                  onChange={(e) => handleInputChange('hardwareNumber', e.target.value)}
-                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.softwareNumber')}</label>
-                <input
-                  type="text"
-                  value={formData.softwareNumber}
-                  onChange={(e) => handleInputChange('softwareNumber', e.target.value)}
-                  className="w-full px-3 py-2 bg-white text-black placeholder-gray-400 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
+
+
 
 
             </div>
@@ -1193,8 +1202,22 @@ const ServiceConfiguration: React.FC = () => {
               <CreditCard className="w-6 h-6 text-blue-600 mr-3" />
               <h2 className="text-xl font-semibold text-gray-900">{t('headers.billingInfo')}</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+            
+            <div className="mb-6">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={needsInvoice}
+                  onChange={(e) => setNeedsInvoice(e.target.checked)}
+                  className="mr-3 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-gray-700">{t('labels.needsInvoice')}</span>
+              </label>
+            </div>
+
+            {needsInvoice && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">{t('labels.billingName')} *</label>
                 <input
                   type="text"
@@ -1275,7 +1298,8 @@ const ServiceConfiguration: React.FC = () => {
                   required
                 />
               </div>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Terms and Conditions */}
