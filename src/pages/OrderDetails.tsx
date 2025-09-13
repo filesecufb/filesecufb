@@ -1377,7 +1377,7 @@ const OrderDetails: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="space-y-3 sm:space-y-4">
                   <div>
-                    <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.makeModel')}</label>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.brandModel')}</label>
                     <p className="text-white font-semibold text-sm sm:text-base break-words">
                       {order.vehicle_make} {order.vehicle_model}
                     </p>
@@ -1414,7 +1414,7 @@ const OrderDetails: React.FC = () => {
                     </p>
                   </div>
                   <div>
-                    <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.readMethod')}</label>
+                    <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.readingMethod')}</label>
                     <p className="text-white font-medium text-sm sm:text-base break-words">{order.read_method || 'N/A'}</p>
                   </div>
                   <div>
@@ -1536,7 +1536,7 @@ const OrderDetails: React.FC = () => {
               
               {/* Archivo principal */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.mainFile')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.mainFile.title')}</h3>
                 {(() => {
                   // Función para parsear main_file_url que puede ser string simple o JSON array
                   const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
@@ -1568,7 +1568,7 @@ const OrderDetails: React.FC = () => {
                             <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
                             <div className="min-w-0 flex-1">
                               <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
-                              <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.ecuFile')}</p>
+                              <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.mainFile.ecuFile')}</p>
                             </div>
                           </div>
                           <button
@@ -1576,7 +1576,7 @@ const OrderDetails: React.FC = () => {
                             className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
                           >
                             <Download className="w-4 h-4" />
-                            <span>{t('orderDetails.files.download')}</span>
+                            <span>{t('orderDetails.common.download')}</span>
                           </button>
                         </div>
                       ))}
@@ -1585,8 +1585,8 @@ const OrderDetails: React.FC = () => {
                     <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                       <div className="text-center">
                         <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
-                        <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.noMainFiles')}</p>
-                        <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.noMainFilesDesc')}</p>
+                        <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.mainFile.noFiles')}</p>
+                        <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.mainFile.noFilesDescription')}</p>
                       </div>
                     </div>
                   );
@@ -1595,7 +1595,7 @@ const OrderDetails: React.FC = () => {
 
               {/* Archivos adicionales del cliente */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.additionalFiles')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.additionalFiles.title')}</h3>
                 {order.optional_attachments_urls && order.optional_attachments_urls.length > 0 ? (
                   <div className="space-y-3">
                     {order.optional_attachments_urls.map((url, index) => (
@@ -1604,7 +1604,7 @@ const OrderDetails: React.FC = () => {
                           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                           <div className="min-w-0 flex-1">
                             <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
-                            <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.attachedDocument')}</p>
+                            <p className="text-gray-400 text-xs sm:text-sm">Documento adjunto</p>
                           </div>
                         </div>
                         <button
@@ -1612,7 +1612,7 @@ const OrderDetails: React.FC = () => {
                           className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
                         >
                           <Download className="w-4 h-4" />
-                          <span>Descargar</span>
+                          <span>{t('orderDetails.common.download')}</span>
                         </button>
                       </div>
                     ))}
@@ -1621,8 +1621,8 @@ const OrderDetails: React.FC = () => {
                   <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
                       <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.noAdditionalFiles')}</p>
-                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.noAdditionalFilesDesc')}</p>
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.additionalFiles.noFiles')}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.additionalFiles.noFilesDescription')}</p>
                     </div>
                   </div>
                 )}
@@ -1630,7 +1630,7 @@ const OrderDetails: React.FC = () => {
 
               {/* Mapas tuneados subidos por admin */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.tunedMaps')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.tunedMaps.title')}</h3>
                 {order.order_files && order.order_files.filter(f => f.file_category === 'map').length > 0 ? (
                   <div className="space-y-3">
                     {order.order_files.filter(f => f.file_category === 'map').map((file) => (
@@ -1641,7 +1641,7 @@ const OrderDetails: React.FC = () => {
                             <div className="min-w-0 flex-1">
                               <p className="text-white font-medium text-sm sm:text-base truncate">{file.file_name}</p>
                               <p className="text-gray-400 text-xs sm:text-sm">
-                                {t('orderDetails.files.uploaded')}: {new Date(file.created_at).toLocaleDateString('es-ES')}
+                                {t('orderDetails.files.tunedMaps.uploaded')}: {new Date(file.created_at).toLocaleDateString('es-ES')}
                               </p>
                             </div>
                           </div>
@@ -1651,7 +1651,7 @@ const OrderDetails: React.FC = () => {
                               className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
-                              <span className="hidden sm:inline">{t('orderDetails.files.download')}</span>
+                              <span className="hidden sm:inline">{t('orderDetails.common.download')}</span>
                             </button>
                             <button
                               onClick={() => confirmDelete(file.id)}
@@ -1660,7 +1660,7 @@ const OrderDetails: React.FC = () => {
                             >
                               <Trash2 className="w-4 h-4" />
                               <span className="hidden sm:inline">
-                                {deletingFile[file.id] ? t('orderDetails.files.deleting') : t('orderDetails.files.delete')}
+                                {deletingFile[file.id] ? t('orderDetails.files.tunedMaps.deleting') : 'Eliminar'}
                               </span>
                             </button>
                           </div>
@@ -1668,7 +1668,7 @@ const OrderDetails: React.FC = () => {
                         
                         {/* Comentarios editables */}
                         <div className="mt-3">
-                          <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.files.adminComments')}:</label>
+                          <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.files.tunedMaps.adminComments')}:</label>
                           {editingComments[file.id] ? (
                             <div className="mt-2 space-y-2">
                               <textarea
@@ -1676,20 +1676,20 @@ const OrderDetails: React.FC = () => {
                                 onChange={(e) => setTempComments(prev => ({ ...prev, [file.id]: e.target.value }))}
                                 className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                                 rows={3}
-                                placeholder={t('orderDetails.files.addMapComments')}
+                                placeholder={t('orderDetails.files.tunedMaps.addComments')}
                               />
                               <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
                                 <button
                                   onClick={() => saveComment(file.id, 'order_files')}
                                   className="px-3 py-2 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors text-sm min-h-[44px]"
                                 >
-                                  {t('orderDetails.files.save')}
+                                  {t('orderDetails.files.tunedMaps.save')}
                                 </button>
                                 <button
                                   onClick={() => cancelEditingComment(file.id)}
                                   className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm min-h-[44px]"
                                 >
-                                  {t('orderDetails.files.cancel')}
+                                  {t('orderDetails.files.tunedMaps.cancel')}
                                 </button>
                               </div>
                             </div>
@@ -1697,13 +1697,13 @@ const OrderDetails: React.FC = () => {
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
                                 <p className="text-gray-300 text-xs sm:text-sm">
-                                  {file.admin_comments || t('orderDetails.files.noComments')}
+                                  {file.admin_comments || 'Sin comentarios'}
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(file.id, file.admin_comments || '')}
                                   className="text-primary hover:text-primary/80 text-xs sm:text-sm font-medium min-h-[44px] flex items-center"
                                 >
-                                  {t('orderDetails.files.edit')}
+                                  Editar
                                 </button>
                               </div>
                             </div>
@@ -1716,9 +1716,9 @@ const OrderDetails: React.FC = () => {
                             <div className="flex items-start space-x-3">
                               <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
                               <div className="flex-1">
-                                <p className="text-red-400 font-medium text-sm">{t('orderDetails.files.deleteMapConfirm')}</p>
+                                <p className="text-red-400 font-medium text-sm">{t('orderDetails.files.tunedMaps.deleteConfirm')}</p>
                                 <p className="text-gray-300 text-xs mt-1">
-                                  {t('orderDetails.files.deleteWarning')}
+                                  {t('orderDetails.files.tunedMaps.deleteDescription')}
                                 </p>
                                 <div className="flex space-x-2 mt-3">
                                   <button
@@ -1726,13 +1726,13 @@ const OrderDetails: React.FC = () => {
                                     disabled={deletingFile[file.id]}
                                     className="px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
-                                    {deletingFile[file.id] ? t('orderDetails.files.deleting') : t('orderDetails.files.confirm')}
+                                    {deletingFile[file.id] ? t('orderDetails.files.tunedMaps.deleting') : t('orderDetails.files.tunedMaps.confirm')}
                                   </button>
                                   <button
                                     onClick={() => cancelDelete(file.id)}
                                     className="px-3 py-1 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm font-medium"
                                   >
-                                    {t('orderDetails.files.cancel')}
+                                    {t('orderDetails.files.tunedMaps.cancel')}
                                   </button>
                                 </div>
                               </div>
@@ -1746,8 +1746,8 @@ const OrderDetails: React.FC = () => {
                   <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
                       <MapPin className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.noTunedMaps')}</p>
-                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.noTunedMapsDesc')}</p>
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.tunedMaps.noMaps')}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.tunedMaps.noMapsDescription')}</p>
                     </div>
                   </div>
                 )}
@@ -1755,7 +1755,7 @@ const OrderDetails: React.FC = () => {
 
               {/* Facturas subidas por admin */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.invoices')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.invoices.title')}</h3>
                 {order.invoices && order.invoices.length > 0 ? (
                   <div className="space-y-3">
                     {order.invoices.map((invoice) => (
@@ -1766,7 +1766,7 @@ const OrderDetails: React.FC = () => {
                             <div className="min-w-0 flex-1">
                               <p className="text-white font-medium text-sm sm:text-base truncate">{invoice.file_name}</p>
                               <p className="text-gray-400 text-xs sm:text-sm">
-                                {t('orderDetails.files.uploaded')}: {new Date(invoice.created_at).toLocaleDateString('es-ES')}
+                                {t('orderDetails.files.tunedMaps.uploaded')}: {new Date(invoice.created_at).toLocaleDateString('es-ES')}
                               </p>
                             </div>
                           </div>
@@ -1776,7 +1776,7 @@ const OrderDetails: React.FC = () => {
                               className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
-                              <span className="hidden sm:inline">{t('orderDetails.files.download')}</span>
+                              <span className="hidden sm:inline">{t('orderDetails.common.download')}</span>
                             </button>
                             <button
                               onClick={() => confirmDelete(invoice.id)}
@@ -1785,7 +1785,7 @@ const OrderDetails: React.FC = () => {
                             >
                               <Trash2 className="w-4 h-4" />
                               <span className="hidden sm:inline">
-                                {deletingFile[invoice.id] ? t('orderDetails.files.deleting') : t('orderDetails.files.delete')}
+                                {deletingFile[invoice.id] ? 'Eliminando...' : 'Eliminar'}
                               </span>
                             </button>
                           </div>
@@ -1793,7 +1793,7 @@ const OrderDetails: React.FC = () => {
                         
                         {/* Comentarios editables */}
                         <div className="mt-3">
-                          <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.files.adminComments')}:</label>
+                          <label className="text-gray-400 text-xs sm:text-sm font-medium">Comentarios del Admin:</label>
                           {editingComments[invoice.id] ? (
                             <div className="mt-2 space-y-2">
                               <textarea
@@ -1801,20 +1801,20 @@ const OrderDetails: React.FC = () => {
                                 onChange={(e) => setTempComments(prev => ({ ...prev, [invoice.id]: e.target.value }))}
                                 className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                                 rows={3}
-                                placeholder={t('orderDetails.files.addInvoiceComments')}
+                                placeholder={t('orderDetails.files.invoices.addComments')}
                               />
                               <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
                                 <button
                                   onClick={() => saveComment(invoice.id, 'invoices')}
                                   className="px-3 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors text-sm min-h-[44px]"
                                 >
-                                  {t('orderDetails.files.save')}
+                                  Guardar
                                 </button>
                                 <button
                                   onClick={() => cancelEditingComment(invoice.id)}
                                   className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm min-h-[44px]"
                                 >
-                                  {t('orderDetails.files.cancel')}
+                                  Cancelar
                                 </button>
                               </div>
                             </div>
@@ -1822,13 +1822,13 @@ const OrderDetails: React.FC = () => {
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
                                 <p className="text-gray-300 text-xs sm:text-sm">
-                                  {invoice.admin_comments || t('orderDetails.files.noComments')}
+                                  {invoice.admin_comments || t('orderDetails.files.invoices.noComments')}
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(invoice.id, invoice.admin_comments || '')}
                                   className="text-primary hover:text-primary/80 text-xs sm:text-sm font-medium min-h-[44px] flex items-center"
                                 >
-                                  {t('orderDetails.files.edit')}
+                                  {t('orderDetails.files.invoices.edit')}
                                 </button>
                               </div>
                             </div>
@@ -1841,9 +1841,9 @@ const OrderDetails: React.FC = () => {
                             <div className="flex flex-col sm:flex-row sm:items-start space-y-3 sm:space-y-0 sm:space-x-3">
                               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 sm:mt-0.5" />
                               <div className="flex-1">
-                                <p className="text-red-400 font-medium text-sm">{t('orderDetails.files.deleteInvoiceConfirm')}</p>
+                                <p className="text-red-400 font-medium text-sm">{t('orderDetails.files.invoices.deleteConfirm')}</p>
                                 <p className="text-gray-300 text-xs mt-1">
-                                  {t('orderDetails.files.deleteWarning')}
+                                  {t('orderDetails.files.invoices.deleteDescription')}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0 mt-3">
                                   <button
@@ -1851,13 +1851,13 @@ const OrderDetails: React.FC = () => {
                                     disabled={deletingFile[invoice.id]}
                                     className="px-3 py-2 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                                   >
-                                    {deletingFile[invoice.id] ? t('orderDetails.files.deleting') : t('orderDetails.files.confirm')}
+                                    {deletingFile[invoice.id] ? 'Eliminando...' : 'Confirmar'}
                                   </button>
                                   <button
                                     onClick={() => cancelDelete(invoice.id)}
                                     className="px-3 py-2 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm font-medium min-h-[44px]"
                                   >
-                                    {t('orderDetails.files.cancel')}
+                                    {t('orderDetails.files.invoices.cancel')}
                                   </button>
                                 </div>
                               </div>
@@ -1871,8 +1871,8 @@ const OrderDetails: React.FC = () => {
                   <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
                     <div className="text-center">
                       <CreditCard className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
-                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.noInvoices')}</p>
-                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.noInvoicesDesc')}</p>
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.invoices.noInvoices')}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.invoices.noInvoicesDescription')}</p>
                     </div>
                   </div>
                 )}
@@ -1880,7 +1880,7 @@ const OrderDetails: React.FC = () => {
 
               {/* Subir mapa tuneado */}
               <div className="mb-4 sm:mb-6">
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.uploadTunedMap')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.upload.tunedMap.title')}</h3>
                 <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
                     <textarea
@@ -1888,7 +1888,7 @@ const OrderDetails: React.FC = () => {
                       onChange={(e) => setMapComment(e.target.value)}
                       className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                       rows={3}
-                      placeholder={t('orderDetails.files.mapComments')}
+                      placeholder={t('orderDetails.upload.tunedMap.comments')}
                     />
                     
                     <div className="text-center">
@@ -1904,8 +1904,8 @@ const OrderDetails: React.FC = () => {
                       >
                         <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                         <div>
-                          <p className="text-white font-medium text-sm sm:text-base">{t('orderDetails.files.uploadTunedMap')}</p>
-                          <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.anyFormat')}</p>
+                          <p className="text-white font-medium text-sm sm:text-base">{t('orderDetails.upload.tunedMap.uploadText')}</p>
+                          <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.upload.tunedMap.formatText')}</p>
                         </div>
                       </label>
                     </div>
@@ -1913,7 +1913,7 @@ const OrderDetails: React.FC = () => {
                     {uploading && (
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-primary mx-auto"></div>
-                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.files.uploadingMap')}</p>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.upload.tunedMap.uploading')}</p>
                       </div>
                     )}
                   </div>
@@ -1922,7 +1922,7 @@ const OrderDetails: React.FC = () => {
 
               {/* Subir factura */}
               <div>
-                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.uploadInvoice')}</h3>
+                <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.upload.invoice.title')}</h3>
                 <div className="border-2 border-dashed border-blue-600/30 rounded-lg p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
                     <textarea
@@ -1930,7 +1930,7 @@ const OrderDetails: React.FC = () => {
                       onChange={(e) => setInvoiceComment(e.target.value)}
                       className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
                       rows={3}
-                      placeholder={t('orderDetails.files.invoiceComments')}
+                      placeholder={t('orderDetails.upload.invoice.comments')}
                     />
                     
                     <div className="text-center">
@@ -1947,8 +1947,8 @@ const OrderDetails: React.FC = () => {
                       >
                         <CreditCard className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
                         <div>
-                          <p className="text-white font-medium text-sm sm:text-base">{t('orderDetails.files.uploadInvoice')}</p>
-                          <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.invoiceFormats')}</p>
+                          <p className="text-white font-medium text-sm sm:text-base">{t('orderDetails.upload.invoice.uploadText')}</p>
+                          <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.upload.invoice.formatText')}</p>
                         </div>
                       </label>
                     </div>
@@ -1956,7 +1956,7 @@ const OrderDetails: React.FC = () => {
                     {uploadingInvoice && (
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-500 mx-auto"></div>
-                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.files.uploadingInvoice')}</p>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.upload.invoice.uploading')}</p>
                       </div>
                     )}
                   </div>
@@ -1966,7 +1966,7 @@ const OrderDetails: React.FC = () => {
 
             {/* Estado del Pedido */}
             <div className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-4 sm:p-6 z-10">
-              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">{t('orderDetails.status.title')}</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">{t('orderDetails.orderStatus.title')}</h2>
               <div className="relative">
                 <button
                   onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
