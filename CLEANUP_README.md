@@ -4,7 +4,7 @@ Este sistema implementa una limpieza automática diaria de archivos en Supabase 
 
 ## 🚀 Características
 
-- **Limpieza automática**: Se ejecuta todos los días a las 16:45 hora española (14:45 UTC)
+- **Limpieza automática**: Se ejecuta todos los días a las 17:10 hora española (15:10 UTC)
 - **Eliminación inteligente**: Solo elimina archivos con más de 24 horas de antigüedad
 - **Múltiples buckets**: Limpia automáticamente `order-files`, `user-files` y `admin-files`
 - **Seguridad**: Protegido con token de autenticación
@@ -73,7 +73,7 @@ openssl rand -hex 32
 
 ### `vercel.json`
 - **Configuración del cron**: Define cuándo se ejecuta la limpieza
-- **Programación actual**: `"45 14 * * *"` (14:45 UTC = 16:45 España)
+- **Programación actual**: `"10 15 * * *"` (15:10 UTC = 17:10 España)
 
 ## 🧪 Pruebas
 
@@ -119,7 +119,7 @@ Edita el cron schedule en `vercel.json`:
   "crons": [
     {
       "path": "/api/cleanup-storage",
-      "schedule": "45 14 * * *"  // Formato: minuto hora día mes día_semana
+      "schedule": "10 15 * * *"  // Formato: minuto hora día mes día_semana
     }
   ]
 }
