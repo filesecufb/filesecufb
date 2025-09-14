@@ -48,7 +48,7 @@
   "crons": [
     {
       "path": "/api/cleanup-storage",
-      "schedule": "30 14 * * *"
+      "schedule": "45 14 * * *"
     }
   ],
   "env": {
