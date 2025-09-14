@@ -47,14 +47,8 @@
   ],
   "crons": [
     {
-      "path": "/api/cleanup-storage",
+      "path": "/api/cron/cleanup-storage",
       "schedule": "45 14 * * *"
     }
-  ],
-  "env": {
-    "VITE_API_BASE_URL": "https://filesecufb.com",
-    "VITE_SUPABASE_URL": "https://njxyatnhizjyzoisceuw.supabase.co",
-    "VITE_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5qeHlhdG5oaXpqeXpvaXNjZXV3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTczNDAxMzMsImV4cCI6MjA3MjkxNjEzM30.IytR4YCvDOrGPI_aLJIlNFH3FckFfVqLBfOijrT8y6s",
-    "VITE_RESEND_API_KEY": "re_ATGBs8Uh_4B5LVqoBTcMZQBkEzGBMSuL5"
-  }
+  ]
 }
