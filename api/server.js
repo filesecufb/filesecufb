@@ -842,6 +842,33 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Email API is running' });
 });
 
+// Importar y configurar endpoints de limpieza de storage
+import('./test-cleanup.js').then(module => {
+  const testCleanupHandler = module.default;
+  app.get('/api/test-cleanup', testCleanupHandler);
+  console.log('✅ Test cleanup endpoint configured');
+}).catch(error => {
+  console.warn('⚠️ Test cleanup endpoint not available:', error.message);
+});
+
+import('./cron/cleanup-storage.js').then(module => {
+  const cleanupHandler = module.default;
+  app.get('/api/cron/cleanup-storage', cleanupHandler);
+  console.log('✅ Cleanup cron endpoint configured');
+}).catch(error => {
+  console.warn('⚠️ Cleanup cron endpoint not available:', error.message);
+});
+
+// Importar endpoint de prueba manual de limpieza
+import('./test-cleanup-manual.js').then(module => {
+  const manualCleanupHandler = module.default;
+  app.get('/api/test-cleanup-manual', manualCleanupHandler);
+  app.post('/api/test-cleanup-manual', manualCleanupHandler);
+  console.log('✅ Manual cleanup test endpoint configured');
+}).catch(error => {
+  console.warn('⚠️ Manual cleanup test endpoint not available:', error.message);
+});
+
 app.listen(PORT, () => {
   console.log(`Email API server running on port ${PORT}`);
 });
