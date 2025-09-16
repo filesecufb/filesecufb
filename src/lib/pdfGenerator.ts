@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 // Interfaces necesarias para el generador de PDF
 interface OrderData {

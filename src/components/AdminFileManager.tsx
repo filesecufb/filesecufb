@@ -28,6 +28,7 @@ interface AdminFile {
   file_url: string;
   file_type: string;
   file_category: 'map' | 'invoice';
+  bucket_name?: string;
   order_id: string;
   uploaded_by: string;
   created_at: string;
@@ -216,9 +217,9 @@ const AdminFileManager: React.FC = () => {
 
   const filteredFiles = adminFiles.filter(file => {
     if (activeTab === 'maps') {
-      return file.bucket_name === 'adminorders';
+      return file.file_category === 'map';
     } else {
-      return file.bucket_name === 'invoices';
+      return file.file_category === 'invoice';
     }
   });
 

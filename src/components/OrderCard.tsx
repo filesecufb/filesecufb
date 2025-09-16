@@ -2,7 +2,7 @@ import React from 'react';
 import { Car, Calendar, Wrench, FileText, CheckCircle, Clock, AlertCircle, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 interface OrderCardProps {
   order: any;

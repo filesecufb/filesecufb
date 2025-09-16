@@ -74,6 +74,7 @@ interface AdminFile {
   file_size?: number;
   file_type?: string;
   file_category?: 'map' | 'invoice' | 'other';
+  bucket_name?: string;
   admin_comments?: string;
   created_at: string;
 }
