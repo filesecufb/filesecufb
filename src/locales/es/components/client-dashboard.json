@@ -93,6 +93,10 @@
     "userId": "ID de Usuario",
     "registrationDate": "Fecha de Registro",
     "changePassword": "Cambiar Contraseña",
+    "currentPassword": "Contraseña Actual",
+    "newPassword": "Nueva Contraseña",
+    "confirmPassword": "Confirmar Contraseña",
+    "updatePassword": "Actualizar Contraseña",
     "actions": {
       "edit": "Editar",
       "save": "Guardar",

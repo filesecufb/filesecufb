@@ -819,11 +819,34 @@ const ClientDashboard: React.FC = () => {
       return;
     }
     
-    // TODO: Implementar lógica de cambio de contraseña
-    // Password change logic removed
-    toast.success(t('clientDashboard.messages.success.passwordChanged'));
-    setShowPasswordChange(false);
-  };
+    if (newPassword.length < 6) {
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    try {
+      // Actualizar contraseña usando Supabase Auth
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) {
+        console.error('Error updating password:', error);
+        toast.error('Error al cambiar la contraseña: ' + error.message);
+        return;
+      }
+      
+      toast.success(t('clientDashboard.messages.success.passwordChanged'));
+      setShowPasswordChange(false);
+      
+      // Limpiar el formulario
+      (e.target as HTMLFormElement).reset();
+      
+    } catch (error) {
+       console.error('Error updating password:', error);
+       toast.error('Error inesperado al cambiar la contraseña');
+     }
+   };
 
 
 
