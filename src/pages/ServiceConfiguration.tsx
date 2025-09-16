@@ -394,15 +394,18 @@ const ServiceConfiguration: React.FC = () => {
   };
 
   // Función para sanitizar nombres de archivos
+  // FUNCIÓN SANITIZADORA DE NOMBRES DE ARCHIVOS - CREADA DESDE CERO
   const sanitizeFileName = (fileName: string): string => {
     return fileName
       .normalize('NFD') // Descomponer caracteres acentuados
       .replace(/[\u0300-\u036f]/g, '') // Eliminar diacríticos (acentos)
-      .replace(/[^a-zA-Z0-9.-]/g, '-') // Reemplazar caracteres especiales con guiones
-      .replace(/-+/g, '-') // Reemplazar múltiples guiones con uno solo
-      .replace(/^-|-$/g, ''); // Eliminar guiones al inicio y final
+      .replace(/[^a-zA-Z0-9._-]/g, '_') // Reemplazar caracteres especiales con guiones bajos
+      .replace(/_+/g, '_') // Reemplazar múltiples guiones bajos con uno solo
+      .replace(/^_|_$/g, '') // Eliminar guiones bajos al inicio y final
+      .substring(0, 100); // Limitar longitud del nombre
   };
 
+  // FUNCIÓN HANDLESUBMIT CREADA DESDE CERO - NUEVA LÓGICA DE ARCHIVOS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -423,6 +426,8 @@ const ServiceConfiguration: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('🚀 Iniciando proceso de creación de pedido desde cero');
+      
       // 1. Actualizar información del perfil del usuario
       const profileUpdateData = {
         full_name: personalInfo.full_name,
@@ -445,58 +450,10 @@ const ServiceConfiguration: React.FC = () => {
       if (profileError) {
         throw new Error(`Error al actualizar perfil: ${profileError.message}`);
       }
-
-      // 2. Las carpetas se crearán automáticamente al subir los archivos reales
-      // No es necesario crear archivos temporales que causan errores 400
       
-      // 3. Subir archivos a Supabase Storage
-      const mainFileUrls = [];
-      const optionalFileUrls = [];
+      console.log('✅ Perfil actualizado correctamente');
 
-      // Subir archivos principales
-      if (formData.mainFile && formData.mainFile.length > 0) {
-        for (let i = 0; i < formData.mainFile.length; i++) {
-          const file = formData.mainFile[i];
-          const fileExtension = file.name.split('.').pop();
-          const originalName = file.name.replace(`.${fileExtension}`, '');
-          const sanitizedName = sanitizeFileName(originalName);
-          const mainFileName = `${sanitizedName}.${fileExtension}`;
-          const mainFilePath = `clientordersprincipal/${user.id}/${Date.now()}-${i}/${mainFileName}`;
-          const { error: mainFileError } = await supabase.storage
-            .from('order-files')
-            .upload(mainFilePath, file);
-          
-          if (mainFileError) {
-            throw new Error(`Error al subir archivo principal ${i + 1}: ${mainFileError.message}`);
-          }
-          
-          mainFileUrls.push(mainFilePath);
-        }
-      }
-
-      // Subir archivos opcionales
-      if (formData.hasOptionalAttachments && formData.optionalAttachments.length > 0) {
-        for (let i = 0; i < formData.optionalAttachments.length; i++) {
-          const file = formData.optionalAttachments[i];
-          const fileExtension = file.name.split('.').pop();
-          const originalName = file.name.replace(`.${fileExtension}`, '');
-          const sanitizedName = sanitizeFileName(originalName);
-          const optionalFileName = `${sanitizedName}.${fileExtension}`;
-          const optionalFilePath = `clientorderadicional/${user.id}/${Date.now()}-${i}/${optionalFileName}`;
-          
-          const { error: optionalFileError } = await supabase.storage
-            .from('order-files')
-            .upload(optionalFilePath, file);
-          
-          if (optionalFileError) {
-            throw new Error(`Error al subir archivo opcional ${i + 1}: ${optionalFileError.message}`);
-          }
-          
-          optionalFileUrls.push(optionalFilePath);
-        }
-      }
-
-      // 4. Calcular precios de servicios adicionales
+      // 2. Crear el pedido PRIMERO para obtener el ID real
       const additionalServicesPrice = additionalServices
         .filter(service => formData.selectedAdditionalServices.includes(service.id))
         .reduce((sum, service) => {
@@ -506,7 +463,6 @@ const ServiceConfiguration: React.FC = () => {
           return sum + price;
         }, 0);
 
-      // 5. Crear el pedido
       const orderData = {
         client_id: user.id,
         service_id: selectedService.id,
@@ -525,7 +481,6 @@ const ServiceConfiguration: React.FC = () => {
         engine_kw: formData.engineKw?.substring(0, 50) || '',
         vin: formData.vin,
         read_method: formData.readMethod,
-
         
         // Modified Parts
         has_modified_parts: formData.hasModifiedParts,
@@ -543,10 +498,6 @@ const ServiceConfiguration: React.FC = () => {
         
         // Additional Services
         additional_services: formData.selectedAdditionalServices,
-        
-        // File URLs
-        main_file_url: mainFileUrls.length > 0 ? JSON.stringify(mainFileUrls) : null,
-        optional_attachments_urls: optionalFileUrls,
         
         // Pricing
         base_price: selectedService.price,
@@ -566,45 +517,150 @@ const ServiceConfiguration: React.FC = () => {
       if (orderError) {
         throw new Error(`${t('errors.orderCreationError')}: ${orderError.message}`);
       }
+      
+      console.log('✅ Pedido creado con ID:', insertedOrder.id);
 
-      // Enviar emails de notificación
-      try {
-        const emailOrderData: OrderData = {
-          id: insertedOrder.id,
-          client_name: personalInfo.full_name || personalInfo.email.split('@')[0],
-          client_email: personalInfo.email,
-          service_name: selectedService.title,
-          status: 'pending',
-          created_at: insertedOrder.created_at,
-          total_price: calculateTotal()
-        };
-
-        const emailResults = await handleNewOrder(emailOrderData);
+      // 3. SUBIR ARCHIVOS PRINCIPALES A BUCKET 'clientordersprincipal'
+      if (formData.mainFile && formData.mainFile.length > 0) {
+        console.log('📁 Subiendo archivos principales...');
         
-        // Log results but don't fail the order if emails fail
-        if (emailResults.adminEmail.status === 'rejected') {
-          console.warn('Failed to send admin notification email:', emailResults.adminEmail.reason);
+        for (let i = 0; i < formData.mainFile.length; i++) {
+          const file = formData.mainFile[i];
+          const fileExtension = file.name.split('.').pop() || 'bin';
+          const originalName = file.name.replace(`.${fileExtension}`, '');
+          const sanitizedName = sanitizeFileName(originalName);
+          const fileName = `${sanitizedName}.${fileExtension}`;
+          
+          // Estructura: userId/orderId/filename
+          const filePath = `${user.id}/${insertedOrder.id}/${fileName}`;
+          
+          console.log(`📤 Subiendo archivo principal ${i + 1}:`, fileName);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('clientordersprincipal')
+            .upload(filePath, file);
+          
+          if (uploadError) {
+            throw new Error(`Error al subir archivo principal ${fileName}: ${uploadError.message}`);
+          }
+          
+          // Obtener URL pública del archivo
+          const { data: urlData } = supabase.storage
+            .from('clientordersprincipal')
+            .getPublicUrl(filePath);
+          
+          // Insertar registro en order_files
+          const { error: insertFileError } = await supabase
+            .from('order_files')
+            .insert({
+              order_id: insertedOrder.id,
+              client_id: user.id,
+              uploaded_by: user.id,
+              file_name: fileName,
+              file_url: urlData.publicUrl,
+              file_category: 'map',
+              file_size: file.size,
+              file_type: file.type
+            });
+            
+          if (insertFileError) {
+            console.error('❌ Error insertando registro de archivo principal:', insertFileError);
+            throw new Error(`Error al registrar archivo principal ${fileName}: ${insertFileError.message}`);
+          }
+          
+          console.log('✅ Archivo principal subido y registrado:', fileName);
         }
-        if (emailResults.clientEmail.status === 'rejected') {
-          console.warn('Failed to send client confirmation email:', emailResults.clientEmail.reason);
-        }
-      } catch (emailError) {
-        console.error('Error sending notification emails:', emailError);
-        // Don't fail the order creation if emails fail
       }
 
-      toast.success(t('messages.orderSuccess'));
-      
-      // Navegar al dashboard del cliente
-      navigate('/client-dashboard');
-      
-    } catch (error) {
-      console.error('Error al procesar el pedido:', error);
-      toast.error(error instanceof Error ? error.message : t('errors.orderProcessingError'));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      // 4. SUBIR ARCHIVOS OPCIONALES A BUCKET 'clientorderadicional'
+      if (formData.hasOptionalAttachments && formData.optionalAttachments.length > 0) {
+        console.log('📁 Subiendo archivos opcionales...');
+        
+        for (let i = 0; i < formData.optionalAttachments.length; i++) {
+          const file = formData.optionalAttachments[i];
+          const fileExtension = file.name.split('.').pop() || 'bin';
+          const originalName = file.name.replace(`.${fileExtension}`, '');
+          const sanitizedName = sanitizeFileName(originalName);
+          const fileName = `${sanitizedName}.${fileExtension}`;
+          
+          // Estructura: userId/orderId/filename
+          const filePath = `${user.id}/${insertedOrder.id}/${fileName}`;
+          
+          console.log(`📤 Subiendo archivo opcional ${i + 1}:`, fileName);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('clientorderadicional')
+            .upload(filePath, file);
+          
+          if (uploadError) {
+            throw new Error(`Error al subir archivo opcional ${fileName}: ${uploadError.message}`);
+          }
+          
+          // Obtener URL pública del archivo
+          const { data: urlData } = supabase.storage
+            .from('clientorderadicional')
+            .getPublicUrl(filePath);
+          
+          // Insertar registro en order_files
+          const { error: insertFileError } = await supabase
+            .from('order_files')
+            .insert({
+              order_id: insertedOrder.id,
+              client_id: user.id,
+              uploaded_by: user.id,
+              file_name: fileName,
+              file_url: urlData.publicUrl,
+              file_category: 'map',
+              file_size: file.size,
+              file_type: file.type
+            });
+              
+            if (insertFileError) {
+            console.error('❌ Error insertando registro de archivo opcional:', insertFileError);
+            throw new Error(`Error al registrar archivo opcional ${fileName}: ${insertFileError.message}`);
+          }
+          
+          console.log('✅ Archivo opcional subido y registrado:', fileName);
+        }
+      }
+
+      // 5. Enviar email de notificación
+      try {
+        console.log('📧 Enviando email de notificación...');
+        const emailResponse = await fetch('/api/send-order-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            orderId: insertedOrder.id,
+            clientEmail: user.email,
+            clientName: personalInfo.full_name,
+            serviceName: selectedService.name,
+            totalPrice: calculateTotal()
+          }),
+        });
+
+        if (!emailResponse.ok) {
+          console.warn('⚠️ Error enviando email de notificación');
+        } else {
+          console.log('✅ Email de notificación enviado');
+        }
+      } catch (emailError) {
+        console.warn('⚠️ Error enviando email de notificación:', emailError);
+      }
+
+      console.log('🎉 Proceso completado exitosamente');
+       toast.success(t('success.orderCreated'));
+       navigate('/client-dashboard');
+       
+     } catch (error) {
+       console.error('❌ Error creando pedido:', error);
+       toast.error(error instanceof Error ? error.message : t('errors.orderCreationError'));
+     } finally {
+       setIsSubmitting(false);
+     }
+   };
 
   // Authentication protection
   if (authLoading) {

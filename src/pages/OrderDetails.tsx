@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Download, User, Car, FileText, Settings, CheckCircle, Clock, AlertCircle, ChevronDown, FileDown, Upload, MapPin, Wrench, CreditCard, Trash2 } from 'lucide-react';
-import jsPDF from 'jspdf';
+import JSZip from 'jszip';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
+import { generatePDF, generatePDFBlob } from '../lib/pdfGenerator';
 import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
 
 interface OrderData {
@@ -107,6 +108,10 @@ const OrderDetails: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<{[key: string]: boolean}>({});
   const [deletingFile, setDeletingFile] = useState<{[key: string]: boolean}>({});
   const [downloadingAllFiles, setDownloadingAllFiles] = useState(false);
+  const [adminFiles, setAdminFiles] = useState<AdminFile[]>([]);
+  const [adminInvoices, setAdminInvoices] = useState<AdminFile[]>([]);
+  const [adminFilesLoading, setAdminFilesLoading] = useState(false);
+
 
   // Protección de rutas: Solo admins pueden acceder
   useEffect(() => {
@@ -124,7 +129,7 @@ const OrderDetails: React.FC = () => {
     }
   }, [authLoading, user, isAdmin, navigate]);
 
-  // Cargar datos del pedido desde Supabase
+  // NUEVA LÓGICA: Cargar datos del pedido desde Supabase
   useEffect(() => {
     const loadOrder = async () => {
       if (!orderId) {
@@ -137,7 +142,7 @@ const OrderDetails: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        // Obtener el pedido con archivos admin e invoices
+        // Obtener el pedido básico
         const { data, error } = await supabase
           .from('orders')
           .select(`
@@ -147,28 +152,6 @@ const OrderDetails: React.FC = () => {
               title,
               category,
               price
-            ),
-            order_files (
-              id,
-              order_id,
-              file_name,
-              file_url,
-              file_size,
-              file_type,
-              file_category,
-              admin_comments,
-              created_at
-            ),
-            invoices (
-              id,
-              order_id,
-              client_id,
-              file_name,
-              file_url,
-              file_size,
-              file_type,
-              admin_comments,
-              created_at
             )
           `)
           .eq('id', orderId)
@@ -213,10 +196,15 @@ const OrderDetails: React.FC = () => {
             }
           }
 
+          // NUEVA LÓGICA: Cargar archivos del cliente desde order_files
+          const clientFiles = await loadClientFiles(data.client_id, orderId);
+
           const orderWithProfile = {
             ...data,
             profiles: profileData,
-            additional_services_details: additionalServicesDetails
+            additional_services_details: additionalServicesDetails,
+            order_files: [...clientFiles.mainFiles, ...clientFiles.additionalFiles],
+            optional_attachments_urls: clientFiles.additionalFiles.map(f => f.file_url)
           };
 
           setOrder(orderWithProfile);
@@ -231,6 +219,199 @@ const OrderDetails: React.FC = () => {
 
     loadOrder();
   }, [orderId]);
+
+  // NUEVA FUNCIÓN: Cargar archivos del cliente desde order_files
+  const loadClientFiles = async (clientId: string, orderId: string) => {
+    try {
+      console.log('🔍 Cargando archivos del cliente:', { clientId, orderId });
+      
+      // Cargar todos los archivos del cliente (file_category = 'map')
+      const { data: clientFilesData, error: clientError } = await supabase
+        .from('order_files')
+        .select('*')
+        .eq('order_id', orderId)
+        .eq('uploaded_by', clientId)
+        .eq('file_category', 'map')
+        .order('created_at', { ascending: false });
+
+      if (clientError) {
+        console.error('Error loading client files:', clientError);
+        return { mainFiles: [], additionalFiles: [] };
+      }
+
+      console.log('📁 Archivos encontrados en BD:', clientFilesData?.length || 0, clientFilesData);
+
+      // Procesar todos los archivos del cliente
+      const processedClientFiles = (clientFilesData || []).map(file => ({
+        id: file.id,
+        order_id: file.order_id,
+        file_name: file.file_name,
+        file_url: file.file_url,
+        file_size: file.file_size,
+        file_type: file.file_type,
+        file_category: file.file_category,
+        admin_comments: file.admin_comments,
+        created_at: file.created_at
+      }));
+
+      // Separar archivos principales y adicionales por bucket usando file_url
+      const processedMainFiles = processedClientFiles.filter(file => 
+        file.file_url.includes('clientordersprincipal')
+      );
+      
+      const processedAdditionalFiles = processedClientFiles.filter(file => 
+        file.file_url.includes('clientorderadicional')
+      );
+
+      console.log('✅ Archivos del cliente separados por bucket:', {
+        mainFiles: processedMainFiles.length,
+        additionalFiles: processedAdditionalFiles.length,
+        mainFilesList: processedMainFiles.map(f => f.file_name),
+        additionalFilesList: processedAdditionalFiles.map(f => f.file_name)
+      });
+
+      return {
+        mainFiles: processedMainFiles,
+        additionalFiles: processedAdditionalFiles
+      };
+    } catch (error) {
+      console.error('Error loading client files:', error);
+      return { mainFiles: [], additionalFiles: [] };
+    }
+  };
+
+  // NUEVA FUNCIÓN: Descargar archivos del cliente
+  const downloadFile = async (file: any, fileName?: string) => {
+    try {
+      console.log('📥 Descargando archivo:', file);
+      
+      // Manejar tanto objetos de archivo como URLs directas
+      let downloadUrl: string;
+      let downloadFileName: string;
+      
+      if (typeof file === 'string') {
+        // Es una URL directa (para compatibilidad con archivos admin)
+        downloadUrl = file;
+        downloadFileName = fileName || extractFileNameFromUrl(file);
+      } else {
+        // Es un objeto de archivo
+        downloadUrl = file.file_url;
+        downloadFileName = file.file_name;
+      }
+
+      // Usar directamente la URL almacenada (ya es pública)
+
+      // Crear enlace de descarga
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = downloadFileName;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log('✅ Archivo descargado exitosamente desde:', downloadUrl);
+      toast.success('Archivo descargado correctamente');
+    } catch (error) {
+      console.error('❌ Error descargando archivo:', error);
+      toast.error(`Error al descargar el archivo: ${error.message}`);
+    }
+  };
+
+  // NUEVA FUNCIÓN: Cargar archivos subidos por admin
+  const loadAdminFiles = async () => {
+    if (!order?.id || !order?.client_id) return;
+
+    try {
+      setAdminFilesLoading(true);
+      console.log('🔍 Cargando archivos del admin para orden:', order.id);
+      
+      // Obtener archivos tuneados del admin (file_category = 'map')
+      const { data: mapFilesData, error: mapFilesError } = await supabase
+        .from('order_files')
+        .select('*')
+        .eq('order_id', order.id)
+        .eq('file_category', 'map')
+        .is('uploaded_by', null) // Admin files have null uploaded_by
+        .order('created_at', { ascending: false });
+
+      if (mapFilesError) {
+        console.error('Error loading map files:', mapFilesError);
+      }
+
+      // Obtener facturas del admin (file_category = 'invoice')
+      const { data: invoiceFilesData, error: invoiceFilesError } = await supabase
+        .from('order_files')
+        .select('*')
+        .eq('order_id', order.id)
+        .eq('file_category', 'invoice')
+        .is('uploaded_by', null) // Admin files have null uploaded_by
+        .order('created_at', { ascending: false });
+
+      if (invoiceFilesError) {
+        console.error('Error loading invoice files:', invoiceFilesError);
+      }
+
+      // Procesar archivos tuneados del admin
+      const processedAdminFiles: AdminFile[] = (mapFilesData || []).map(file => {
+        const { data: { publicUrl } } = supabase.storage
+          .from('adminorders')
+          .getPublicUrl(file.file_url);
+
+        return {
+          id: file.id,
+          order_id: file.order_id,
+          file_name: file.file_name,
+          file_url: publicUrl,
+          file_size: file.file_size,
+          file_type: file.file_type,
+          file_category: file.file_category,
+          admin_comments: file.admin_comments,
+          created_at: file.created_at,
+          uploaded_by: file.uploaded_by
+        };
+      });
+
+      // Procesar facturas del admin
+      const processedInvoiceFiles: AdminFile[] = (invoiceFilesData || []).map(file => {
+        const { data: { publicUrl } } = supabase.storage
+          .from('invoices')
+          .getPublicUrl(file.file_url);
+
+        return {
+          id: file.id,
+          order_id: file.order_id,
+          file_name: file.file_name,
+          file_url: publicUrl,
+          file_size: file.file_size,
+          file_type: file.file_type,
+          file_category: file.file_category,
+          admin_comments: file.admin_comments,
+          created_at: file.created_at,
+          uploaded_by: file.uploaded_by
+        };
+      });
+
+      setAdminFiles(processedAdminFiles);
+      setAdminInvoices(processedInvoiceFiles);
+
+      console.log('✅ Archivos del admin cargados:', {
+        mapFiles: mapFilesData?.length || 0,
+        invoiceFiles: invoiceFilesData?.length || 0,
+        totalAdminFiles: processedAdminFiles.length,
+        totalInvoices: processedInvoiceFiles.length
+      });
+    } catch (err: any) {
+      console.error('Error loading admin files:', err);
+    } finally {
+      setAdminFilesLoading(false);
+    }
+  };
+
+  // Cargar archivos del admin cuando se monta el componente
+  useEffect(() => {
+    loadAdminFiles();
+  }, [order?.id, order?.client_id]);
 
   const handleStatusChange = async (newStatus: string) => {
     if (!order) return;
@@ -333,112 +514,190 @@ const OrderDetails: React.FC = () => {
     });
   };
 
+  // NUEVA FUNCIÓN: Función para limpiar nombres de archivo
+  const sanitizeFileName = (fileName: string): string => {
+    return fileName
+      .replace(/[^a-zA-Z0-9.-]/g, '_') // Reemplazar caracteres especiales con _
+      .replace(/_{2,}/g, '_') // Reemplazar múltiples _ con uno solo
+      .replace(/^_|_$/g, ''); // Remover _ al inicio y final
+  };
+
+  // NUEVA FUNCIÓN: Subir archivos tuneados del admin
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !order) return;
+    if (!file || !order) {
+      console.log('❌ No file selected or no order:', { file: !!file, order: !!order });
+      return;
+    }
+
+    console.log('🚀 NUEVA LÓGICA - Starting tuned file upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      orderId: order.id,
+      clientId: order.client_id,
+      mapComment
+    });
 
     try {
       setUploading(true);
       
-      // Crear un nombre único para el archivo
-      const fileName = `tuned-map-${order.id}-${Date.now()}.${file.name.split('.').pop()}`;
+      // Limpiar nombre del archivo
+      const sanitizedFileName = sanitizeFileName(file.name);
       
+      // NUEVA ESTRUCTURA: adminorders/clientId/orderId/filename
+      const filePath = `${order.client_id}/${order.id}/${sanitizedFileName}`;
+      
+      console.log('📁 NUEVA ESTRUCTURA - Upload path:', filePath);
+      
+      // Subir a bucket 'adminorders'
       const { error: uploadError } = await supabase.storage
-        .from('order-files')
-        .upload(fileName, file);
+        .from('adminorders')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true // Permitir sobrescribir archivos existentes
+        });
 
       if (uploadError) {
+        console.error('❌ Storage upload error:', uploadError);
         throw uploadError;
       }
 
-      // Obtener URL pública del archivo
-      const { data: { publicUrl } } = supabase.storage
-        .from('order-files')
-        .getPublicUrl(fileName);
+      console.log('✅ File uploaded to adminorders bucket successfully');
 
-      // Guardar información del archivo en la base de datos
-      const { error: dbError } = await supabase
+      // NUEVA LÓGICA: Insertar en 'order_files' con file_category = 'map'
+      const insertData = {
+        order_id: order.id,
+        client_id: order.client_id, // Incluir client_id para evitar error de constraint
+        uploaded_by: null, // Admin files have null uploaded_by
+        file_name: sanitizedFileName,
+        file_url: filePath, // Guardar el path relativo
+        file_size: file.size,
+        file_type: file.type,
+        file_category: 'map', // Categoría para archivos tuneados
+        admin_comments: mapComment || null
+      };
+
+      console.log('💾 NUEVA LÓGICA - Inserting to order_files:', insertData);
+
+      // Insertar registro en order_files
+      const { data: insertResult, error: dbError } = await supabase
         .from('order_files')
-        .insert({
-          order_id: order.id,
-          client_id: order.client_id,
-          uploaded_by: user?.id || null,
-          file_name: file.name,
-          file_url: publicUrl,
-          file_size: file.size,
-          file_type: file.type,
-          file_category: 'map',
-          admin_comments: mapComment
-        });
+        .insert(insertData)
+        .select();
 
       if (dbError) {
-        console.error('Error saving file info:', dbError);
+        console.error('❌ Database insert error:', dbError);
         throw dbError;
       }
 
-      toast.success('Mapa tuneado subido correctamente');
+      console.log('✅ Database insert successful:', insertResult);
+
+      toast.success('Archivo tuneado subido correctamente');
       setMapComment('');
       
-      // Recargar datos de la orden
-      window.location.reload();
+      // Limpiar el input de archivo
+      const fileInput = event.target;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
+      // Recargar archivos del admin
+      await loadAdminFiles();
       
     } catch (err: any) {
-      console.error('Error uploading file:', err);
-      toast.error(`Error al subir archivo: ${err.message}`);
+      console.error('💥 Error uploading tuned file:', err);
+      toast.error(`Error al subir archivo tuneado: ${err.message}`);
     } finally {
       setUploading(false);
     }
   };
 
+  // NUEVA FUNCIÓN: Subir facturas del admin
   const handleInvoiceUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !order) return;
+    if (!file || !order) {
+      console.log('❌ No invoice file selected or no order:', { file: !!file, order: !!order });
+      return;
+    }
+
+    console.log('🚀 NUEVA LÓGICA - Starting invoice upload:', {
+      fileName: file.name,
+      fileSize: file.size,
+      fileType: file.type,
+      orderId: order.id,
+      clientId: order.client_id,
+      invoiceComment
+    });
 
     try {
       setUploadingInvoice(true);
       
-      // Crear un nombre único para la factura
-      const fileName = `invoice-${order.id}-${Date.now()}.${file.name.split('.').pop()}`;
+      // Limpiar nombre del archivo
+      const sanitizedFileName = sanitizeFileName(file.name);
       
+      // NUEVA ESTRUCTURA: invoices/clientId/orderId/filename
+      const filePath = `${order.client_id}/${order.id}/${sanitizedFileName}`;
+      
+      console.log('📁 NUEVA ESTRUCTURA - Invoice upload path:', filePath);
+      
+      // Subir a bucket 'invoices'
       const { error: uploadError } = await supabase.storage
-        .from('order-files')
-        .upload(fileName, file);
+        .from('invoices')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true // Permitir sobrescribir archivos existentes
+        });
 
       if (uploadError) {
+        console.error('❌ Invoice storage upload error:', uploadError);
         throw uploadError;
       }
 
-      // Obtener URL pública del archivo
-      const { data: { publicUrl } } = supabase.storage
-        .from('order-files')
-        .getPublicUrl(fileName);
+      console.log('✅ Invoice uploaded to invoices bucket successfully');
 
-      // Guardar información de la factura en la base de datos
-      const { error: dbError } = await supabase
-        .from('invoices')
-        .insert({
-          order_id: order.id,
-          client_id: order.client_id,
-          file_name: file.name,
-          file_url: publicUrl,
-          file_size: file.size,
-          file_type: file.type,
-          admin_comments: invoiceComment
-        });
+      // NUEVA LÓGICA: Insertar en 'order_files' con file_category = 'invoice'
+      const insertData = {
+        order_id: order.id,
+        client_id: order.client_id, // Incluir client_id para evitar error de constraint
+        uploaded_by: null, // Admin invoices have null uploaded_by
+        file_name: sanitizedFileName,
+        file_url: filePath, // Guardar el path relativo
+        file_size: file.size,
+        file_type: file.type,
+        file_category: 'invoice', // Categoría para facturas
+        admin_comments: invoiceComment || null
+      };
+
+      console.log('💾 NUEVA LÓGICA - Inserting invoice to order_files:', insertData);
+
+      // Insertar registro en order_files
+      const { data: insertResult, error: dbError } = await supabase
+        .from('order_files')
+        .insert(insertData)
+        .select();
 
       if (dbError) {
-        console.error('Error saving invoice info:', dbError);
+        console.error('❌ Invoice database insert error:', dbError);
         throw dbError;
       }
+
+      console.log('✅ Invoice database insert successful:', insertResult);
 
       toast.success('Factura subida correctamente');
       setInvoiceComment('');
       
-      // Recargar datos de la orden
-      window.location.reload();
+      // Limpiar el input de archivo
+      const fileInput = event.target;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
+      // Recargar archivos del admin
+      await loadAdminFiles();
       
     } catch (err: any) {
-      console.error('Error uploading invoice:', err);
+      console.error('💥 Error uploading invoice:', err);
       toast.error(`Error al subir factura: ${err.message}`);
     } finally {
       setUploadingInvoice(false);
@@ -459,6 +718,7 @@ const OrderDetails: React.FC = () => {
     try {
       const comment = tempComments[fileId];
       
+      // Actualizar en la base de datos
       const { error } = await supabase
         .from(table)
         .update({ admin_comments: comment })
@@ -469,15 +729,14 @@ const OrderDetails: React.FC = () => {
       }
 
       // Actualizar el estado local
-      if (order) {
-        if (table === 'order_files') {
-          setOrder(prev => ({
-            ...prev!,
-            order_files: prev!.order_files?.map(file => 
-              file.id === fileId ? { ...file, admin_comments: comment } : file
-            )
-          }));
-        } else {
+      if (table === 'order_files') {
+        setAdminFiles(prev => 
+          prev.map(file => 
+            file.id === fileId ? { ...file, admin_comments: comment } : file
+          )
+        );
+      } else if (order) {
+        if (table === 'invoices') {
           setOrder(prev => ({
             ...prev!,
             invoices: prev!.invoices?.map(invoice => 
@@ -504,89 +763,155 @@ const OrderDetails: React.FC = () => {
     setShowDeleteConfirm(prev => ({ ...prev, [fileId]: false }));
   };
 
+
+
+  // NUEVA FUNCIÓN: Eliminar archivos del admin
+  // FUNCIÓN DELETEFILE CREADA DESDE CERO
   const deleteFile = async (fileId: string, table: 'order_files' | 'invoices') => {
     try {
       setDeletingFile(prev => ({ ...prev, [fileId]: true }));
       
-      // Primero eliminar de la base de datos
+      console.log('🗑️ NUEVA LÓGICA - Iniciando eliminación de archivo:', {
+        fileId,
+        table,
+        orderId: order?.id,
+        clientId: order?.client_id
+      });
+      
+      if (!order) {
+        throw new Error('Pedido no disponible');
+      }
+
+      // Obtener información del archivo desde order_files
+      const { data: fileData, error: fetchError } = await supabase
+        .from('order_files')
+        .select('*')
+        .eq('id', fileId)
+        .single();
+
+      if (fetchError || !fileData) {
+        console.error('❌ Error obteniendo archivo:', fetchError);
+        throw new Error('Archivo no encontrado');
+      }
+
+      console.log('📄 Datos del archivo encontrado:', {
+        fileName: fileData.file_name,
+        fileCategory: fileData.file_category,
+        uploadedBy: fileData.uploaded_by
+      });
+
+      // NUEVA LÓGICA: Determinar bucket automáticamente según file_category
+      let bucketName = '';
+      if (fileData.file_category === 'map') {
+        bucketName = 'adminorders';
+      } else if (fileData.file_category === 'invoice') {
+        bucketName = 'invoices';
+      } else {
+        throw new Error(`Categoría de archivo no soportada: ${fileData.file_category}`);
+      }
+      
+      console.log('🪣 Bucket detectado:', bucketName);
+
+      // NUEVA ESTRUCTURA: Eliminar del storage usando client_id/order_id/filename
+      const sanitizedFileName = sanitizeFileName(fileData.file_name);
+      const storagePath = `${order.client_id}/${order.id}/${sanitizedFileName}`;
+      
+      console.log('🗑️ Eliminando del storage:', {
+        bucket: bucketName,
+        path: storagePath
+      });
+      
+      const { error: storageError } = await supabase.storage
+        .from(bucketName)
+        .remove([storagePath]);
+
+      if (storageError) {
+        console.warn('⚠️ Advertencia al eliminar del storage:', storageError);
+        // Continuar con la eliminación de la base de datos aunque falle el storage
+      } else {
+        console.log('✅ Archivo eliminado del storage exitosamente');
+      }
+
+      // NUEVA LÓGICA: Eliminar registro de order_files
+      console.log('🗑️ Eliminando de la tabla order_files:', fileId);
+      
       const { error: dbError } = await supabase
-        .from(table)
+        .from('order_files')
         .delete()
         .eq('id', fileId);
 
       if (dbError) {
+        console.error('❌ Error eliminando de la base de datos:', dbError);
         throw dbError;
       }
-
-      // Luego eliminar del storage
-      // Extraer el nombre del archivo del file_url para eliminarlo del storage
-      const fileData = table === 'order_files' 
-        ? order?.order_files?.find(f => f.id === fileId)
-        : order?.invoices?.find(f => f.id === fileId);
       
-      if (fileData && fileData.file_url) {
-        // Extraer el nombre del archivo del URL
-        const urlParts = fileData.file_url.split('/');
-        const storageFileName = urlParts[urlParts.length - 1];
-        
-        const { error: storageError } = await supabase.storage
-          .from('order-files')
-          .remove([storageFileName]);
+      console.log('✅ Archivo eliminado de la base de datos exitosamente');
 
-        if (storageError) {
-          console.warn('Error deleting from storage (file may not exist):', storageError);
-        }
-      }
-
-      // Actualizar el estado local
-      if (order) {
-        if (table === 'order_files') {
-          setOrder(prev => ({
-            ...prev!,
-            order_files: prev!.order_files?.filter(file => file.id !== fileId)
-          }));
-        } else {
-          setOrder(prev => ({
-            ...prev!,
-            invoices: prev!.invoices?.filter(invoice => invoice.id !== fileId)
-          }));
-        }
-      }
-
-      setShowDeleteConfirm(prev => ({ ...prev, [fileId]: false }));
-      toast.success(`${table === 'order_files' ? 'Mapa' : 'Factura'} eliminado correctamente`);
+      // Actualizar estado local - recargar archivos admin
+      await loadAdminFiles();
+      
+      toast.success(`${fileData.file_category === 'map' ? 'Mapa tuneado' : 'Factura'} eliminado correctamente`);
+      
+      console.log('✅ Eliminación completada exitosamente');
+      
     } catch (err: any) {
-      console.error('Error deleting file:', err);
+      console.error('💥 Error eliminando archivo:', err);
       toast.error(`Error al eliminar archivo: ${err.message}`);
     } finally {
       setDeletingFile(prev => ({ ...prev, [fileId]: false }));
+      setShowDeleteConfirm(prev => ({ ...prev, [fileId]: false }));
     }
   };
+
+  // FUNCIONES AUXILIARES CREADAS DESDE CERO
 
   // Función para extraer el path del archivo desde una URL completa de Supabase Storage
   const extractFilePathFromUrl = (url: string): string => {
     try {
       // Si ya es un path relativo (no contiene http), devolverlo tal como está
       if (!url.startsWith('http')) {
+        console.log('📁 URL ya es un path relativo:', url);
         return url;
       }
       
-      // Extraer el path después de '/object/'
-      const objectIndex = url.indexOf('/object/');
-      if (objectIndex !== -1) {
-        return url.substring(objectIndex + 8); // +8 para saltar '/object/'
+      console.log('🔍 Extrayendo path de URL completa:', url);
+      
+      // Extraer el path después de '/object/public/bucket_name/'
+      const objectPublicIndex = url.indexOf('/object/public/');
+      if (objectPublicIndex !== -1) {
+        const afterObjectPublic = url.substring(objectPublicIndex + 15); // +15 para saltar '/object/public/'
+        
+        // Buscar el primer '/' después del nombre del bucket para obtener el path del archivo
+        const firstSlashIndex = afterObjectPublic.indexOf('/');
+        if (firstSlashIndex !== -1) {
+          const filePath = afterObjectPublic.substring(firstSlashIndex + 1);
+          console.log('📁 Path extraído (método object/public):', filePath);
+          return filePath;
+        }
       }
       
-      // Si no encuentra el patrón, intentar extraer después del bucket name
-      const bucketPattern = '/order-files/';
-      const bucketIndex = url.indexOf(bucketPattern);
-      if (bucketIndex !== -1) {
-        return url.substring(bucketIndex + bucketPattern.length);
+      // Método alternativo: extraer después del bucket name
+      // Buscar patrones de buckets conocidos
+      const bucketPatterns = [
+        '/clientordersprincipal/',
+        '/clientorderadicional/',
+        '/adminorders/',
+        '/invoices/'
+      ];
+      
+      for (const bucketPattern of bucketPatterns) {
+        const bucketIndex = url.indexOf(bucketPattern);
+        if (bucketIndex !== -1) {
+          const filePath = url.substring(bucketIndex + bucketPattern.length);
+          console.log(`📁 Path extraído (método bucket pattern ${bucketPattern}):`, filePath);
+          return filePath;
+        }
       }
       
+      console.warn('⚠️ No se pudo extraer path, usando URL completa');
       return url;
     } catch (error) {
-      console.error('Error extracting file path:', error);
+      console.error('❌ Error extracting file path:', error);
       return url;
     }
   };
@@ -616,525 +941,44 @@ const OrderDetails: React.FC = () => {
     }
   };
 
-  const downloadFile = async (url: string, fileName: string) => {
-    try {
-      // Validar que la URL no esté vacía
-      if (!url || url.trim() === '') {
-        toast.error('URL de archivo no válida');
-        return;
-      }
-
-      // Usar la URL directamente para la descarga
-      // Si es una URL completa de Supabase, usarla tal como está
-      // Si es un path relativo, construir la URL pública
-      let downloadUrl = url;
-      
-      if (!url.startsWith('http')) {
-        // Es un path relativo, construir URL pública
-        const { data } = supabase.storage
-          .from('order-files')
-          .getPublicUrl(url);
-        downloadUrl = data.publicUrl;
-      }
-
-      // Crear elemento temporal para descarga
-      const response = await fetch(downloadUrl);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
-      const objectUrl = URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-      
-      toast.success('Descarga iniciada correctamente');
-    } catch (err: any) {
-      console.error('Error downloading file:', err);
-      
-      // Manejo de errores más específico
-      if (err.message.includes('404') || err.message.includes('not found')) {
-        toast.error('El archivo no existe o ha sido eliminado');
-      } else if (err.message.includes('403') || err.message.includes('permission')) {
-        toast.error('No tienes permisos para descargar este archivo');
-      } else if (err.message.includes('network') || err.message.includes('fetch')) {
-        toast.error('Error de conexión al descargar el archivo');
-      } else {
-        toast.error('Error al descargar el archivo. Inténtalo de nuevo.');
+  // Función global para parsear main_file_url que puede ser string simple o JSON array
+  const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
+    if (!mainFileUrl) return [];
+    
+    // Si es un string que empieza con '[', es un JSON array
+    if (mainFileUrl.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(mainFileUrl);
+        return Array.isArray(parsed) ? parsed : [mainFileUrl];
+      } catch (error) {
+        console.error('Error parsing main_file_url JSON:', error);
+        return [mainFileUrl];
       }
     }
+    
+    // Si no, es un string simple
+    return [mainFileUrl];
   };
 
-  const generatePDF = async () => {
+
+
+  // Usar la función unificada de generación de PDF
+  const handleGeneratePDF = async () => {
     if (!order) return;
-
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = 20;
-      let yPosition = 25;
-
-      // Colores corporativos
-      const primaryColor = [59, 130, 246]; // Azul primario
-      const darkColor = [31, 41, 55]; // Gris oscuro
-      const lightColor = [107, 114, 128]; // Gris claro
-      const accentColor = [16, 185, 129]; // Verde accent
-
-      // Función para verificar si necesitamos una nueva página
-      const checkNewPage = (requiredSpace: number) => {
-        if (yPosition + requiredSpace > pageHeight - 30) {
-          doc.addPage();
-          yPosition = 30;
-          return true;
-        }
-        return false;
-      };
-
-      // Función para agregar logo (simulado con texto estilizado)
-      const addLogo = () => {
-        // Logo simulado con texto estilizado
-        doc.setFontSize(24);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text('FILESECUFB', margin, yPosition);
-        
-        // Subtítulo del logo
-        doc.setFontSize(10);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Professional ECU Services', margin, yPosition + 8);
-        
-        yPosition += 20;
-      };
-
-      // Función para agregar header con información de la empresa
-      const addCompanyHeader = () => {
-        // Línea decorativa superior
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(2);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 10;
-
-        // Información de la empresa (lado derecho)
-        const companyInfo = [
-          'www.filesecufb.com',
-          'info@filesecufb.com',
-          '+34 630 84 10 47'
-        ];
-        
-        doc.setFontSize(9);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        companyInfo.forEach((info, index) => {
-          doc.text(info, pageWidth - margin, yPosition + (index * 5), { align: 'right' });
-        });
-        
-        yPosition += 25;
-      };
-
-      // Función para agregar título del documento
-      const addDocumentTitle = () => {
-        doc.setFontSize(28);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text('DETALLE DEL PEDIDO', pageWidth / 2, yPosition, { align: 'center' });
-        
-        // Línea decorativa bajo el título
-        yPosition += 8;
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(1);
-        doc.line(pageWidth / 2 - 40, yPosition, pageWidth / 2 + 40, yPosition);
-        yPosition += 20;
-      };
-
-      // Función para agregar información básica del pedido
-      const addOrderBasicInfo = () => {
-        // Fondo gris claro para la información básica
-        doc.setFillColor(248, 250, 252);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 25, 'F');
-        
-        doc.setFontSize(12);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'bold');
-        
-        // Primera fila
-        doc.text(`Pedido #${order.id.slice(-8).toUpperCase()}`, margin + 5, yPosition + 5);
-        doc.text(`Fecha: ${formatDate(order.created_at)}`, pageWidth / 2, yPosition + 5, { align: 'center' });
-        doc.text(`Total: €${parseFloat(order.total_price?.toString() || '0').toFixed(2)}`, pageWidth - margin - 5, yPosition + 5, { align: 'right' });
-        
-        // Segunda fila
-        doc.text(`Servicio: ${order.services?.title || 'N/A'}`, margin + 5, yPosition + 15);
-        
-        yPosition += 35;
-      };
-
-      // Función para agregar sección con título
-      const addSection = (title: string, content: () => void) => {
-        checkNewPage(30);
-        
-        // Título de sección
-        doc.setFontSize(16);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text(title, margin, yPosition);
-        
-        // Línea bajo el título
-        yPosition += 3;
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPosition, margin + 60, yPosition);
-        yPosition += 12;
-        
-        content();
-        yPosition += 18;
-      };
-
-      // Función para agregar información del cliente
-      const addClientInfo = () => {
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        const clientData = [
-          { label: 'Nombre Completo:', value: order.profiles?.full_name || 'N/A' },
-          { label: 'Email:', value: order.profiles?.email || 'N/A' },
-          { label: 'Teléfono:', value: order.profiles?.phone || 'N/A' },
-          { label: 'Dirección:', value: order.profiles?.billing_address || 'N/A' },
-          { label: 'Ciudad:', value: order.profiles?.billing_city || 'N/A' },
-          { label: 'Código Postal:', value: order.profiles?.billing_postal_code || 'N/A' },
-          { label: 'País:', value: order.profiles?.billing_country || 'N/A' }
-        ];
-        
-        clientData.forEach((item, index) => {
-          if (item.value !== 'N/A') {
-            doc.setFont('helvetica', 'bold');
-            doc.text(item.label, margin, yPosition);
-            doc.setFont('helvetica', 'normal');
-            doc.text(item.value, margin + 40, yPosition);
-            yPosition += 8;
-          }
-        });
-      };
-
-      // Función para agregar información del vehículo
-      const addVehicleInfo = () => {
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        const vehicleData = [
-          { label: 'Marca:', value: order.vehicle_make },
-          { label: 'Modelo:', value: order.vehicle_model },
-          { label: 'Generación:', value: order.vehicle_generation },
-          { label: 'Motor:', value: order.vehicle_engine },
-          { label: 'Año:', value: order.vehicle_year },
-          { label: 'ECU:', value: order.vehicle_ecu },
-          { label: 'Transmisión:', value: order.vehicle_gearbox },
-          { label: 'Potencia:', value: order.engine_hp ? `${order.engine_hp} HP${order.engine_kw ? ` (${order.engine_kw} kW)` : ''}` : null },
-          { label: 'Lectura:', value: order.read_method },
-          { label: 'Hardware:', value: order.hardware_number },
-          { label: 'Software:', value: order.software_number }
-        ];
-        
-        let col1Y = yPosition;
-        let col2Y = yPosition;
-        const colWidth = (pageWidth - 2 * margin) / 2;
-        
-        vehicleData.forEach((item, index) => {
-          if (item.value) {
-            const isLeftColumn = index % 2 === 0;
-            const xPos = isLeftColumn ? margin : margin + colWidth;
-            const currentY = isLeftColumn ? col1Y : col2Y;
-            
-            doc.setFont('helvetica', 'bold');
-            doc.text(item.label, xPos, currentY);
-            doc.setFont('helvetica', 'normal');
-            doc.text(item.value, xPos + 35, currentY);
-            
-            if (isLeftColumn) {
-              col1Y += 8;
-            } else {
-              col2Y += 8;
-            }
-          }
-        });
-        
-        yPosition = Math.max(col1Y, col2Y);
-      };
-
-      // Función para agregar modificaciones del vehículo
-      const addVehicleModifications = () => {
-        const modifications = [
-          { key: 'aftermarket_exhaust', label: 'Escape Aftermarket', remarks: 'aftermarket_exhaust_remarks' },
-          { key: 'aftermarket_intake_manifold', label: 'Colector de Admisión Aftermarket', remarks: 'aftermarket_intake_manifold_remarks' },
-          { key: 'cold_air_intake', label: 'Admisión de Aire Frío', remarks: 'cold_air_intake_remarks' },
-          { key: 'decat', label: 'Decat', remarks: 'decat_remarks' }
-        ];
-        
-        const hasAnyModification = modifications.some(({ key }) => order[key as keyof OrderData]);
-        
-        if (!hasAnyModification) {
-          doc.setFontSize(11);
-          doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-          doc.setFont('helvetica', 'italic');
-          doc.text('No se han reportado modificaciones en el vehículo.', margin, yPosition);
-          yPosition += 8;
-          return;
-        }
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        modifications.forEach(({ key, label, remarks }) => {
-          const hasModification = order[key as keyof OrderData] as boolean;
-          const remarkText = order[remarks as keyof OrderData] as string;
-          
-          if (hasModification) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(`• ${label}`, margin, yPosition);
-            doc.setFont('helvetica', 'normal');
-            yPosition += 8;
-            
-            if (remarkText && remarkText.trim()) {
-              doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-              doc.setFont('helvetica', 'italic');
-              const lines = doc.splitTextToSize(`  Observaciones: ${remarkText}`, pageWidth - 2 * margin - 10);
-              lines.forEach((line: string) => {
-                doc.text(line, margin + 5, yPosition);
-                yPosition += 7;
-              });
-              yPosition += 3;
-            }
-            
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-          }
-        });
-      };
-
-      // Función para agregar servicios adicionales
-      const addAdditionalServices = () => {
-        if (!order.additional_services_details || order.additional_services_details.length === 0) return;
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        let totalAdditional = 0;
-        
-        order.additional_services_details.forEach((service: any, index: number) => {
-          const price = parseFloat(service.price || 0);
-          totalAdditional += price;
-          
-          doc.setFont('helvetica', 'normal');
-          doc.text(`• ${service.title}`, margin, yPosition);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`€${price.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
-          yPosition += 8;
-        });
-        
-        // Total de servicios adicionales
-        if (totalAdditional > 0) {
-          yPosition += 5;
-          doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
-          doc.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-          doc.text('Total Servicios Adicionales:', margin, yPosition);
-          doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
-        }
-      };
-
-      // Función para agregar archivos del cliente
-      const addClientFiles = () => {
-        const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
-          if (!mainFileUrl) return [];
-          if (mainFileUrl.startsWith('[')) {
-            try {
-              const parsed = JSON.parse(mainFileUrl);
-              return Array.isArray(parsed) ? parsed : [mainFileUrl];
-            } catch (error) {
-              return [mainFileUrl];
-            }
-          }
-          return [mainFileUrl];
-        };
-        
-        const mainFileUrls = parseMainFileUrl(order.main_file_url);
-        const additionalFiles = order.optional_attachments_urls || [];
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        if (mainFileUrls.length > 0) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Archivos Principales:', margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'normal');
-          mainFileUrls.forEach((url, index) => {
-            if (url && url.trim() !== '') {
-              const fileName = extractFileNameFromUrl(url);
-              doc.text(`• ${fileName}`, margin + 5, yPosition);
-              yPosition += 7;
-            }
-          });
-          yPosition += 8;
-        }
-        
-        if (additionalFiles.length > 0) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Archivos Adicionales:', margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'normal');
-          additionalFiles.forEach((url, index) => {
-            if (url && url.trim() !== '') {
-              const fileName = extractFileNameFromUrl(url);
-              doc.text(`• ${fileName}`, margin + 5, yPosition);
-              yPosition += 7;
-            }
-          });
-        }
-      };
-
-      // Función para agregar información adicional
-      const addAdditionalInfo = () => {
-        if (!order.additional_info) return;
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        const lines = doc.splitTextToSize(order.additional_info, pageWidth - 2 * margin - 10);
-        lines.forEach((line: string) => {
-          checkNewPage(10);
-          doc.text(line, margin, yPosition);
-          yPosition += 7;
-        });
-      };
-
-      // Función para agregar resumen financiero
-      const addFinancialSummary = () => {
-        checkNewPage(40);
-        
-        // Fondo para el resumen
-        doc.setFillColor(248, 250, 252);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 35, 'F');
-        
-        doc.setFontSize(14);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RESUMEN FINANCIERO', margin + 5, yPosition + 8);
-        
-        yPosition += 20;
-        
-        // Detalles financieros
-        const basePrice = parseFloat(order.base_price?.toString() || '0');
-        const additionalPrice = order.additional_services_details?.reduce((sum: number, service: any) => 
-          sum + parseFloat(service.price || 0), 0) || 0;
-        const totalPrice = parseFloat(order.total_price?.toString() || '0');
-        
-        doc.setFontSize(12);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        if (basePrice > 0) {
-          doc.text('Precio Base:', margin + 5, yPosition);
-          doc.text(`€${basePrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-          yPosition += 8;
-        }
-        
-        if (additionalPrice > 0) {
-          doc.text('Servicios Adicionales:', margin + 5, yPosition);
-          doc.text(`€${additionalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-          yPosition += 8;
-        }
-        
-        // Línea separadora
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(1);
-        doc.line(margin + 5, yPosition, pageWidth - margin - 5, yPosition);
-        yPosition += 8;
-        
-        // Total final
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.text('TOTAL:', margin + 5, yPosition);
-        doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-      };
-
-      // Función para agregar footer
-      const addFooter = () => {
-        const footerY = pageHeight - 20;
-        
-        doc.setFontSize(8);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        // Línea separadora
-        doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setLineWidth(0.5);
-        doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
-        
-        // Texto del footer
-        doc.text('Este documento ha sido generado automáticamente por FilesECUFB', pageWidth / 2, footerY, { align: 'center' });
-        doc.text(`Generado el: ${new Date().toLocaleDateString('es-ES')} a las ${new Date().toLocaleTimeString('es-ES')}`, pageWidth / 2, footerY + 5, { align: 'center' });
-      };
-
-      // Construir el PDF
-      addLogo();
-      addCompanyHeader();
-      addDocumentTitle();
-      addOrderBasicInfo();
-      
-      addSection('INFORMACIÓN DEL CLIENTE', addClientInfo);
-      addSection('INFORMACIÓN DEL VEHÍCULO', addVehicleInfo);
-      addSection('MODIFICACIONES DEL VEHÍCULO', addVehicleModifications);
-      addSection('SERVICIOS ADICIONALES', addAdditionalServices);
-      addSection('ARCHIVOS DEL CLIENTE', addClientFiles);
-      addSection('INFORMACIÓN ADICIONAL', addAdditionalInfo);
-      addFinancialSummary();
-      addFooter();
-
-      // Guardar el PDF
-      doc.save(`pedido-${order.id.slice(-8)}-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success('PDF generado correctamente');
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      toast.error('Error al generar el PDF');
-    }
+    
+    // Cargar archivos del cliente para incluir en el PDF
+    const clientFilesData = await loadClientFiles(order.client_id, order.id);
+    const allClientFiles = [
+      ...(clientFilesData.mainFiles || []),
+      ...(clientFilesData.additionalFiles || [])
+    ];
+    
+    await generatePDF(order, allClientFiles);
   };
 
   // Función para verificar si hay archivos del cliente
   const hasClientFiles = (): boolean => {
     if (!order) return false;
-    
-    // Función para parsear main_file_url que puede ser string simple o JSON array
-    const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
-      if (!mainFileUrl) return [];
-      
-      // Si es un string que empieza con '[', es un JSON array
-      if (mainFileUrl.startsWith('[')) {
-        try {
-          const parsed = JSON.parse(mainFileUrl);
-          return Array.isArray(parsed) ? parsed : [mainFileUrl];
-        } catch (error) {
-          console.error('Error parsing main_file_url JSON:', error);
-          return [mainFileUrl];
-        }
-      }
-      
-      // Si no, es un string simple
-      return [mainFileUrl];
-    };
     
     // Verificar archivos principales
     const mainFileUrls = parseMainFileUrl(order.main_file_url);
@@ -1146,86 +990,131 @@ const OrderDetails: React.FC = () => {
     return hasMainFiles || hasAdditionalFiles;
   };
 
-  // Función para descargar todos los archivos del cliente
-  const downloadAllClientFiles = async () => {
+  // Función para descargar archivo como blob
+  const downloadFileAsBlob = async (url: string, fileName: string): Promise<{ blob: Blob; fileName: string } | null> => {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Error al descargar ${fileName}: ${response.statusText}`);
+      }
+      const blob = await response.blob();
+      return { blob, fileName };
+    } catch (error) {
+      console.error(`Error descargando ${fileName}:`, error);
+      return null;
+    }
+  };
+
+
+
+
+  // Función principal para descargar todo en ZIP
+  const handleDownloadAll = async () => {
     if (!order || downloadingAllFiles) return;
     
     setDownloadingAllFiles(true);
     
     try {
-      const downloadPromises: Promise<void>[] = [];
-      let downloadCount = 0;
+      const zip = new JSZip();
+      let totalFiles = 0;
       
-      // Función para parsear main_file_url que puede ser string simple o JSON array
-      const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
-        if (!mainFileUrl) return [];
-        
-        // Si es un string que empieza con '[', es un JSON array
-        if (mainFileUrl.startsWith('[')) {
-          try {
-            const parsed = JSON.parse(mainFileUrl);
-            return Array.isArray(parsed) ? parsed : [mainFileUrl];
-          } catch (error) {
-            console.error('Error parsing main_file_url JSON:', error);
-            return [mainFileUrl];
+      // 1. Generar PDF usando la función unificada
+      const pdfBlob = await generatePDFBlob(order);
+      if (pdfBlob) {
+        zip.file(`pedido_${order.id.slice(-8)}.pdf`, pdfBlob);
+        totalFiles++;
+      }
+      
+      // 2. Crear carpetas para archivos del cliente
+      const clientMainFolder = zip.folder('archivos_cliente/principales');
+      const clientAdditionalFolder = zip.folder('archivos_cliente/adicionales');
+      
+      // Cargar archivos del cliente desde order_files (incluye ambos buckets)
+      const clientFilesData = await loadClientFiles(order.client_id, order.id);
+      
+      // Agregar archivos principales del cliente (clientordersprincipal)
+      if (clientFilesData.mainFiles && clientFilesData.mainFiles.length > 0) {
+        for (const file of clientFilesData.mainFiles) {
+          if (file.file_url) {
+            const fileData = await downloadFileAsBlob(file.file_url, file.file_name);
+            if (fileData && clientMainFolder) {
+              clientMainFolder.file(fileData.fileName, fileData.blob);
+              totalFiles++;
+            }
           }
         }
+      }
+      
+      // Agregar archivos adicionales del cliente (clientorderadicional)
+      if (clientFilesData.additionalFiles && clientFilesData.additionalFiles.length > 0) {
+        for (const file of clientFilesData.additionalFiles) {
+          if (file.file_url) {
+            const fileData = await downloadFileAsBlob(file.file_url, file.file_name);
+            if (fileData && clientAdditionalFolder) {
+              clientAdditionalFolder.file(fileData.fileName, fileData.blob);
+              totalFiles++;
+            }
+          }
+        }
+      }
+      
+      // 3. Crear carpetas para archivos del admin
+      const adminMapsFolder = zip.folder('archivos_admin/mapas_tuneados');
+      const adminInvoicesFolder = zip.folder('archivos_admin/facturas');
+      
+      // Agregar mapas tuneados (admin files)
+      if (adminFiles && adminFiles.length > 0) {
+        for (const file of adminFiles) {
+          if (file.file_url) {
+            const fileData = await downloadFileAsBlob(file.file_url, file.file_name);
+            if (fileData && adminMapsFolder) {
+              adminMapsFolder.file(fileData.fileName, fileData.blob);
+              totalFiles++;
+            }
+          }
+        }
+      }
+      
+      // Agregar facturas (admin invoices)
+      if (adminInvoices && adminInvoices.length > 0) {
+        for (const invoice of adminInvoices) {
+          if (invoice.file_url) {
+            const fileData = await downloadFileAsBlob(invoice.file_url, invoice.file_name);
+            if (fileData && adminInvoicesFolder) {
+              adminInvoicesFolder.file(fileData.fileName, fileData.blob);
+              totalFiles++;
+            }
+          }
+        }
+      }
+      
+      // 4. Generar y descargar el ZIP
+      if (totalFiles > 0) {
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `pedido_completo_${order.id.slice(-8)}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         
-        // Si no, es un string simple
-        return [mainFileUrl];
-      };
-      
-      // Descargar archivos principales
-      const mainFileUrls = parseMainFileUrl(order.main_file_url);
-      if (mainFileUrls.length > 0) {
-        mainFileUrls.forEach((url, index) => {
-          if (url && url.trim() !== '') {
-            downloadPromises.push(
-              downloadFile(url, extractFileNameFromUrl(url))
-            );
-            downloadCount++;
-          }
-        });
+        toast.success(`Se ha descargado el archivo ZIP con ${totalFiles} archivos`);
+      } else {
+        toast.error('No se encontraron archivos para descargar');
       }
-      
-      // Descargar archivos adicionales
-      if (order.optional_attachments_urls && order.optional_attachments_urls.length > 0) {
-        order.optional_attachments_urls.forEach((url, index) => {
-          if (url && url.trim() !== '') {
-            downloadPromises.push(
-              downloadFile(url, extractFileNameFromUrl(url))
-            );
-            downloadCount++;
-          }
-        });
-      }
-      
-      // Generar y descargar PDF del pedido
-      downloadPromises.push(
-        new Promise<void>((resolve) => {
-          try {
-            generatePDF();
-            resolve();
-          } catch (error) {
-            console.error('Error generando PDF:', error);
-            resolve(); // No fallar toda la descarga por el PDF
-          }
-        })
-      );
-      downloadCount++;
-      
-      // Ejecutar todas las descargas
-      await Promise.allSettled(downloadPromises);
-      
-      toast.success(`Se han descargado ${downloadCount} archivos del cliente`);
       
     } catch (error) {
-      console.error('Error descargando archivos:', error);
-      toast.error('Error al descargar algunos archivos');
+      console.error('Error creando ZIP:', error);
+      toast.error('Error al crear el archivo ZIP');
     } finally {
       setDownloadingAllFiles(false);
     }
   };
+
+  // Función para descargar todos los archivos del cliente (mantener compatibilidad)
+  const downloadAllClientFiles = handleDownloadAll;
 
   // Mostrar loading mientras se verifica la autenticación
   if (authLoading) {
@@ -1496,7 +1385,7 @@ const OrderDetails: React.FC = () => {
               <h2 className="text-lg sm:text-xl font-bold text-white mb-4 sm:mb-6">{t('orderDetails.actions.title')}</h2>
               <div className="space-y-3 sm:space-y-4">
                 <button
-                  onClick={generatePDF}
+                  onClick={handleGeneratePDF}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-green-600/20 text-green-400 border border-green-600/30 rounded-xl hover:bg-green-600/30 transition-colors min-h-[44px] text-sm sm:text-base"
                 >
                   <FileDown className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -1537,83 +1426,65 @@ const OrderDetails: React.FC = () => {
               {/* Archivo principal */}
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.mainFile.title')}</h3>
-                {(() => {
-                  // Función para parsear main_file_url que puede ser string simple o JSON array
-                  const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
-                    if (!mainFileUrl) return [];
-                    
-                    // Si es un string que empieza con '[', es un JSON array
-                    if (mainFileUrl.startsWith('[')) {
-                      try {
-                        const parsed = JSON.parse(mainFileUrl);
-                        return Array.isArray(parsed) ? parsed : [mainFileUrl];
-                      } catch (error) {
-                        console.error('Error parsing main_file_url JSON:', error);
-                        return [mainFileUrl];
-                      }
-                    }
-                    
-                    // Si no, es un string simple
-                    return [mainFileUrl];
-                  };
-                  
-                  // Manejar tanto main_file_url (string/JSON) como main_file_urls (array) para compatibilidad
-                  const mainFileUrls = parseMainFileUrl(order.main_file_url);
-                  
-                  return mainFileUrls.length > 0 ? (
-                    <div className="space-y-3">
-                      {mainFileUrls.map((url, index) => (
-                        <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
-                          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
-                            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
-                            <div className="min-w-0 flex-1">
-                              <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
-                              <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.mainFile.ecuFile')}</p>
-                            </div>
+                {order.order_files && order.order_files.filter(file => file.file_url.includes('clientordersprincipal')).length > 0 ? (
+                  <div className="space-y-3">
+                    {order.order_files.filter(file => file.file_url.includes('clientordersprincipal')).map((file) => (
+                      <div key={file.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                          <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-white font-medium text-sm sm:text-base truncate">{file.file_name}</p>
+                            <p className="text-gray-400 text-xs sm:text-sm">{t('orderDetails.files.mainFile.ecuFile')}</p>
+                            <p className="text-gray-500 text-xs">Subido: {new Date(file.created_at).toLocaleDateString('es-ES')}</p>
                           </div>
+                        </div>
+                        <div className="flex items-center space-x-2 self-start sm:self-auto">
                           <button
-                            onClick={() => downloadFile(url, extractFileNameFromUrl(url))}
-                            className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
+                            onClick={() => downloadFile(file)}
+                            className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium"
                           >
                             <Download className="w-4 h-4" />
                             <span>{t('orderDetails.common.download')}</span>
                           </button>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
-                      <div className="text-center">
-                        <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
-                        <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.mainFile.noFiles')}</p>
-                        <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.mainFile.noFilesDescription')}</p>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center p-4 sm:p-6 bg-gray-700/30 rounded-lg border border-gray-600/30 border-dashed">
+                    <div className="text-center">
+                      <FileText className="w-8 h-8 sm:w-12 sm:h-12 text-gray-500 mx-auto mb-2" />
+                      <p className="text-gray-400 font-medium text-sm sm:text-base">{t('orderDetails.files.mainFile.noFiles')}</p>
+                      <p className="text-gray-500 text-xs sm:text-sm">{t('orderDetails.files.mainFile.noFilesDescription')}</p>
                     </div>
-                  );
-                })()}
+                  </div>
+                )}
               </div>
 
               {/* Archivos adicionales del cliente */}
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.additionalFiles.title')}</h3>
-                {order.optional_attachments_urls && order.optional_attachments_urls.length > 0 ? (
+                {order.order_files && order.order_files.filter(file => file.file_url.includes('clientorderadicional')).length > 0 ? (
                   <div className="space-y-3">
-                    {order.optional_attachments_urls.map((url, index) => (
-                      <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
+                    {order.order_files.filter(file => file.file_url.includes('clientorderadicional')).map((file) => (
+                      <div key={file.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 p-3 bg-gray-700/50 rounded-lg border border-gray-600/50">
                         <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
                           <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
                           <div className="min-w-0 flex-1">
-                            <p className="text-white font-medium text-sm sm:text-base truncate">{extractFileNameFromUrl(url)}</p>
+                            <p className="text-white font-medium text-sm sm:text-base truncate">{file.file_name}</p>
                             <p className="text-gray-400 text-xs sm:text-sm">Documento adjunto</p>
+                            <p className="text-gray-500 text-xs">Subido: {new Date(file.created_at).toLocaleDateString('es-ES')}</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => downloadFile(url, extractFileNameFromUrl(url))}
-                          className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium self-start sm:self-auto"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>{t('orderDetails.common.download')}</span>
-                        </button>
+                        <div className="flex items-center space-x-2 self-start sm:self-auto">
+                          <button
+                            onClick={() => downloadFile(file)}
+                            className="flex items-center justify-center space-x-2 px-3 py-2 bg-primary/20 text-primary border border-primary/30 rounded-lg hover:bg-primary/30 transition-colors min-h-[44px] text-sm font-medium"
+                          >
+                            <Download className="w-4 h-4" />
+                            <span>{t('orderDetails.common.download')}</span>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1631,9 +1502,9 @@ const OrderDetails: React.FC = () => {
               {/* Mapas tuneados subidos por admin */}
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.tunedMaps.title')}</h3>
-                {order.order_files && order.order_files.filter(f => f.file_category === 'map').length > 0 ? (
+                {adminFiles && adminFiles.length > 0 ? (
                   <div className="space-y-3">
-                    {order.order_files.filter(f => f.file_category === 'map').map((file) => (
+                    {adminFiles.map((file) => (
                       <div key={file.id} className="p-3 bg-green-900/20 rounded-lg border border-green-600/30">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-2">
                           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
@@ -1647,7 +1518,7 @@ const OrderDetails: React.FC = () => {
                           </div>
                           <div className="flex items-center space-x-2 self-start sm:self-auto">
                             <button
-                              onClick={() => window.open(file.file_url, '_blank')}
+                              onClick={() => downloadFile(file.file_url, file.file_name)}
                               className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-green-600/20 text-green-400 border border-green-600/30 rounded-lg hover:bg-green-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
@@ -1722,12 +1593,12 @@ const OrderDetails: React.FC = () => {
                                 </p>
                                 <div className="flex space-x-2 mt-3">
                                   <button
-                                    onClick={() => deleteFile(file.id, 'order_files')}
-                                    disabled={deletingFile[file.id]}
-                                    className="px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    {deletingFile[file.id] ? t('orderDetails.files.tunedMaps.deleting') : t('orderDetails.files.tunedMaps.confirm')}
-                                  </button>
+                              onClick={() => deleteFile(file.id, 'order_files')}
+                              disabled={deletingFile[file.id]}
+                              className="px-3 py-1 bg-red-600/20 text-red-400 border border-red-600/30 rounded-lg hover:bg-red-600/30 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {deletingFile[file.id] ? t('orderDetails.files.tunedMaps.deleting') : t('orderDetails.files.tunedMaps.confirm')}
+                            </button>
                                   <button
                                     onClick={() => cancelDelete(file.id)}
                                     className="px-3 py-1 bg-gray-600/20 text-gray-400 border border-gray-600/30 rounded-lg hover:bg-gray-600/30 transition-colors text-sm font-medium"
@@ -1756,9 +1627,9 @@ const OrderDetails: React.FC = () => {
               {/* Facturas subidas por admin */}
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.files.invoices.title')}</h3>
-                {order.invoices && order.invoices.length > 0 ? (
+                {adminInvoices && adminInvoices.length > 0 ? (
                   <div className="space-y-3">
-                    {order.invoices.map((invoice) => (
+                    {adminInvoices.map((invoice) => (
                       <div key={invoice.id} className="p-3 bg-blue-900/20 rounded-lg border border-blue-600/30">
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-2">
                           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
@@ -1772,7 +1643,7 @@ const OrderDetails: React.FC = () => {
                           </div>
                           <div className="flex items-center space-x-2 self-start sm:self-auto">
                             <button
-                              onClick={() => window.open(invoice.file_url, '_blank')}
+                              onClick={() => downloadFile(invoice.file_url, invoice.file_name)}
                               className="flex items-center justify-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-blue-600/20 text-blue-400 border border-blue-600/30 rounded-lg hover:bg-blue-600/30 transition-colors min-h-[44px] text-xs sm:text-sm font-medium"
                             >
                               <Download className="w-4 h-4" />
@@ -1877,6 +1748,8 @@ const OrderDetails: React.FC = () => {
                   </div>
                 )}
               </div>
+
+
 
               {/* Subir mapa tuneado */}
               <div className="mb-4 sm:mb-6">

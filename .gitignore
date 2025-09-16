@@ -190,7 +190,7 @@ test-*
 # Specific test/debug files with credentials
 check-admin-files.js
 check-invoices-structure.js
-check-order-files.js
+check-adminorders.js
 check-orders.js
 check-orders-status.js
 check-permissions.js
@@ -200,7 +200,7 @@ check-table-columns.js
 check-tables.js
 check-table-structure.js
 create-missing-profile.js
-create-order-files.js
+create-adminorders.js
 create-test-data.js
 create-test-orders.js
 debug-profiles.js

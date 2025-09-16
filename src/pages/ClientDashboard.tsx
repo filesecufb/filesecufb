@@ -6,6 +6,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import jsPDF from 'jspdf';
+import OrderCard from '../components/OrderCard';
+import OrderDetailModal from '../components/dashboard/OrderDetailModal';
 
 // Las interfaces ahora se importan desde los hooks
 // TunedFile desde useFiles
@@ -137,6 +139,146 @@ const ClientDashboard: React.FC = () => {
     setFilteredOrders(filtered);
     setCurrentPage(1);
   }, [orders, searchTerm, statusFilter, dateFrom, dateTo, sortBy]);
+
+  // Función para manejar descargas de archivos
+  const handleDownload = async (fileUrl: string, fileName: string) => {
+    console.log('🔥 INICIO handleDownload - Botón clickeado');
+    console.log('📁 Parámetros recibidos:', { fileUrl, fileName });
+    
+    try {
+      console.log('✅ Validando parámetros...');
+      if (!fileUrl || fileUrl.trim() === '') {
+        console.error('❌ ERROR: fileUrl está vacío o es inválido:', fileUrl);
+        toast.error(t('clientDashboard.messages.errors.invalidFileUrl'));
+        return;
+      }
+      console.log('✅ Parámetros válidos');
+
+      // Para URLs completas, usar fetch directo
+      if (fileUrl.startsWith('http')) {
+        console.log('🌐 Detectada URL completa, usando fetch directo');
+        const response = await fetch(fileUrl);
+        console.log('📡 Respuesta del fetch:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          console.error('❌ ERROR en fetch:', response.status, response.statusText);
+          throw new Error('Error al obtener el archivo');
+        }
+        
+        console.log('📦 Convirtiendo respuesta a blob...');
+        const blob = await response.blob();
+        console.log('📦 Blob creado:', blob.size, 'bytes');
+        
+        const downloadUrl = URL.createObjectURL(blob);
+        console.log('🔗 URL de descarga creada:', downloadUrl);
+        
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        console.log('🖱️ Simulando click en enlace de descarga...');
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        
+        console.log('✅ Descarga HTTP completada exitosamente');
+        toast.success(`Descargando ${fileName}...`);
+        return;
+      }
+
+      // Para paths relativos o URLs de Supabase, extraer path y bucket
+      console.log('🗂️ Procesando URL de Supabase, extrayendo path y bucket...');
+      
+      let bucketName = 'adminorders'; // Bucket por defecto
+      let filePath = fileUrl;
+      
+      // Si es una URL completa de Supabase, extraer el path
+      if (fileUrl.includes('supabase.co/storage/v1/object/public/')) {
+        console.log('🔗 Detectada URL completa de Supabase, extrayendo path...');
+        const urlParts = fileUrl.split('/storage/v1/object/public/');
+        if (urlParts.length > 1) {
+          const pathWithBucket = urlParts[1];
+          const pathParts = pathWithBucket.split('/');
+          bucketName = pathParts[0]; // Primer parte es el bucket
+          filePath = pathParts.slice(1).join('/'); // Resto es el path
+          console.log('🗂️ Bucket extraído:', bucketName);
+          console.log('📂 Path extraído:', filePath);
+        }
+      } else {
+        // Para paths relativos, determinar bucket por contenido
+        console.log('🗂️ Detectado path relativo, determinando bucket...');
+        if (fileUrl.includes('clientordersprincipal/')) {
+          bucketName = 'clientordersprincipal';
+        } else if (fileUrl.includes('clientorderadicional/')) {
+          bucketName = 'clientorderadicional';
+        } else if (fileUrl.includes('invoices/')) {
+          bucketName = 'invoices';
+        }
+        filePath = fileUrl;
+      }
+      
+      // Detectar bucket correcto basado en la URL
+      if (fileUrl.includes('/invoices/')) {
+        bucketName = 'invoices';
+        console.log('🧾 Detectado archivo de factura, usando bucket invoices');
+      } else if (fileUrl.includes('/adminorders/')) {
+        bucketName = 'adminorders';
+        console.log('📁 Detectado archivo tuneado, usando bucket adminorders');
+      }
+      
+      console.log('🗂️ Bucket final determinado:', bucketName);
+      console.log('📂 Path final del archivo:', filePath);
+
+      console.log('☁️ Creando URL firmada para descarga desde Supabase Storage...');
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(filePath, 60); // URL válida por 60 segundos
+
+      if (signedUrlError) {
+        console.error('❌ ERROR al crear URL firmada:', signedUrlError);
+        throw signedUrlError;
+      }
+      
+      if (!signedUrlData?.signedUrl) {
+        console.error('❌ ERROR: No se pudo obtener URL firmada');
+        throw new Error('No se pudo generar la URL de descarga');
+      }
+
+      console.log('🔗 URL firmada creada exitosamente');
+      
+      // Descargar usando la URL firmada
+      console.log('📡 Descargando archivo usando URL firmada...');
+      const response = await fetch(signedUrlData.signedUrl);
+      
+      if (!response.ok) {
+        console.error('❌ ERROR en respuesta HTTP:', response.status, response.statusText);
+        throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      console.log('📦 Archivo descargado:', blob.size, 'bytes');
+      
+      const downloadUrl = URL.createObjectURL(blob);
+      console.log('🔗 URL de descarga local creada:', downloadUrl);
+      
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      console.log('🖱️ Simulando click en enlace de descarga...');
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      
+      console.log('✅ Descarga de Supabase completada exitosamente');
+      toast.success(`Descargando ${fileName}...`);
+    } catch (error: any) {
+      console.error('💥 ERROR COMPLETO en handleDownload:', error);
+      console.error('💥 Mensaje del error:', error.message);
+      console.error('💥 Stack del error:', error.stack);
+      toast.error(`${t('clientDashboard.messages.errors.downloadError')}: ${error.message || t('clientDashboard.messages.errors.unknownError')}`);
+    }
+  };
 
   // Cargar pedidos del usuario
   useEffect(() => {
@@ -321,7 +463,7 @@ const ClientDashboard: React.FC = () => {
     return {};
   };
 
-  // Function to load files for completed orders
+  // Function to load files for completed orders - CREADA DESDE CERO
   const loadOrderFiles = async (completedOrders: any[]) => {
     for (const order of completedOrders) {
       try {
@@ -342,41 +484,157 @@ const ClientDashboard: React.FC = () => {
           setOrderFiles(prev => ({ ...prev, [order.id]: files || [] }));
         }
 
-        // Load admin files
-        setAdminFilesLoading(prev => ({ ...prev, [order.id]: true }));
+        // Load admin files - REEMPLAZADO COMPLETAMENTE
+        await loadAdminFiles(order.id);
         
-        // Load admin files - need to get admin user IDs first
-        const { data: adminProfiles, error: adminProfileError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('role', 'admin');
-
-        if (adminProfileError) {
-          console.error('Error loading admin profiles:', adminProfileError);
-          setAdminFiles(prev => ({ ...prev, [order.id]: [] }));
-        } else {
-          const adminIds = adminProfiles?.map(profile => profile.id) || [];
-          
-          const { data: adminFilesData, error: adminError } = await supabase
-            .from('order_files')
-            .select('*')
-            .eq('order_id', order.id)
-            .in('uploaded_by', adminIds)
-            .order('created_at', { ascending: false });
-
-          if (adminError) {
-             console.error('Error loading admin files for order:', order.id, adminError);
-           } else {
-             setAdminFiles(prev => ({ ...prev, [order.id]: adminFilesData || [] }));
-           }
-         }
       } catch (err) {
         console.error('Error loading files for order:', order.id, err);
       } finally {
         setFilesLoading(prev => ({ ...prev, [order.id]: false }));
-        setAdminFilesLoading(prev => ({ ...prev, [order.id]: false }));
       }
     }
+  };
+
+  // Función para cargar archivos del admin - CREADA DESDE CERO
+  const loadAdminFiles = async (orderId: string) => {
+    if (!user) return;
+
+    try {
+      setAdminFilesLoading(prev => ({ ...prev, [orderId]: true }));
+      
+      // Cargar archivos tuneados y facturas del admin
+      const { data: files, error } = await supabase
+        .from('order_files')
+        .select('*')
+        .eq('order_id', orderId)
+        .is('uploaded_by', null) // Admin files
+        .in('file_category', ['map', 'invoice'])
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setAdminFiles(prev => ({ ...prev, [orderId]: files || [] }));
+      
+    } catch (error) {
+      setAdminFiles(prev => ({ ...prev, [orderId]: [] }));
+    } finally {
+      setAdminFilesLoading(prev => ({ ...prev, [orderId]: false }));
+    }
+  };
+
+  // Función para descargar archivos del admin - CORREGIDA PARA USAR SIGNED URLs
+  const downloadAdminFile = async (file: any) => {
+    console.log('🔥 INICIO downloadAdminFile - Archivo admin clickeado');
+    console.log('📁 Archivo recibido:', file);
+    
+    try {
+      let bucketName = '';
+      let filePath = '';
+      
+      // Detectar bucket automáticamente
+      if (file.file_category === 'map') {
+        bucketName = 'adminorders';
+        console.log('📁 Detectado archivo tuneado, usando bucket adminorders');
+      } else if (file.file_category === 'invoice') {
+        bucketName = 'invoices';
+        console.log('🧾 Detectado archivo de factura, usando bucket invoices');
+      } else {
+        console.error('❌ ERROR: Tipo de archivo no válido:', file.file_category);
+        toast.error('Tipo de archivo no válido');
+        return;
+      }
+
+      // Usar file_url si está disponible, sino construir el path
+      if (file.file_url) {
+        filePath = file.file_url;
+        console.log('🔗 Usando file_url:', filePath);
+      } else if (file.file_path) {
+        filePath = file.file_path;
+        console.log('📂 Usando file_path:', filePath);
+      } else {
+        console.error('❌ ERROR: No se encontró URL o path del archivo');
+        toast.error('No se pudo encontrar la ubicación del archivo');
+        return;
+      }
+
+      // Si es una URL completa de Supabase, extraer el path
+      if (filePath.includes('supabase.co/storage/v1/object/public/')) {
+        console.log('🔗 Detectada URL completa de Supabase, extrayendo path...');
+        const urlParts = filePath.split('/storage/v1/object/public/');
+        if (urlParts.length > 1) {
+          const pathWithBucket = urlParts[1];
+          const pathParts = pathWithBucket.split('/');
+          bucketName = pathParts[0]; // Primer parte es el bucket
+          filePath = pathParts.slice(1).join('/'); // Resto es el path
+          console.log('🗂️ Bucket extraído:', bucketName);
+          console.log('📂 Path extraído:', filePath);
+        }
+      }
+      
+      console.log('🗂️ Bucket final:', bucketName);
+      console.log('📂 Path final del archivo:', filePath);
+
+      console.log('☁️ Creando URL firmada para descarga desde Supabase Storage...');
+      const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+        .from(bucketName)
+        .createSignedUrl(filePath, 60); // URL válida por 60 segundos
+
+      if (signedUrlError) {
+        console.error('❌ ERROR al crear URL firmada:', signedUrlError);
+        toast.error(`Error al crear URL de descarga: ${signedUrlError.message}`);
+        return;
+      }
+      
+      if (!signedUrlData?.signedUrl) {
+        console.error('❌ ERROR: No se pudo obtener URL firmada');
+        toast.error('No se pudo generar la URL de descarga');
+        return;
+      }
+
+      console.log('🔗 URL firmada creada exitosamente');
+      
+      // Descargar usando la URL firmada
+      console.log('📡 Descargando archivo usando URL firmada...');
+      const response = await fetch(signedUrlData.signedUrl);
+      
+      if (!response.ok) {
+        console.error('❌ ERROR en respuesta HTTP:', response.status, response.statusText);
+        toast.error(`Error HTTP: ${response.status} ${response.statusText}`);
+        return;
+      }
+      
+      const blob = await response.blob();
+      console.log('📦 Archivo descargado:', blob.size, 'bytes');
+      
+      const downloadUrl = URL.createObjectURL(blob);
+      console.log('🔗 URL de descarga local creada:', downloadUrl);
+      
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = file.file_name || 'archivo_admin';
+      document.body.appendChild(a);
+      console.log('🖱️ Simulando click en enlace de descarga...');
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      
+      console.log('✅ Descarga de archivo admin completada exitosamente');
+      toast.success(`Descargando ${file.file_name || 'archivo'}...`);
+    } catch (error: any) {
+      console.error('💥 ERROR COMPLETO en downloadAdminFile:', error);
+      console.error('💥 Mensaje del error:', error.message);
+      console.error('💥 Stack del error:', error.stack);
+      toast.error(`Error al descargar archivo: ${error.message || 'Error desconocido'}`);
+    }
+  };
+
+  // Función para formatear tamaño de archivos - CREADA DESDE CERO
+  const formatFileSize = (bytes: number): string => {
+    if (!bytes) return 'Tamaño desconocido';
+    
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    
+    return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
   };
 
   // Function to load invoices for completed orders
@@ -464,269 +722,7 @@ const ClientDashboard: React.FC = () => {
   // Los datos del perfil ahora vienen del hook useProfile()
   // Se obtienen automáticamente de Supabase
 
-  // Componente OrderCard rediseñado - Sin desplegables
-  const OrderCard: React.FC<{ order: any; onDownload: (fileId: string, fileName: string) => void }> = ({ order, onDownload }) => {
-    // Obtener datos de facturas y archivos del estado
-    const invoices = orderInvoices[order.id] || [];
-    const files = orderFiles[order.id] || [];
-    const isLoadingInvoices = invoicesLoading[order.id] || false;
-    const isLoadingFiles = filesLoading[order.id] || false;
 
-    const getStatusIcon = (status: string) => {
-      switch (status) {
-        case 'completed':
-          return <CheckCircle className="w-5 h-5" />;
-        case 'in_progress':
-          return <Clock className="w-5 h-5" />;
-        case 'pending':
-          return <AlertCircle className="w-5 h-5" />;
-        default:
-          return <Clock className="w-5 h-5" />;
-      }
-    };
-
-    const getStatusBadge = (status: string) => {
-      const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold border-2 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105";
-      switch (status) {
-        case 'completed':
-        case 'delivered':
-          return `${baseClasses} bg-gradient-to-r from-green-500/30 to-emerald-500/30 text-green-300 border-green-400/60 shadow-green-500/25 hover:shadow-green-500/40`;
-        case 'in_progress':
-          return `${baseClasses} bg-gradient-to-r from-yellow-500/30 to-amber-500/30 text-yellow-300 border-yellow-400/60 shadow-yellow-500/25 hover:shadow-yellow-500/40`;
-        case 'pending':
-          return `${baseClasses} bg-gradient-to-r from-orange-500/30 to-red-500/30 text-orange-300 border-orange-400/60 shadow-orange-500/25 hover:shadow-orange-500/40`;
-        default:
-          return `${baseClasses} bg-gradient-to-r from-gray-500/30 to-slate-500/30 text-gray-300 border-gray-400/60 shadow-gray-500/25 hover:shadow-gray-500/40`;
-      }
-    };
-
-    return (
-      <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border border-gray-700/50 rounded-2xl overflow-hidden hover:border-primary/30 transition-all duration-300 shadow-lg hover:shadow-2xl hover:shadow-primary/10 w-full max-w-none">
-        {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-gray-700/30">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="bg-primary/20 p-2 rounded-lg flex-shrink-0">
-                  <Car className="w-5 h-5 text-primary" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-lg font-bold text-white truncate">Pedido #{order.id}</h3>
-                  <p className="text-sm text-gray-400">{new Date(order.order_date || order.created_at).toLocaleDateString('es-ES')}</p>
-                </div>
-              </div>
-              <div className={getStatusBadge(order.status)}>
-                {getStatusIcon(order.status)}
-                <span className="truncate">{getStatusText(order.status)}</span>
-              </div>
-            </div>
-            <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 sm:text-right">
-              <p className="text-xl sm:text-2xl font-bold text-primary">€{parseFloat(order.total_price || '0').toFixed(2)}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Vehicle & Service Info */}
-        <div className="p-4 sm:p-6 bg-gray-800/30">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-500/20 p-2 rounded-lg flex-shrink-0">
-                  <Car className="w-4 h-4 text-blue-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.vehicle')}</p>
-                  <p className="text-white font-medium break-words">{order.vehicle || `${order.vehicle_make || ''} ${order.vehicle_model || ''}`.trim()}</p>
-                  {order.vehicle_year && <p className="text-sm text-gray-400 mt-1">{t('clientDashboard.orders.card.year')} {order.vehicle_year}</p>}
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="bg-purple-500/20 p-2 rounded-lg flex-shrink-0">
-                  <Wrench className="w-4 h-4 text-purple-400" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.service')}</p>
-                  <p className="text-white font-medium break-words">{order.services?.title || order.service_name || order.service_type || 'Servicio no especificado'}</p>
-                  {order.additional_services_details && order.additional_services_details.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.additionalServices')}</p>
-                      <div className="space-y-1">
-                        {order.additional_services_details.map((service, index) => (
-                          <div key={index} className="flex justify-between items-center text-sm">
-                            <span className="text-gray-300">{service.title}</span>
-                            <span className="text-primary font-medium">€{service.price}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Content - Siempre visible */}
-        <div className="border-t border-gray-700/30 p-6">
-          {order.estimated_delivery && (
-            <div className="bg-gray-700/30 rounded-lg p-3 mb-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                <p className="text-sm text-gray-300">
-                  Entrega estimada: {new Date(order.estimated_delivery).toLocaleDateString('es-ES')}
-                </p>
-              </div>
-            </div>
-          )}
-          
-          <div className="space-y-4">
-          {/* Archivos */}
-          {(isLoadingFiles || adminFilesLoading[order.id]) ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-400 text-sm mt-2">Cargando archivos...</p>
-            </div>
-          ) : ((files && files.length > 0) || (adminFiles[order.id] && adminFiles[order.id].length > 0)) && (
-            <div className="bg-gray-700/20 rounded-lg p-4">
-              <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Archivos Tuneados
-              </h4>
-              
-              {/* Archivos del Cliente */}
-              {files && files.length > 0 && (
-                <div className="mb-4">
-                  <h5 className="text-md font-medium text-gray-300 mb-3 flex items-center gap-2">
-                    <User className="w-4 h-4" />
-                    Tus archivos subidos
-                  </h5>
-                  <div className="space-y-3">
-                    {files.map((file) => (
-                      <div key={file.id} className="bg-gray-600/30 rounded-lg p-3">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium break-words">{file.file_name}</p>
-                            <p className="text-gray-400 text-sm break-words">
-                              {t('clientDashboard.orders.files.uploaded')}: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.orders.files.unknownSize')}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => onDownload(file.file_url, file.file_name)}
-                            className="bg-primary hover:bg-primary/80 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
-                          >
-                            <Download className="w-4 h-4" />
-                            {t('clientDashboard.common.download')}
-                          </button>
-                        </div>
-                        {file.admin_comments && (
-                          <div className="bg-gray-700/40 rounded-lg p-3 border-l-4 border-primary/50">
-                            <p className="text-gray-300 text-sm font-medium mb-1">Comentarios técnicos:</p>
-                            <p className="text-gray-200 text-sm leading-relaxed">{file.admin_comments}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Archivos del Admin */}
-              {adminFiles[order.id] && adminFiles[order.id].length > 0 && (
-                <div>
-                  <div className="space-y-3">
-                    {adminFiles[order.id].map((file) => (
-                      <div key={file.id} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-white font-medium break-words">{file.file_name}</p>
-                            <p className="text-gray-400 text-sm break-words">
-                              {t('clientDashboard.orders.files.processed')}: {new Date(file.created_at).toLocaleDateString('es-ES')} • {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.orders.files.unknownSize')}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => onDownload(file.file_url, file.file_name)}
-                            className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
-                          >
-                            <Download className="w-4 h-4" />
-                            {t('clientDashboard.common.download')}
-                          </button>
-                        </div>
-                        {file.admin_comments && (
-                          <div className="bg-green-800/40 rounded-lg p-3 border-l-4 border-green-400/50">
-                            <p className="text-green-300 text-sm font-medium mb-1">Comentarios del admin:</p>
-                            <p className="text-green-100 text-sm leading-relaxed">{file.admin_comments}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-          
-          {/* Facturas */}
-          {isLoadingInvoices ? (
-            <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-              <p className="text-gray-400 text-sm mt-2">Cargando facturas...</p>
-            </div>
-          ) : (invoices && invoices.length > 0) && (
-            <div className="bg-gray-700/20 rounded-lg p-4">
-              <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-                <CreditCard className="w-5 h-5" />
-                Facturas
-              </h4>
-              
-              <div className="space-y-3">
-                {invoices.map((invoice) => (
-                  <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-white font-medium break-words">{invoice.file_name || `Factura ${invoice.id.slice(-8)}`}</p>
-                        <p className="text-gray-400 text-sm break-words">
-                          Generada: {new Date(invoice.created_at).toLocaleDateString('es-ES')}
-                        </p>
-                      </div>
-                      {invoice.file_url && (
-                        <button
-                          onClick={() => onDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.id.slice(-8)}.pdf`)}
-                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center gap-2 text-sm sm:text-base touch-manipulation flex-shrink-0 w-full sm:w-auto"
-                        >
-                          <Download className="w-4 h-4" />
-                          Descargar
-                        </button>
-                      )}
-                    </div>
-                    {invoice.admin_comments && (
-                      <div className="bg-blue-800/40 rounded-lg p-3 border-l-4 border-blue-400/50">
-                        <p className="text-blue-300 text-sm font-medium mb-1">Comentarios del admin:</p>
-                        <p className="text-blue-100 text-sm leading-relaxed">{invoice.admin_comments}</p>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Botón Ver más - Al final de la tarjeta */}
-          <div className="mt-6 pt-4 border-t border-gray-700/30 flex justify-center">
-            <button
-              onClick={() => setSelectedOrderForModal(order)}
-              className="bg-transparent hover:bg-gray-700/50 text-primary hover:text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 flex items-center gap-2"
-            >
-              <Eye className="w-4 h-4" />
-              {t('clientDashboard.orders.card.viewMore')}
-            </button>
-          </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -829,79 +825,14 @@ const ClientDashboard: React.FC = () => {
     setShowPasswordChange(false);
   };
 
-  const handleDownload = async (fileUrl: string, fileName: string) => {
-    try {
-      // Validar que la URL no esté vacía
-      if (!fileUrl || fileUrl.trim() === '') {
-        toast.error(t('clientDashboard.messages.errors.invalidFileUrl'));
-        return;
-      }
 
-      // Si es una URL completa de Supabase, descargar usando fetch para preservar el nombre
-      if (fileUrl.startsWith('http')) {
-        try {
-          const response = await fetch(fileUrl);
-          if (!response.ok) {
-            throw new Error('Error al obtener el archivo');
-          }
-          
-          const blob = await response.blob();
-          const downloadUrl = URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = fileName; // Usar el nombre original
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(downloadUrl);
-          
-          toast.success(`Descargando ${fileName}...`);
-          return;
-        } catch (fetchError) {
-          console.error('Error with fetch download:', fetchError);
-          // Fallback al método anterior
-          const link = document.createElement('a');
-          link.href = fileUrl;
-          link.download = fileName;
-          link.target = '_blank';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          toast.success(`Descargando ${fileName}...`);
-          return;
-        }
-      }
 
-      // Determinar el bucket basado en la URL del archivo
-      let bucketName = 'order-files';
-      if (fileUrl.includes('adminorders/')) {
-        bucketName = 'adminorders';
-      }
 
-      const { data, error } = await supabase.storage
-        .from(bucketName)
-        .download(fileUrl);
 
-      if (error) {
-        throw error;
-      }
+  // Funciones de utilidad definidas en OrderDetails.tsx para evitar duplicación
+  // extractFilePathFromUrl, extractFileNameFromUrl, parseMainFileUrl
 
-      // Crear URL para descarga
-      const downloadUrl = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
-      
-      toast.success(`Descargando ${fileName}...`);
-    } catch (error: any) {
-      console.error('Error downloading file:', error);
-      toast.error(`${t('clientDashboard.messages.errors.downloadError')}: ${error.message || t('clientDashboard.messages.errors.unknownError')}`);
-    }
-  };
+
 
   // Función para formatear fecha
   const formatDate = (dateString: string) => {
@@ -912,502 +843,6 @@ const ClientDashboard: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
-  };
-
-  // Función para extraer el path del archivo desde una URL completa de Supabase Storage
-  const extractFilePathFromUrl = (url: string): string => {
-    try {
-      // Si ya es un path relativo (no contiene http), devolverlo tal como está
-      if (!url.startsWith('http')) {
-        return url;
-      }
-      
-      // Extraer el path después de '/object/'
-      const objectIndex = url.indexOf('/object/');
-      if (objectIndex !== -1) {
-        return url.substring(objectIndex + 8); // +8 para saltar '/object/'
-      }
-      
-      // Si no encuentra el patrón, intentar extraer después del bucket name
-      const bucketPattern = '/order-files/';
-      const bucketIndex = url.indexOf(bucketPattern);
-      if (bucketIndex !== -1) {
-        return url.substring(bucketIndex + bucketPattern.length);
-      }
-      
-      // Como último recurso, devolver la URL completa
-      return url;
-    } catch (error) {
-      console.error('Error extracting file path:', error);
-      return url;
-    }
-  };
-
-  // Función para extraer el nombre original del archivo desde una URL de Supabase Storage
-  const extractFileNameFromUrl = (url: string): string => {
-    try {
-      if (!url) return 'archivo-sin-nombre';
-      
-      // Extraer el path del archivo
-      const filePath = extractFilePathFromUrl(url);
-      
-      // Obtener solo el nombre del archivo (última parte del path)
-      const fileName = filePath.split('/').pop() || 'archivo-sin-nombre';
-      
-      // Decodificar URL para manejar caracteres especiales
-      const decodedFileName = decodeURIComponent(fileName);
-      
-      // Remover el timestamp del inicio del nombre si existe (formato: timestamp_nombreoriginal)
-      const timestampPattern = /^\d{13}_/; // 13 dígitos seguidos de guión bajo
-      const originalName = decodedFileName.replace(timestampPattern, '');
-      
-      return originalName || 'archivo-sin-nombre';
-    } catch (error) {
-      console.error('Error extracting file name:', error);
-      return 'archivo-sin-nombre';
-    }
-  };
-
-  // Función para generar PDF del pedido (idéntica a OrderDetails.tsx)
-  const generatePDF = async (order: any) => {
-    if (!order) return;
-
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.width;
-      const pageHeight = doc.internal.pageSize.height;
-      const margin = 20;
-      let yPosition = 25;
-
-      // Colores corporativos
-      const primaryColor = [59, 130, 246]; // Azul primario
-      const darkColor = [31, 41, 55]; // Gris oscuro
-      const lightColor = [107, 114, 128]; // Gris claro
-      const accentColor = [16, 185, 129]; // Verde accent
-
-      // Función para verificar si necesitamos una nueva página
-      const checkNewPage = (requiredSpace: number) => {
-        if (yPosition + requiredSpace > pageHeight - 30) {
-          doc.addPage();
-          yPosition = 30;
-          return true;
-        }
-        return false;
-      };
-
-      // Función para agregar logo (simulado con texto estilizado)
-      const addLogo = () => {
-        // Logo simulado con texto estilizado
-        doc.setFontSize(24);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text('FILESECUFB', margin, yPosition);
-        
-        // Subtítulo del logo
-        doc.setFontSize(10);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Professional ECU Services', margin, yPosition + 8);
-        
-        yPosition += 20;
-      };
-
-      // Función para agregar header con información de la empresa
-      const addCompanyHeader = () => {
-        // Línea decorativa superior
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(2);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 10;
-
-        // Información de la empresa (lado derecho)
-        const companyInfo = [
-          'www.filesecufb.com',
-          'info@filesecufb.com',
-          '+34 630 84 10 47'
-        ];
-        
-        doc.setFontSize(9);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        companyInfo.forEach((info, index) => {
-          doc.text(info, pageWidth - margin, yPosition + (index * 5), { align: 'right' });
-        });
-        
-        yPosition += 25;
-      };
-
-      // Función para agregar título del documento
-      const addDocumentTitle = () => {
-        doc.setFontSize(28);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text('DETALLE DEL PEDIDO', pageWidth / 2, yPosition, { align: 'center' });
-        
-        // Línea decorativa bajo el título
-        yPosition += 8;
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(1);
-        doc.line(pageWidth / 2 - 40, yPosition, pageWidth / 2 + 40, yPosition);
-        yPosition += 20;
-      };
-
-      // Función para agregar información básica del pedido
-      const addOrderBasicInfo = () => {
-        // Fondo gris claro para la información básica
-        doc.setFillColor(248, 250, 252);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 25, 'F');
-        
-        doc.setFontSize(12);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'bold');
-        
-        // Primera fila
-        doc.text(`Pedido #${order.id.slice(-8).toUpperCase()}`, margin + 5, yPosition + 5);
-        doc.text(`Fecha: ${formatDate(order.created_at)}`, pageWidth / 2, yPosition + 5, { align: 'center' });
-        doc.text(`Total: €${parseFloat(order.total_price?.toString() || '0').toFixed(2)}`, pageWidth - margin - 5, yPosition + 5, { align: 'right' });
-        
-        // Segunda fila
-        doc.text(`Servicio: ${order.services?.title || 'N/A'}`, margin + 5, yPosition + 15);
-        
-        yPosition += 35;
-      };
-
-      // Función para agregar sección con título
-      const addSection = (title: string, content: () => void) => {
-        checkNewPage(30);
-        
-        // Título de sección
-        doc.setFontSize(16);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text(title, margin, yPosition);
-        
-        // Línea bajo el título
-        yPosition += 3;
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(0.5);
-        doc.line(margin, yPosition, margin + 60, yPosition);
-        yPosition += 12;
-        
-        content();
-        yPosition += 18;
-      };
-
-      // Función para agregar información del cliente
-      const addClientInfo = () => {
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        const clientData = [
-          { label: `${t('clientDashboard.profile.fullName')}:`, value: order.profiles?.full_name || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.email')}:`, value: order.profiles?.email || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.phone')}:`, value: order.profiles?.phone || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.address')}:`, value: order.profiles?.billing_address || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.city')}:`, value: order.profiles?.billing_city || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.postalCode')}:`, value: order.profiles?.billing_postal_code || t('clientDashboard.common.na') },
-          { label: `${t('clientDashboard.profile.country')}:`, value: order.profiles?.billing_country || t('clientDashboard.common.na') }
-        ];
-        
-        clientData.forEach((item, index) => {
-          if (item.value !== 'N/A') {
-            doc.setFont('helvetica', 'bold');
-            doc.text(item.label, margin, yPosition);
-            doc.setFont('helvetica', 'normal');
-            doc.text(item.value, margin + 40, yPosition);
-            yPosition += 8;
-          }
-        });
-      };
-
-      // Función para agregar información del vehículo
-      const addVehicleInfo = () => {
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        const vehicleData = [
-          { label: `${t('clientDashboard.modal.vehicle.make')}:`, value: order.vehicle_make },
-          { label: `${t('clientDashboard.modal.vehicle.model')}:`, value: order.vehicle_model },
-          { label: `${t('clientDashboard.modal.vehicle.generation')}:`, value: order.vehicle_generation },
-          { label: `${t('clientDashboard.modal.vehicle.engine')}:`, value: order.vehicle_engine },
-          { label: `${t('clientDashboard.modal.vehicle.year')}:`, value: order.vehicle_year },
-          { label: `${t('clientDashboard.modal.vehicle.ecu')}:`, value: order.vehicle_ecu },
-          { label: `${t('clientDashboard.modal.vehicle.transmission')}:`, value: order.vehicle_gearbox },
-          { label: `${t('clientDashboard.modal.vehicle.power')}:`, value: order.engine_hp ? `${order.engine_hp} HP${order.engine_kw ? ` (${order.engine_kw} kW)` : ''}` : null },
-          { label: `${t('clientDashboard.modal.vehicle.reading')}:`, value: order.read_method },
-          { label: `${t('clientDashboard.modal.vehicle.hardware')}:`, value: order.hardware_number },
-          { label: `${t('clientDashboard.modal.vehicle.software')}:`, value: order.software_number }
-        ];
-        
-        let col1Y = yPosition;
-        let col2Y = yPosition;
-        const colWidth = (pageWidth - 2 * margin) / 2;
-        
-        vehicleData.forEach((item, index) => {
-          if (item.value) {
-            const isLeftColumn = index % 2 === 0;
-            const xPos = isLeftColumn ? margin : margin + colWidth;
-            const currentY = isLeftColumn ? col1Y : col2Y;
-            
-            doc.setFont('helvetica', 'bold');
-            doc.text(item.label, xPos, currentY);
-            doc.setFont('helvetica', 'normal');
-            doc.text(item.value, xPos + 35, currentY);
-            
-            if (isLeftColumn) {
-              col1Y += 8;
-            } else {
-              col2Y += 8;
-            }
-          }
-        });
-        
-        yPosition = Math.max(col1Y, col2Y);
-      };
-
-      // Función para agregar modificaciones del vehículo
-      const addVehicleModifications = () => {
-        const modifications = [
-          { key: 'aftermarket_exhaust', label: t('clientDashboard.modal.modifications.aftermarketExhaust'), remarks: 'aftermarket_exhaust_remarks' },
-          { key: 'aftermarket_intake_manifold', label: t('clientDashboard.modal.modifications.aftermarketIntake'), remarks: 'aftermarket_intake_manifold_remarks' },
-          { key: 'cold_air_intake', label: t('clientDashboard.modal.modifications.coldAirIntake'), remarks: 'cold_air_intake_remarks' },
-          { key: 'decat', label: t('clientDashboard.modal.modifications.decat'), remarks: 'decat_remarks' }
-        ];
-        
-        const hasAnyModification = modifications.some(({ key }) => order[key as keyof any]);
-        
-        if (!hasAnyModification) {
-          doc.setFontSize(11);
-          doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-          doc.setFont('helvetica', 'italic');
-          doc.text(t('clientDashboard.modal.modifications.noModifications'), margin, yPosition);
-          yPosition += 8;
-          return;
-        }
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        modifications.forEach(({ key, label, remarks }) => {
-          const hasModification = order[key as keyof any] as boolean;
-          const remarkText = order[remarks as keyof any] as string;
-          
-          if (hasModification) {
-            doc.setFont('helvetica', 'bold');
-            doc.text(`• ${label}`, margin, yPosition);
-            doc.setFont('helvetica', 'normal');
-            yPosition += 8;
-            
-            if (remarkText && remarkText.trim()) {
-              doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-              doc.setFont('helvetica', 'italic');
-              const lines = doc.splitTextToSize(`  ${t('clientDashboard.modal.modifications.observations')}: ${remarkText}`, pageWidth - 2 * margin - 10);
-              lines.forEach((line: string) => {
-                doc.text(line, margin + 5, yPosition);
-                yPosition += 7;
-              });
-              yPosition += 3;
-            }
-            
-            doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-          }
-        });
-      };
-
-      // Función para agregar servicios adicionales
-      const addAdditionalServices = () => {
-        if (!order.additional_services_details || order.additional_services_details.length === 0) return;
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        let totalAdditional = 0;
-        
-        order.additional_services_details.forEach((service: any, index: number) => {
-          const price = parseFloat(service.price || 0);
-          totalAdditional += price;
-          
-          doc.setFont('helvetica', 'normal');
-          doc.text(`• ${service.title}`, margin, yPosition);
-          doc.setFont('helvetica', 'bold');
-          doc.text(`€${price.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
-          yPosition += 8;
-        });
-        
-        // Total de servicios adicionales
-        if (totalAdditional > 0) {
-          yPosition += 5;
-          doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
-          doc.line(margin, yPosition, pageWidth - margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-          doc.text(t('clientDashboard.modal.additionalServices.total'), margin, yPosition);
-          doc.text(`€${totalAdditional.toFixed(2)}`, pageWidth - margin, yPosition, { align: 'right' });
-        }
-      };
-
-      // Función para agregar archivos del cliente
-      const addClientFiles = () => {
-        const parseMainFileUrl = (mainFileUrl: string | null): string[] => {
-          if (!mainFileUrl) return [];
-          if (mainFileUrl.startsWith('[')) {
-            try {
-              const parsed = JSON.parse(mainFileUrl);
-              return Array.isArray(parsed) ? parsed : [mainFileUrl];
-            } catch (error) {
-              return [mainFileUrl];
-            }
-          }
-          return [mainFileUrl];
-        };
-        
-        const mainFileUrls = order.main_file_urls || parseMainFileUrl(order.main_file_url);
-        const additionalFiles = order.optional_attachments_urls || [];
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        
-        if (mainFileUrls.length > 0) {
-          doc.setFont('helvetica', 'bold');
-          doc.text(t('clientDashboard.modal.files.mainFiles'), margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'normal');
-          mainFileUrls.forEach((url, index) => {
-            if (url && url.trim() !== '') {
-              const fileName = extractFileNameFromUrl(url);
-              doc.text(`• ${fileName}`, margin + 5, yPosition);
-              yPosition += 7;
-            }
-          });
-          yPosition += 8;
-        }
-        
-        if (additionalFiles.length > 0) {
-          doc.setFont('helvetica', 'bold');
-          doc.text(t('clientDashboard.modal.files.additionalFiles'), margin, yPosition);
-          yPosition += 8;
-          
-          doc.setFont('helvetica', 'normal');
-          additionalFiles.forEach((url, index) => {
-            if (url && url.trim() !== '') {
-              const fileName = extractFileNameFromUrl(url);
-              doc.text(`• ${fileName}`, margin + 5, yPosition);
-              yPosition += 7;
-            }
-          });
-        }
-      };
-
-      // Función para agregar información adicional
-      const addAdditionalInfo = () => {
-        if (!order.additional_info) return;
-        
-        doc.setFontSize(11);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        const lines = doc.splitTextToSize(order.additional_info, pageWidth - 2 * margin - 10);
-        lines.forEach((line: string) => {
-          checkNewPage(10);
-          doc.text(line, margin, yPosition);
-          yPosition += 7;
-        });
-      };
-
-      // Función para agregar resumen financiero
-      const addFinancialSummary = () => {
-        checkNewPage(40);
-        
-        // Fondo para el resumen
-        doc.setFillColor(248, 250, 252);
-        doc.rect(margin, yPosition - 5, pageWidth - 2 * margin, 35, 'F');
-        
-        doc.setFontSize(14);
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setFont('helvetica', 'bold');
-        doc.text(t('clientDashboard.modal.financial.title'), margin + 5, yPosition + 8);
-        
-        yPosition += 20;
-        
-        // Detalles financieros
-        const basePrice = parseFloat(order.base_price?.toString() || '0');
-        const additionalPrice = order.additional_services_details?.reduce((sum: number, service: any) => 
-          sum + parseFloat(service.price || 0), 0) || 0;
-        const totalPrice = parseFloat(order.total_price?.toString() || '0');
-        
-        doc.setFontSize(12);
-        doc.setTextColor(darkColor[0], darkColor[1], darkColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        if (basePrice > 0) {
-          doc.text(`${t('clientDashboard.modal.financial.basePrice')}:`, margin + 5, yPosition);
-          doc.text(`€${basePrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-          yPosition += 8;
-        }
-        
-        if (additionalPrice > 0) {
-          doc.text(`${t('clientDashboard.modal.financial.additionalServices')}:`, margin + 5, yPosition);
-          doc.text(`€${additionalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-          yPosition += 8;
-        }
-        
-        // Línea separadora
-        doc.setDrawColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.setLineWidth(1);
-        doc.line(margin + 5, yPosition, pageWidth - margin - 5, yPosition);
-        yPosition += 8;
-        
-        // Total final
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        doc.text(`${t('clientDashboard.modal.financial.total')}:`, margin + 5, yPosition);
-        doc.text(`€${totalPrice.toFixed(2)}`, pageWidth - margin - 5, yPosition, { align: 'right' });
-      };
-
-      // Función para agregar footer
-      const addFooter = () => {
-        const footerY = pageHeight - 20;
-        
-        doc.setFontSize(8);
-        doc.setTextColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setFont('helvetica', 'normal');
-        
-        // Línea separadora
-        doc.setDrawColor(lightColor[0], lightColor[1], lightColor[2]);
-        doc.setLineWidth(0.5);
-        doc.line(margin, footerY - 5, pageWidth - margin, footerY - 5);
-        
-        // Texto del footer
-        doc.text(t('clientDashboard.pdf.footer.generated'), pageWidth / 2, footerY, { align: 'center' });
-        doc.text(`${t('clientDashboard.pdf.footer.generatedOn')}: ${new Date().toLocaleDateString('es-ES')} ${t('clientDashboard.pdf.footer.at')} ${new Date().toLocaleTimeString('es-ES')}`, pageWidth / 2, footerY + 5, { align: 'center' });
-      };
-
-      // Construir el PDF
-      addLogo();
-      addCompanyHeader();
-      addDocumentTitle();
-      addOrderBasicInfo();
-      
-      addSection(t('clientDashboard.pdf.sections.clientInfo'), addClientInfo);
-      addSection(t('clientDashboard.pdf.sections.vehicleInfo'), addVehicleInfo);
-      addSection(t('clientDashboard.pdf.sections.vehicleModifications'), addVehicleModifications);
-      addSection(t('clientDashboard.pdf.sections.additionalServices'), addAdditionalServices);
-      addSection(t('clientDashboard.pdf.sections.clientFiles'), addClientFiles);
-      addSection(t('clientDashboard.pdf.sections.additionalInfo'), addAdditionalInfo);
-      addFinancialSummary();
-      addFooter();
-
-      // Guardar el PDF
-      doc.save(`pedido-${order.id.slice(-8)}-${new Date().toISOString().split('T')[0]}.pdf`);
-      toast.success(t('clientDashboard.messages.pdfGenerated'));
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      toast.error(t('clientDashboard.messages.pdfError'));
-    }
   };
 
   const renderOrders = () => {
@@ -1579,10 +1014,11 @@ const ClientDashboard: React.FC = () => {
           <div className="space-y-6">
             {paginatedOrders.map((order) => (
               <OrderCard
-                key={order.id}
-                order={order}
-                onDownload={handleDownload}
-              />
+                      key={order.id}
+                      order={order}
+                      onViewMore={setSelectedOrderForModal}
+                      adminFiles={adminFiles}
+                    />
             ))}
           </div>
           
@@ -2010,476 +1446,19 @@ const ClientDashboard: React.FC = () => {
       
       {/* Modal de información completa del pedido */}
       {selectedOrderForModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-2xl border border-gray-700 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            {/* Header del Modal */}
-            <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-6 flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-white">{t('clientDashboard.modal.completeInfo')} - {t('clientDashboard.modal.orderNumber', { id: selectedOrderForModal.id })}</h2>
-              <button
-                onClick={() => setSelectedOrderForModal(null)}
-                className="text-gray-400 hover:text-white transition-colors p-2 hover:bg-gray-800 rounded-lg"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            
-            {/* Contenido del Modal */}
-            <div className="p-6 space-y-6">
-              {/* Información Básica del Pedido */}
-              <div className="bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  {t('clientDashboard.modal.orderInfo')}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.orderId')}</p>
-                    <p className="text-white font-medium">#{selectedOrderForModal.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.orderDate')}</p>
-                    <p className="text-white font-medium">{new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.status')}</p>
-                    <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                      selectedOrderForModal.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                      selectedOrderForModal.status === 'in_progress' ? 'bg-yellow-500/20 text-yellow-400' :
-                      'bg-orange-500/20 text-orange-400'
-                    }`}>
-                      {getStatusText(selectedOrderForModal.status)}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.totalPrice')}</p>
-                    <p className="text-white font-bold text-lg">€{parseFloat(selectedOrderForModal.total_price || '0').toFixed(2)}</p>
-                  </div>
-                  {selectedOrderForModal.estimated_delivery && (
-                    <div className="md:col-span-2">
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.estimatedDelivery')}</p>
-                      <p className="text-white font-medium">{new Date(selectedOrderForModal.estimated_delivery).toLocaleDateString('es-ES')}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Información del Cliente */}
-              <div className="bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <User className="w-5 h-5" />
-                  {t('clientDashboard.modal.clientInfo')}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.name')}</p>
-                    <p className="text-white font-medium">{fullProfile?.full_name || user?.email || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.email')}</p>
-                    <p className="text-white font-medium">{user?.email || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.phone')}</p>
-                    <p className="text-white font-medium">{fullProfile?.phone || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.address')}</p>
-                    <p className="text-white font-medium">{fullProfile?.billing_address || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Información del Vehículo */}
-              <div className="bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <Car className="w-5 h-5" />
-                  {t('clientDashboard.modal.vehicleInfo')}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.brand')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_make || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.model')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_model || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.generation')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_generation || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.engine')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_engine || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.ecu')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_ecu || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.year')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_year || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.gearbox')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.vehicle_gearbox || t('clientDashboard.profile.notSpecified')}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm">{t('clientDashboard.modal.service')}</p>
-                    <p className="text-white font-medium">{selectedOrderForModal.service_name || selectedOrderForModal.service_type || selectedOrderForModal.services?.title || t('clientDashboard.modal.service')}</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Información Adicional del Vehículo */}
-              <div className="bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  {t('clientDashboard.modal.additionalInfo')}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(selectedOrderForModal.engine_hp || selectedOrderForModal.engine_kw) && (
-                    <div>
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.enginePower')}</p>
-                      <p className="text-white font-medium">
-                        {selectedOrderForModal.engine_hp && `${selectedOrderForModal.engine_hp} HP`}
-                        {selectedOrderForModal.engine_hp && selectedOrderForModal.engine_kw && ' / '}
-                        {selectedOrderForModal.engine_kw && `${selectedOrderForModal.engine_kw} kW`}
-                      </p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.vin && (
-                    <div>
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.vin')}</p>
-                      <p className="text-white font-medium break-all">{selectedOrderForModal.vin}</p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.read_method && (
-                    <div>
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.readMethod')}</p>
-                      <p className="text-white font-medium">{selectedOrderForModal.read_method}</p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.hardware_number && (
-                    <div>
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.hardwareNumber')}</p>
-                      <p className="text-white font-medium">{selectedOrderForModal.hardware_number}</p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.software_number && (
-                    <div>
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.softwareNumber')}</p>
-                      <p className="text-white font-medium">{selectedOrderForModal.software_number}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Piezas Modificadas */}
-              {selectedOrderForModal.has_modified_parts && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <Wrench className="w-5 h-5" />
-                    {t('clientDashboard.modal.modifiedParts')}
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedOrderForModal.aftermarket_exhaust && (
-                      <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">{t('clientDashboard.modal.aftermarketExhaust')}</p>
-                        {selectedOrderForModal.aftermarket_exhaust_remarks && (
-                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_exhaust_remarks}</p>
-                        )}
-                      </div>
-                    )}
-                    {selectedOrderForModal.aftermarket_intake_manifold && (
-                      <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">{t('clientDashboard.modal.aftermarketIntakeManifold')}</p>
-                        {selectedOrderForModal.aftermarket_intake_manifold_remarks && (
-                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.aftermarket_intake_manifold_remarks}</p>
-                        )}
-                      </div>
-                    )}
-                    {selectedOrderForModal.cold_air_intake && (
-                      <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">{t('clientDashboard.modal.coldAirIntake')}</p>
-                        {selectedOrderForModal.cold_air_intake_remarks && (
-                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.cold_air_intake_remarks}</p>
-                        )}
-                      </div>
-                    )}
-                    {selectedOrderForModal.decat && (
-                      <div className="bg-gray-700/30 rounded-lg p-3">
-                        <p className="text-white font-medium">{t('clientDashboard.modal.decat')}</p>
-                        {selectedOrderForModal.decat_remarks && (
-                          <p className="text-gray-300 text-sm mt-1">{selectedOrderForModal.decat_remarks}</p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-              
-              {/* Servicios Adicionales */}
-              {selectedOrderForModal.additional_services_details && selectedOrderForModal.additional_services_details.length > 0 && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <Wrench className="w-5 h-5" />
-                    {t('clientDashboard.modal.additionalServices')}
-                  </h3>
-                  <div className="space-y-3">
-                    {selectedOrderForModal.additional_services_details.map((service, index) => (
-                      <div key={index} className="bg-gray-700/30 rounded-lg p-3">
-                        <div className="flex justify-between items-center">
-                          <p className="text-white font-medium">{service.title}</p>
-                          <p className="text-green-400 font-semibold">€{service.price}</p>
-                        </div>
-                        {service.description && (
-                          <p className="text-gray-400 text-sm mt-2">{service.description}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Información Adicional */}
-              {selectedOrderForModal.additional_info && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    {t('clientDashboard.modal.additionalInfo')}
-                  </h3>
-                  <div>
-                    <p className="text-gray-400 text-sm mb-2">{t('clientDashboard.modal.additionalComments')}</p>
-                    <p className="text-white whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
-                  </div>
-                </div>
-              )}
-              
-              {/* Información de Precios */}
-              <div className="bg-gray-800/50 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  {t('clientDashboard.modal.priceInfo')}
-                </h3>
-                <div className="space-y-3">
-                  {selectedOrderForModal.base_price && (
-                    <div className="flex justify-between">
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.basePrice')}</p>
-                      <p className="text-white font-medium">€{selectedOrderForModal.base_price}</p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.additional_services_price && selectedOrderForModal.additional_services_price > 0 && (
-                    <div className="flex justify-between">
-                      <p className="text-gray-400 text-sm">{t('clientDashboard.modal.additionalServicesPrice')}</p>
-                      <p className="text-white font-medium">€{selectedOrderForModal.additional_services_price}</p>
-                    </div>
-                  )}
-                  {selectedOrderForModal.total_price && (
-                    <div className="flex justify-between border-t border-gray-600 pt-3">
-                      <p className="text-white font-semibold">{t('clientDashboard.modal.total')}</p>
-                      <p className="text-white font-bold text-lg">€{selectedOrderForModal.total_price}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Documentos del Cliente */}
-              {(selectedOrderForModal.main_file_url || selectedOrderForModal.optional_attachments_urls) && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    {t('clientDashboard.modal.clientDocuments')}
-                  </h3>
-                  
-                  {/* Archivo Principal */}
-                  {selectedOrderForModal.main_file_url && (
-                    <div className="mb-4">
-                      <h4 className="text-md font-medium text-blue-300 mb-3">{t('clientDashboard.modal.mainFile')}</h4>
-                      <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
-                        <div>
-                          <p className="text-white font-medium">
-                            {selectedOrderForModal.main_file_url.split('/').pop()?.split('?')[0] || 'Archivo principal'}
-                          </p>
-                          <p className="text-gray-400 text-sm">
-                            {new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => handleDownload(selectedOrderForModal.main_file_url, selectedOrderForModal.main_file_url.split('/').pop()?.split('?')[0] || 'archivo_principal')}
-                          className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                        >
-                          <Download className="w-4 h-4" />
-                          {t('clientDashboard.common.download')}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Archivos Adicionales */}
-                  {selectedOrderForModal.optional_attachments_urls && selectedOrderForModal.optional_attachments_urls.length > 0 && (
-                    <div>
-                      <h4 className="text-md font-medium text-gray-300 mb-3">{t('clientDashboard.modal.additionalFiles')}</h4>
-                      <div className="space-y-2">
-                        {selectedOrderForModal.optional_attachments_urls.map((url, index) => (
-                          <div key={index} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
-                            <div>
-                              <p className="text-white font-medium">
-                                {url.split('/').pop()?.split('?')[0] || `Archivo adicional ${index + 1}`}
-                              </p>
-                              <p className="text-gray-400 text-sm">
-                                {new Date(selectedOrderForModal.created_at).toLocaleDateString('es-ES')}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => handleDownload(url, url.split('/').pop()?.split('?')[0] || `archivo_adicional_${index + 1}`)}
-                              className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                            >
-                              <Download className="w-4 h-4" />
-                              {t('clientDashboard.common.download')}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Archivos */}
-              {((orderFiles[selectedOrderForModal.id] && orderFiles[selectedOrderForModal.id].length > 0) || 
-                (adminFiles[selectedOrderForModal.id] && adminFiles[selectedOrderForModal.id].length > 0)) && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    {t('clientDashboard.modal.orderFiles')}
-                  </h3>
-                  
-                  {/* Archivos del Cliente */}
-                  {orderFiles[selectedOrderForModal.id] && orderFiles[selectedOrderForModal.id].length > 0 && (
-                    <div className="mb-4">
-                      <h4 className="text-md font-medium text-gray-300 mb-3">{t('clientDashboard.modal.originalFiles')}</h4>
-                      <div className="space-y-2">
-                        {orderFiles[selectedOrderForModal.id].map((file) => (
-                          <div key={file.id} className="bg-gray-700/30 rounded-lg p-3 flex justify-between items-center">
-                            <div>
-                              <p className="text-white font-medium">{file.file_name}</p>
-                              <p className="text-gray-400 text-sm">
-                                {new Date(file.created_at).toLocaleDateString('es-ES')} • 
-                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.modal.unknownSize')}
-                              </p>
-                            </div>
-                            <button
-                              onClick={() => handleDownload(file.file_url, file.file_name)}
-                              className="bg-primary hover:bg-primary/80 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                            >
-                              <Download className="w-4 h-4" />
-                              {t('clientDashboard.common.download')}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Archivos del Admin */}
-                  {adminFiles[selectedOrderForModal.id] && adminFiles[selectedOrderForModal.id].length > 0 && (
-                    <div>
-                      <h4 className="text-md font-medium text-green-300 mb-3">{t('clientDashboard.modal.tunedFiles')}</h4>
-                      <div className="space-y-2">
-                        {adminFiles[selectedOrderForModal.id].map((file) => (
-                          <div key={file.id} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3 flex justify-between items-center">
-                            <div>
-                              <p className="text-white font-medium">{file.file_name}</p>
-                              <p className="text-gray-400 text-sm">
-                                {new Date(file.created_at).toLocaleDateString('es-ES')} • 
-                                {file.file_size ? `${(file.file_size / 1024).toFixed(1)} KB` : t('clientDashboard.modal.unknownSize')}
-                              </p>
-                              {file.admin_comments && (
-                                <p className="text-green-200 text-sm mt-2 italic">{file.admin_comments}</p>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => handleDownload(file.file_url, file.file_name)}
-                              className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                            >
-                              <Download className="w-4 h-4" />
-                              Descargar
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              
-              {/* Facturas */}
-              {orderInvoices[selectedOrderForModal.id] && orderInvoices[selectedOrderForModal.id].length > 0 && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    {t('clientDashboard.modal.invoices')}
-                  </h3>
-                  <div className="space-y-2">
-                    {orderInvoices[selectedOrderForModal.id].map((invoice) => (
-                      <div key={invoice.id} className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3 flex justify-between items-center">
-                        <div>
-                          <p className="text-white font-medium">{invoice.file_name || `Factura ${invoice.id.slice(-8)}`}</p>
-                          <p className="text-gray-400 text-sm">
-                            {new Date(invoice.created_at).toLocaleDateString('es-ES')}
-                          </p>
-                          {invoice.admin_comments && (
-                            <p className="text-blue-200 text-sm mt-2 italic">{invoice.admin_comments}</p>
-                          )}
-                        </div>
-                        {invoice.file_url && (
-                          <button
-                              onClick={() => handleDownload(invoice.file_url, invoice.file_name || `Factura_${invoice.id.slice(-8)}.pdf`)}
-                              className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
-                            >
-                              <Download className="w-4 h-4" />
-                              {t('clientDashboard.common.download')}
-                            </button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Información Extra */}
-              {selectedOrderForModal.additional_info && (
-                <div className="bg-gray-800/50 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    {t('clientDashboard.modal.extraInfo')}
-                  </h3>
-                  <div className="bg-gray-700/30 rounded-lg p-4">
-                    <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{selectedOrderForModal.additional_info}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Footer del Modal */}
-            <div className="sticky bottom-0 bg-gray-900 border-t border-gray-700 p-6 flex justify-between items-center">
-              <button
-                onClick={() => generatePDF(selectedOrderForModal)}
-                className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2"
-              >
-                <Printer className="w-5 h-5" />
-                {t('clientDashboard.common.printPDF')}
-              </button>
-              <button
-                onClick={() => setSelectedOrderForModal(null)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300"
-              >
-                {t('clientDashboard.common.close')}
-              </button>
-            </div>
-          </div>
-        </div>
+        <OrderDetailModal
+          order={selectedOrderForModal}
+          profile={fullProfile}
+          user={user}
+          onClose={() => setSelectedOrderForModal(null)}
+          adminFiles={adminFiles}
+          orderFiles={orderFiles}
+          orderInvoices={orderInvoices}
+          handleDownload={handleDownload}
+          downloadAdminFile={downloadAdminFile}
+          formatFileSize={formatFileSize}
+          getStatusText={getStatusText}
+        />
       )}
     </div>
   );

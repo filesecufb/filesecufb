@@ -13,10 +13,39 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+// Función para limpiar registros antiguos de la tabla order_files
+async function cleanupOrderFilesTable(maxAgeHours = 24) {
+  try {
+    console.log('🗃️ Iniciando limpieza de la tabla order_files');
+    
+    const cutoffDate = new Date();
+    cutoffDate.setHours(cutoffDate.getHours() - maxAgeHours);
+    
+    // Eliminar registros antiguos de order_files
+    const { data, error } = await supabase
+      .from('order_files')
+      .delete()
+      .lt('created_at', cutoffDate.toISOString());
+    
+    if (error) {
+      console.error('Error eliminando registros de order_files:', error);
+      return { deleted: 0, errors: 1 };
+    }
+    
+    const deletedCount = data?.length || 0;
+    console.log(`🗑️ Eliminados ${deletedCount} registros antiguos de order_files`);
+    
+    return { deleted: deletedCount, errors: 0 };
+  } catch (error) {
+    console.error('Error en limpieza de order_files:', error);
+    return { deleted: 0, errors: 1 };
+  }
+}
+
 // Función para eliminar archivos antiguos de un bucket
 async function cleanupBucket(bucketName, maxAgeHours = 24) {
   try {
-    console.log(`Iniciando limpieza del bucket: ${bucketName}`);
+    console.log(`🧹 Iniciando limpieza del bucket: ${bucketName}`);
     
     // Listar todos los archivos del bucket
     const { data: files, error: listError } = await supabase.storage
@@ -80,9 +109,10 @@ export default async function handler(req, res) {
     
     // Lista de buckets a limpiar
     const bucketsToClean = [
-      'order-files',
-      'user-files', 
-      'admin-files'
+      'clientordersprincipal',
+      'clientorderadicional',
+      'adminorders',
+      'invoices'
     ];
     
     let totalDeleted = 0;
@@ -96,6 +126,12 @@ export default async function handler(req, res) {
       totalDeleted += result.deleted;
       totalErrors += result.errors;
     }
+    
+    // Limpiar tabla order_files
+    const dbResult = await cleanupOrderFilesTable(24);
+    results['order_files_table'] = dbResult;
+    totalDeleted += dbResult.deleted;
+    totalErrors += dbResult.errors;
     
     const endTime = new Date();
     const duration = endTime - startTime;
