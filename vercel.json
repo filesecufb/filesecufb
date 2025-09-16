@@ -49,10 +49,6 @@
     {
       "path": "/api/cron/cleanup-storage",
       "schedule": "15 20 * * *"
-    },
-    {
-      "path": "/api/cron/cleanup-storage-aggressive",
-      "schedule": "*/30 * * * *"
     }
   ]
 }
