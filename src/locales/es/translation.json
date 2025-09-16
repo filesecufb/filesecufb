@@ -3,7 +3,8 @@
     "orders": {
       "modal": {
         "tunedFiles": "Archivos Tuneados",
-        "invoices": "Facturas"
+        "invoices": "Facturas",
+        "download": "Descargar"
       }
     }
   },
