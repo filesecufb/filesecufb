@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, ShoppingCart, Upload, FileText, Settings, BarChart3, Download, ImageIcon, Star, Plus, Trash2, Eye, X, User, Car, Search, CreditCard, ChevronRight, Package, FolderOpen } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
@@ -387,6 +388,7 @@ const OverviewSection: React.FC = () => {
 
 // Services Section
 const ServicesSection: React.FC = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'create' | 'view'>('create');
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1306,6 +1308,7 @@ const ServicesSection: React.FC = () => {
 
 // Clients Section
 const ClientsSection: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [clientSearchTerm, setClientSearchTerm] = useState<string>('');
   const [clients, setClients] = useState<any[]>([]);
@@ -1752,6 +1755,7 @@ const ClientsSection: React.FC = () => {
 
 // Orders Section
 const OrdersSection: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [filterStatus, setFilterStatus] = useState('Pendiente');
   const [searchTerm, setSearchTerm] = useState<string>('');

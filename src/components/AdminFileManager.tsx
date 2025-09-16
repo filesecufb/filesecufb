@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, FileText, Download, Trash2, Search, Package, User, Car } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 interface Order {
@@ -36,6 +37,7 @@ interface AdminFile {
 
 const AdminFileManager: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [adminFiles, setAdminFiles] = useState<AdminFile[]>([]);
