@@ -312,7 +312,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
           <div className="bg-gray-700/20 rounded-lg p-4 mb-4">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
               <FileText className="w-5 h-5" />
-              Archivos Tuneados
+              {t('clientDashboard.orders.modal.tunedFiles')}
             </h4>
             <div className="space-y-2">
                {adminFiles[order.id].filter((file: any) => file.file_category === 'map').map((file: any, index: number) => (
@@ -352,8 +352,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
         {(order.status === 'completed' || order.status === 'delivered') && adminFiles[order.id] && Array.isArray(adminFiles[order.id]) && adminFiles[order.id].filter((file: any) => file.file_category === 'invoice').length > 0 && (
           <div className="bg-gray-700/20 rounded-lg p-4 mb-4">
             <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Facturas
+              <Receipt className="w-5 h-5" />
+              {t('clientDashboard.orders.modal.invoices')}
             </h4>
             <div className="space-y-2">
                {adminFiles[order.id].filter((file: any) => file.file_category === 'invoice').map((file: any, index: number) => (
