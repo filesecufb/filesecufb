@@ -1,4 +1,12 @@
 {
+  "clientDashboard": {
+    "orders": {
+      "modal": {
+        "tunedFiles": "Tuned Files",
+        "invoices": "Invoices"
+      }
+    }
+  },
   "cookies": {
     "banner": {
       "title": "Cookie Settings",

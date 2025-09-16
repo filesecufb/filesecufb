@@ -1,6 +1,12 @@
 {
-
-
+  "clientDashboard": {
+    "orders": {
+      "modal": {
+        "tunedFiles": "Archivos Tuneados",
+        "invoices": "Facturas"
+      }
+    }
+  },
   "cookies": {
     "banner": {
       "title": "Configuración de Cookies",
