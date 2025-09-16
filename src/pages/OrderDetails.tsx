@@ -1135,7 +1135,7 @@ const OrderDetails: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-white mb-2">Cargando pedido...</h2>
+          <h2 className="text-xl font-semibold text-white mb-2">{t('orderDetails.loading')}</h2>
           <p className="text-gray-400">Obteniendo los detalles del pedido</p>
         </div>
       </div>
@@ -1405,7 +1405,7 @@ const OrderDetails: React.FC = () => {
                   {downloadingAllFiles ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-primary"></div>
-                      <span>{t('orderDetails.actions.downloading')}</span>
+                      <span>{t('orderDetails.files.download')}</span>
                     </>
                   ) : (
                     <>
@@ -1787,7 +1787,7 @@ const OrderDetails: React.FC = () => {
                     {uploading && (
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-primary mx-auto"></div>
-                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.upload.tunedMap.uploading')}</p>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.files.uploadingMap')}</p>
                       </div>
                     )}
                   </div>
@@ -1830,7 +1830,7 @@ const OrderDetails: React.FC = () => {
                     {uploadingInvoice && (
                       <div className="text-center">
                         <div className="animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-500 mx-auto"></div>
-                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.upload.invoice.uploading')}</p>
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">{t('orderDetails.files.uploadingInvoice')}</p>
                       </div>
                     )}
                   </div>

@@ -226,7 +226,7 @@ const AdminFileManager: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="text-white">Cargando pedidos...</div>
+        <div className="text-white">{t('adminFileManager.loading.orders')}</div>
       </div>
     );
   }
@@ -342,7 +342,7 @@ const AdminFileManager: React.FC = () => {
                   <label htmlFor="file-upload" className="cursor-pointer">
                     <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-400">
-                      {uploading ? 'Subiendo...' : `Haz clic para subir ${activeTab === 'maps' ? 'mapas' : 'facturas'}`}
+                      {uploading ? t('adminFileManager.uploading') : `${t('adminFileManager.clickToUpload')} ${activeTab === 'maps' ? t('adminFileManager.maps') : t('adminFileManager.invoices')}`}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
                       {activeTab === 'maps' 

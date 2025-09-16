@@ -40,6 +40,7 @@
       "part2": "Servicios"
     },
     "subtitle": "Catálogo profesional de tuning files para todas las marcas y modelos",
+    "loadingPopular": "Cargando servicios populares...",
     "viewAll": "Ver Todos los Ficheros",
     "viewDetails": "Ver Detalles",
     "items": [

@@ -40,6 +40,7 @@
       "part2": "Services"
     },
     "subtitle": "Professional catalog of tuning files for all makes and models",
+    "loadingPopular": "Loading popular services...",
     "viewAll": "View All Files",
     "viewDetails": "View Details",
     "items": [

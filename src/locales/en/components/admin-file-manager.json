@@ -1,0 +1,11 @@
+{
+  "adminFileManager": {
+    "loading": {
+      "orders": "Loading orders..."
+    },
+    "uploading": "Uploading...",
+    "clickToUpload": "Click to upload",
+    "maps": "maps",
+    "invoices": "invoices"
+  }
+}

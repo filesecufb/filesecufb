@@ -1365,7 +1365,7 @@ const ClientDashboard: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <div className="text-white text-xl">{t('clientDashboard.messages.loadingDashboard')}</div>
+          <div className="text-white text-xl">{t('clientDashboard.messages.loading.loadingDashboard')}</div>
         </div>
       </div>
     );

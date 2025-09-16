@@ -953,7 +953,7 @@ const ServicesSection: React.FC = () => {
           
           {loading ? (
             <div className="text-center py-8">
-              <p className="text-gray-300">Cargando servicios...</p>
+              <p className="text-gray-300">{t('adminDashboard.services.loading')}</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
@@ -1645,7 +1645,7 @@ const ClientsSection: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-3 text-gray-300">Cargando clientes...</span>
+            <span className="ml-3 text-gray-300">{t('adminDashboard.clients.loading')}</span>
           </div>
         ) : error ? (
           <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-4 m-4">
@@ -1928,7 +1928,7 @@ const OrdersSection: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="text-white">Cargando pedidos...</div>
+        <div className="text-white">{t('adminDashboard.orders.loading')}</div>
       </div>
     );
   }

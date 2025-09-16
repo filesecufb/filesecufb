@@ -215,7 +215,7 @@ const Services = () => {
           {loading && (
             <div className="flex items-center justify-center mt-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-gray-300">Cargando servicios...</span>
+              <span className="ml-2 text-gray-300">{t('services.loading')}</span>
             </div>
           )}
           {error && (

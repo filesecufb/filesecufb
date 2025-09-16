@@ -296,7 +296,7 @@ const Home: React.FC = () => {
             {servicesLoading && (
               <div className="flex items-center justify-center mt-4">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                <span className="ml-2 text-gray-300 text-sm">Cargando servicios populares...</span>
+                <span className="ml-2 text-gray-300 text-sm">{t('home.services.loadingPopular')}</span>
               </div>
             )}
             {servicesError && (

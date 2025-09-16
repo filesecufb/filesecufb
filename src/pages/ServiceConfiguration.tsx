@@ -691,7 +691,7 @@ const ServiceConfiguration: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">{t('messages.loadingService')}</p>
+          <p className="mt-4 text-gray-600">{t('serviceConfiguration.messages.loadingService')}</p>
         </div>
       </div>
     );
@@ -1142,11 +1142,11 @@ const ServiceConfiguration: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.additionalServices')}</h2>
             {loading ? (
               <div className="text-center py-4">
-                <p className="text-gray-500">{t('messages.loadingAdditionalServices')}</p>
+                <p className="text-gray-500">{t('serviceConfiguration.messages.loadingAdditionalServices')}</p>
               </div>
             ) : error ? (
               <div className="text-center py-4">
-                <p className="text-red-500">{t('errors.loadingAdditionalServices')}: {error}</p>
+                <p className="text-red-500">{t('serviceConfiguration.errors.loadingAdditionalServices')}: {error}</p>
               </div>
             ) : (
               <div className="space-y-4">

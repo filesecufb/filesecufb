@@ -1,0 +1,13 @@
+{
+  "adminDashboard": {
+    "services": {
+      "loading": "Cargando servicios..."
+    },
+    "clients": {
+      "loading": "Cargando clientes..."
+    },
+    "orders": {
+      "loading": "Cargando pedidos..."
+    }
+  }
+}
