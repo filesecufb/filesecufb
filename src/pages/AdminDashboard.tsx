@@ -954,7 +954,7 @@ const ServicesSection: React.FC = () => {
     
     setIsEditTranslating(true);
     try {
-      const translatedText = await geminiTranslation(spanishText, 'es', 'en');
+      const translatedText = await translateText(spanishText, 'English', 'es');
       setEditTranslations(prev => {
         const newFeatures = [...(prev.features || [])];
         newFeatures[index] = translatedText;

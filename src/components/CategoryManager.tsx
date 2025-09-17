@@ -21,6 +21,7 @@ interface ServiceCategory {
     title_part1: string;
     title_part2: string;
     subtitle: string;
+    manually_edited?: boolean;
   };
 }
 
@@ -623,7 +624,7 @@ const CategoryManager: React.FC = () => {
                       />
                       <div className="flex justify-between items-center mt-2">
                          <button
-                           onClick={() => handleRevertToAutoTranslation(category.id)}
+                           onClick={() => handleRevertToAutoTranslation(category)}
                            className="text-xs px-2 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-500 transition-colors"
                            title="Revertir a traducción automática"
                          >
