@@ -1,4 +1,7 @@
 {
+  "services": {
+    "hireButton": "CONTRATAR"
+  },
   "clientDashboard": {
     "orders": {
       "modal": {

@@ -8,6 +8,35 @@
     },
     "orders": {
       "loading": "Cargando pedidos..."
+    },
+    "categories": {
+      "title": "Gestión de Categorías",
+      "loading": "Cargando categorías...",
+      "createNew": "Crear Nueva Categoría",
+      "editCategory": "Editar Categoría",
+      "deleteCategory": "Eliminar Categoría",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esta categoría?",
+      "form": {
+        "emoji": "Emoji/Icono",
+        "titlePart1": "Título Parte 1 (Blanco)",
+        "titlePart2": "Título Parte 2 (Azul)",
+        "subtitle": "Subtítulo",
+        "preview": "Vista Previa",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "update": "Actualizar"
+      },
+      "messages": {
+        "createSuccess": "Categoría creada exitosamente",
+        "updateSuccess": "Categoría actualizada exitosamente",
+        "deleteSuccess": "Categoría eliminada exitosamente",
+        "error": "Error al procesar la solicitud"
+      },
+      "noCategories": "No hay categorías disponibles",
+      "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar"
+      }
     }
   }
 }

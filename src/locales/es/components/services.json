@@ -13,6 +13,7 @@
     "otherServices": {
       "title": "OTROS <span class='text-primary'>SERVICIOS</span>",
       "subtitle": "SERVICIOS ESPECIALIZADOS ADICIONALES"
-    }
+    },
+    "hireButton": "CONTRATAR"
   }
 }

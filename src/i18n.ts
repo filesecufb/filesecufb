@@ -30,6 +30,8 @@ import orderDetailsES from './locales/es/pages/order-details.json';
 import orderDetailsEN from './locales/en/pages/order-details.json';
 import authES from './locales/es/pages/auth.json';
 import authEN from './locales/en/pages/auth.json';
+import servicesPageES from './locales/es/pages/services.json';
+import servicesPageEN from './locales/en/pages/services.json';
 import termsOfServiceES from './locales/es/pages/terms-of-service.json';
 import termsOfServiceEN from './locales/en/pages/terms-of-service.json';
 import cookiePolicyES from './locales/es/pages/cookiePolicy.json';
@@ -123,6 +125,7 @@ const resources = {
       common: commonES
     }),
     'service-configuration': serviceConfigurationES,
+    services: servicesPageES,
     seo: seoES
   },
   en: {
@@ -144,6 +147,7 @@ const resources = {
       common: commonEN
     }),
     'service-configuration': serviceConfigurationEN,
+    services: servicesPageEN,
     seo: seoEN
   }
 }

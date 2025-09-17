@@ -1,4 +1,7 @@
 {
   "loading": "Loading services...",
   "title": "Services",
-  "subtitle": "Our professional tuning services
+  "subtitle": "Our professional tuning services",
+  "all": "All",
+  "searchPlaceholder": "SEARCH SERVICES..."
+}

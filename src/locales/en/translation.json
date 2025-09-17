@@ -1,4 +1,7 @@
 {
+  "services": {
+    "hireButton": "HIRE"
+  },
   "clientDashboard": {
     "orders": {
       "modal": {

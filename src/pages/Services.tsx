@@ -1,92 +1,140 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Settings, Gauge, Wrench, Cog, Car } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import { Search, Settings, Gauge, Wrench, Cog, Car, Zap, Loader2, Hammer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useSEO } from '../hooks/useSEO';
-
-interface Service {
-  id: string;
-  title: string;
-  subtitle?: string;
-  description: string;
-  category: string;
-  price: string;
-  original_price?: string;
-  image_url?: string;
-  features?: string[];
-  badge?: string;
-  popular?: boolean;
-}
+import { useTranslation } from 'react-i18next';
+import { useServices, getServiceTitle, getServiceSubtitle, getServiceDescription, getServiceFeatures } from '../hooks/useServices';
+import { useServiceCategories, getCategoryTitle, getCategorySubtitle } from '../hooks/useServiceCategories';
+import { useCategoryContext } from '../contexts/CategoryContext';
 
 const Services = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
+  
+  // Función para obtener traducciones de services
+  const getServicesTranslation = (key: string) => {
+    const translations = {
+      es: {
+        all: 'Todos',
+        searchPlaceholder: 'BUSCAR SERVICIOS...'
+      },
+      en: {
+        all: 'All',
+        searchPlaceholder: 'SEARCH SERVICES...'
+      }
+    };
+    return translations[language as keyof typeof translations]?.[key as keyof typeof translations.es] || translations.en[key as keyof typeof translations.en];
+  };
+  const { services, loading, error } = useServices();
+  const { categories, loading: categoriesLoading, error: categoriesError } = useServiceCategories();
+  const { refreshTrigger } = useCategoryContext();
+  
+  // Debug logs para rastrear cambios en categorías
+  useEffect(() => {
+    console.log('🔍 Services: Categories updated', { 
+      categoriesCount: categories.length, 
+      categories: categories.map(c => ({ id: c.id, icon: c.icon, title: c.title_part1 + ' ' + c.title_part2 })) 
+    });
+  }, [categories]);
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [forceRender, setForceRender] = useState(0);
   
   // Usar el hook useSEO para gestionar metadatos dinámicos
   useSEO('services');
-  
-  // State for services from Supabase
-  const [services, setServices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Load services from Supabase
+  // Available icons mapping
+  const availableIcons = [
+    { name: 'Car', component: Car },
+    { name: 'Settings', component: Settings },
+    { name: 'Zap', component: Zap },
+    { name: 'Cog', component: Cog },
+    { name: 'Hammer', component: Hammer },
+    { name: 'Gauge', component: Gauge }
+  ];
+
+  // Get icon component by name
+  const getIconComponent = (iconName: string) => {
+    const icon = availableIcons.find(i => i.name === iconName);
+    return icon ? icon.component : Car;
+  };
+
+  // Force re-render when language changes
   useEffect(() => {
-    const loadServices = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('services')
-          .select('*')
-          .eq('status', 'Activo')
-          .order('created_at', { ascending: false });
+    console.log('[Services] Language changed to:', language);
+    setForceRender(prev => prev + 1);
+  }, [language]);
 
-        if (error) throw error;
-        setServices(data || []);
-      } catch (err: any) {
-        console.error('Error loading services:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadServices();
-  }, []);
-  
-  // Filtrar servicios por término de búsqueda
-  const filteredServices = useMemo(() => {
-    if (!searchTerm) return services;
-    return services.filter(service => 
-      service.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      service.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [services, searchTerm]);
-  
-  // Agrupar servicios por categoría - solo servicios de Supabase
+  // Agrupar servicios por categoría
   const groupedServices = useMemo(() => {
-    // Mapear categorías del admin dashboard a las categorías de filtrado
+    const grouped: { [key: string]: Service[] } = {};
     
-    const grouped = {
-      car_tuning: filteredServices.filter(service => {
-        return service.category === 'Car Tuning' || service.category === 'car_tuning';
-      }),
-
-      tcu: filteredServices.filter(service => {
-        return service.category === 'TCU Tuning' || service.category === 'tcu';
-      }),
-      other: filteredServices.filter(service => {
-        return service.category === 'Otros Servicios' || service.category === 'other';
-      })
-    };
+    categories.forEach(category => {
+      const categoryTitle = getCategoryTitle(category, language);
+      grouped[categoryTitle] = services.filter(service => {
+        // Normalize both strings for comparison
+        const serviceCategoryNormalized = service.category.toLowerCase().trim().replace(/\s+/g, ' ');
+        const categoryTitleNormalized = categoryTitle.toLowerCase().trim().replace(/\s+/g, ' ');
+        
+        // Also check against the original Spanish category title
+        const spanishCategoryTitle = `${category.title_part1} ${category.title_part2}`.toLowerCase().trim().replace(/\s+/g, ' ');
+        
+        // Try different matching strategies
+        return serviceCategoryNormalized === categoryTitleNormalized ||
+               serviceCategoryNormalized === spanishCategoryTitle ||
+               serviceCategoryNormalized.includes(categoryTitleNormalized) ||
+               categoryTitleNormalized.includes(serviceCategoryNormalized) ||
+               serviceCategoryNormalized.includes(spanishCategoryTitle) ||
+               spanishCategoryTitle.includes(serviceCategoryNormalized);
+      });
+    });
     
     return grouped;
-  }, [filteredServices]);
+  }, [services, categories, language, forceRender]);
+  
+  // Filtrar servicios por término de búsqueda y categoría
+  const filteredServices = useMemo(() => {
+    let filtered = services;
+    
+    // Filtrar por categoría seleccionada
+    if (selectedCategory !== 'all') {
+      // Find the category object that matches the selected category
+      const selectedCategoryObj = categories.find(cat => getCategoryTitle(cat, language) === selectedCategory);
+      
+      filtered = filtered.filter(service => {
+        if (!selectedCategoryObj) return false;
+        
+        // Use the same matching logic as groupedServices
+        const serviceCategoryNormalized = service.category.toLowerCase().trim().replace(/\s+/g, ' ');
+        const categoryTitleNormalized = selectedCategory.toLowerCase().trim().replace(/\s+/g, ' ');
+        const spanishCategoryTitle = `${selectedCategoryObj.title_part1} ${selectedCategoryObj.title_part2}`.toLowerCase().trim().replace(/\s+/g, ' ');
+        
+        return serviceCategoryNormalized === categoryTitleNormalized ||
+               serviceCategoryNormalized === spanishCategoryTitle ||
+               serviceCategoryNormalized.includes(categoryTitleNormalized) ||
+               categoryTitleNormalized.includes(serviceCategoryNormalized) ||
+               serviceCategoryNormalized.includes(spanishCategoryTitle) ||
+               spanishCategoryTitle.includes(serviceCategoryNormalized);
+      });
+    }
+    
+    // Filtrar por término de búsqueda
+    if (searchTerm) {
+      filtered = filtered.filter(service => 
+        getServiceTitle(service, language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getServiceDescription(service, language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        service.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    return filtered;
+  }, [services, searchTerm, selectedCategory, categories, language, forceRender]);
+  
+
   
   // Servicios eliminados - ahora solo se usan los de Supabase
 
@@ -96,7 +144,7 @@ const Services = () => {
 
   // Servicios otros eliminados - solo Supabase
 
-  const renderServiceCard = (service: Service) => (
+  const renderServiceCard = (service: Service, category?: any) => (
     <div
       key={service.id}
       className={`relative bg-dark-secondary rounded-2xl overflow-hidden border transition-all duration-300 hover:scale-105 hover:shadow-2xl group ${
@@ -120,15 +168,18 @@ const Services = () => {
         {/* Service Icon and Title */}
         <div className="flex items-center mb-4">
           <div className="bg-primary/20 p-2 rounded-lg mr-3">
-            <Settings className="text-primary w-6 h-6" />
+            {(() => {
+              const IconComponent = category ? getIconComponent(category.icon) : Settings;
+              return <IconComponent className="text-primary w-6 h-6" />;
+            })()}
           </div>
           <div>
             <h3 className="text-xl font-bold text-white">
-              {service.title}
+              {getServiceTitle(service, language)}
             </h3>
-            {service.subtitle && (
+            {getServiceSubtitle(service, language) && (
               <p className="text-primary font-semibold">
-                {service.subtitle}
+                {getServiceSubtitle(service, language)}
               </p>
             )}
           </div>
@@ -136,19 +187,19 @@ const Services = () => {
 
         {/* Description */}
         <p className="text-gray-300 text-sm mb-6 leading-relaxed">
-          {service.description}
+          {getServiceDescription(service, language)}
         </p>
 
         {/* Features */}
         <div className="space-y-2 mb-6">
-          {service.features && service.features.slice(0, 3).map((feature: string, index: number) => (
+          {getServiceFeatures(service, language).slice(0, 3).map((feature: string, index: number) => (
             <div key={index} className="flex items-center text-sm text-gray-400">
               <Gauge className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
               {feature}
             </div>
           ))}
-          {service.features && service.features.length > 3 && (
-            <p className="text-xs text-gray-500">+{service.features.length - 3} características más...</p>
+          {getServiceFeatures(service, language).length > 3 && (
+            <p className="text-xs text-gray-500">+{getServiceFeatures(service, language).length - 3} características más...</p>
           )}
         </div>
 
@@ -185,9 +236,7 @@ const Services = () => {
             }
           }}
           className="w-full btn-primary py-3 px-6 btn-text-style btn-hover-effect shadow-subtle hover:shadow-elegant"
-        >
-          VER DETALLES
-        </button>
+        >{t('services.hireButton')}</button>
       </div>
     </div>
   );
@@ -226,110 +275,201 @@ const Services = () => {
 
       {/* Search Section */}
       <div className="py-12 px-4 bg-gray-900/50">
-        <div className="max-w-2xl mx-auto">
-          <div className="relative">
+        <div className="max-w-4xl mx-auto">
+          {/* Search Input */}
+          <div className="relative max-w-2xl mx-auto mb-8">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder={t('services.searchPlaceholder')}
+              placeholder={getServicesTranslation('searchPlaceholder')}
               className="w-full bg-gray-900/80 border border-gray-700 rounded-lg py-4 pl-12 pr-4 text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
             />
           </div>
+          
+          {/* Category Filter Buttons - Horizontal Scrollable */}
+          <div className="relative">
+            {/* Gradient indicators for scroll */}
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-900/50 to-transparent z-10 pointer-events-none md:hidden" />
+            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-900/50 to-transparent z-10 pointer-events-none md:hidden" />
+            
+            {/* Scrollable container */}
+            <div className="overflow-x-auto scrollbar-hide pb-2">
+              <div className="flex gap-3 px-4 md:justify-center md:flex-wrap md:px-0" style={{ minWidth: 'max-content' }}>
+                {/* Botón "Todos" */}
+                <button
+                  onClick={() => setSelectedCategory('all')}
+                  className={`flex-shrink-0 px-4 py-3 md:px-6 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 text-sm md:text-base ${
+                    selectedCategory === 'all'
+                      ? 'bg-primary text-white shadow-lg scale-105'
+                      : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-600'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="whitespace-nowrap">{getServicesTranslation('all')}</span>
+                </button>
+                
+                {/* Botones de categorías */}
+                {categories.map((category) => {
+                  const categoryTitle = getCategoryTitle(category, language);
+                  const IconComponent = getIconComponent(category.icon);
+                  
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => setSelectedCategory(categoryTitle)}
+                      className={`flex-shrink-0 px-4 py-3 md:px-6 rounded-lg font-semibold transition-all duration-300 flex items-center space-x-2 text-sm md:text-base ${
+                        selectedCategory === categoryTitle
+                          ? 'bg-primary text-white shadow-lg scale-105'
+                          : 'bg-gray-800/80 text-gray-300 hover:bg-gray-700/80 hover:text-white border border-gray-600'
+                      }`}
+                    >
+                      <IconComponent className="w-4 h-4 md:w-5 md:h-5" />
+                      <span className="whitespace-nowrap">{categoryTitle}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Car Tuning Section */}
-      <div id="car-tuning" className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-4">
-              <Car className="text-primary w-8 h-8 mr-3" />
-              <h2 className="text-4xl md:text-5xl font-bold">
-                CAR <span className="text-primary">TUNING</span>
-              </h2>
-            </div>
-            <p className="text-gray-400 text-lg">
-              {t('services.carTuning.title')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groupedServices.car_tuning.length > 0 ? (
-              groupedServices.car_tuning.map(renderServiceCard)
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
-                  <Car className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay servicios de Car Tuning disponibles</h3>
-                  <p className="text-gray-500">Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.</p>
+      {/* Dynamic Category Sections */}
+      {categoriesLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-gray-300">Cargando categorías...</span>
+        </div>
+      ) : categoriesError ? (
+        <div className="text-center py-12">
+          <p className="text-red-400">Error al cargar las categorías: {categoriesError}</p>
+        </div>
+      ) : categories.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No hay categorías disponibles</p>
+        </div>
+      ) : selectedCategory === 'all' ? (
+        // Mostrar todas las categorías cuando se selecciona "Todos"
+        categories.map((category) => {
+          const categoryTitle = getCategoryTitle(category, language);
+          const categorySubtitle = getCategorySubtitle(category, language);
+          const categoryServices = groupedServices[categoryTitle] || [];
+          
+          // Filtrar servicios por término de búsqueda si existe
+          const displayServices = searchTerm 
+            ? categoryServices.filter(service => 
+                getServiceTitle(service, language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                getServiceDescription(service, language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+                service.category.toLowerCase().includes(searchTerm.toLowerCase())
+              )
+            : categoryServices;
+          
+          // Solo mostrar la categoría si tiene servicios después del filtrado
+          if (searchTerm && displayServices.length === 0) return null;
+          
+          return (
+            <div key={category.id} id={category.id} className="py-20 px-4">
+              <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-16">
+                  <div className="flex items-center justify-center mb-4">
+                    {(() => {
+                      const IconComponent = getIconComponent(category.icon);
+                      return <IconComponent className="text-primary w-8 h-8 mr-3" />;
+                    })()}
+                    <h2 className="text-4xl md:text-5xl font-bold">
+                      {getCategoryTitle(category, language).toUpperCase()}
+                    </h2>
+                  </div>
+                  <p className="text-gray-400 text-lg">
+                    {categorySubtitle}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {displayServices.length > 0 ? (
+                    displayServices.map(service => renderServiceCard(service, category))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
+                        {(() => {
+                          console.log('🎨 Services: Rendering icon for category', { 
+                            categoryId: category.id, 
+                            icon: category.icon, 
+                            title: category.title_part1 + ' ' + category.title_part2 
+                          });
+                          const IconComponent = getIconComponent(category.icon);
+                          return <IconComponent className="w-16 h-16 text-gray-600 mx-auto mb-4" />;
+                        })()}
+                        <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay servicios disponibles para {categoryTitle}</h3>
+                        <p className="text-gray-500">Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-
-
-      {/* TCU Tuning Section */}
-      <div id="tcu-tuning" className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-4">
-              <Cog className="text-primary w-8 h-8 mr-3" />
-              <h2 className="text-4xl md:text-5xl font-bold">
-                TCU <span className="text-primary">TUNING</span>
-              </h2>
             </div>
-            <p className="text-gray-400 text-lg">
-              {t('services.tcuTuning.subtitle')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {groupedServices.tcu.length > 0 ? (
-              groupedServices.tcu.map(renderServiceCard)
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
-                  <Cog className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay servicios de TCU Tuning disponibles</h3>
-                  <p className="text-gray-500">Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.</p>
+          );
+        })
+      ) : (
+        // Mostrar solo la categoría seleccionada
+        (() => {
+          const selectedCategoryObj = categories.find(cat => getCategoryTitle(cat, language) === selectedCategory);
+          if (!selectedCategoryObj) return null;
+          
+          const categoryTitle = getCategoryTitle(selectedCategoryObj, language);
+          const categorySubtitle = getCategorySubtitle(selectedCategoryObj, language);
+          
+          return (
+            <div key={selectedCategoryObj.id} id={selectedCategoryObj.id} className="py-20 px-4">
+              <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-16">
+                  <div className="flex items-center justify-center mb-4">
+                    {(() => {
+                      const IconComponent = getIconComponent(selectedCategoryObj.icon);
+                      return <IconComponent className="text-primary w-8 h-8 mr-3" />;
+                    })()}
+                    <h2 className="text-4xl md:text-5xl font-bold">
+                      {categoryTitle.toUpperCase()}
+                    </h2>
+                  </div>
+                  <p className="text-gray-400 text-lg">
+                    {categorySubtitle}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredServices.length > 0 ? (
+                    filteredServices.map(service => renderServiceCard(service, selectedCategoryObj))
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
+                        {(() => {
+                          const IconComponent = getIconComponent(selectedCategoryObj.icon);
+                          return <IconComponent className="w-16 h-16 text-gray-600 mx-auto mb-4" />;
+                        })()}
+                        <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                          {searchTerm 
+                            ? `No se encontraron servicios para "${searchTerm}" en ${categoryTitle}`
+                            : `No hay servicios disponibles para ${categoryTitle}`
+                          }
+                        </h3>
+                        <p className="text-gray-500">
+                          {searchTerm 
+                            ? 'Intenta con otros términos de búsqueda o selecciona otra categoría.'
+                            : 'Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Otros Servicios Section */}
-      <div id="other-services" className="py-20 px-4 bg-gray-900/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-4">
-              <Wrench className="text-primary w-8 h-8 mr-3" />
-              <h2 className="text-4xl md:text-5xl font-bold" dangerouslySetInnerHTML={{ __html: t('services.otherServices.title') }}>
-              </h2>
             </div>
-            <p className="text-gray-400 text-lg">
-              {t('services.otherServices.subtitle')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {groupedServices.other.length > 0 ? (
-              groupedServices.other.map(renderServiceCard)
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
-                  <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay otros servicios disponibles</h3>
-                  <p className="text-gray-500">Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+          );
+        })()
+      )}
     </div>
   );
 };

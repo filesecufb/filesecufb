@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
+import { translateText, detectLanguage } from '../lib/geminiTranslation';
+import CategoryManager from '../components/CategoryManager';
 
 type AdminSection = 'overview' | 'services' | 'clients' | 'orders';
 
@@ -389,8 +391,10 @@ const OverviewSection: React.FC = () => {
 // Services Section
 const ServicesSection: React.FC = () => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState<'create' | 'view'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'view' | 'categories'>('create');
   const [services, setServices] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -398,6 +402,8 @@ const ServicesSection: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<any>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [translationProgress, setTranslationProgress] = useState('');
 
   // Form data for creating new service
   const [formData, setFormData] = useState({
@@ -407,17 +413,55 @@ const ServicesSection: React.FC = () => {
     price: '',
     original_price: '',
     badge: '',
-    category: 'Car Tuning',
+    category: '',
     status: 'Activo',
     popular: false,
     isAdditional: false,
     image_url: ''
   });
 
+  // Update default category when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && !formData.category) {
+      setFormData(prev => ({
+        ...prev,
+        category: `${categories[0].title_part1} ${categories[0].title_part2}`.trim()
+      }));
+    }
+  }, [categories, formData.category]);
+
   const [features, setFeatures] = useState<string[]>(['']);
 
   // Form data for editing service
   const [editFormData, setEditFormData] = useState<any>({});
+  const [editTranslations, setEditTranslations] = useState({
+    title: '',
+    subtitle: '',
+    description: '',
+    badge: '',
+    features: []
+  });
+  const [activeEditTab, setActiveEditTab] = useState('spanish');
+  const [isEditTranslating, setIsEditTranslating] = useState(false);
+
+  // Load categories from Supabase
+  const loadCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('service_categories')
+        .select('*')
+        .eq('status', 'active')
+        .order('sort_order', { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (err: any) {
+      console.error('Error loading categories:', err);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   // Load services from Supabase
   const loadServices = async () => {
@@ -439,9 +483,10 @@ const ServicesSection: React.FC = () => {
     }
   };
 
-  // Load services on component mount
+  // Load services and categories on component mount
   useEffect(() => {
     loadServices();
+    loadCategories();
   }, []);
 
   // Handle form input changes
@@ -450,6 +495,68 @@ const ServicesSection: React.FC = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Function to translate service data automatically
+  const translateServiceData = async (serviceData: any) => {
+    try {
+      setIsTranslating(true);
+      setTranslationProgress('Detectando idioma...');
+      
+      // Detect language of the title (main field)
+      const detectedLanguage = await detectLanguage(serviceData.title);
+      console.log('Idioma detectado:', detectedLanguage);
+      
+      // Determine target language
+      const isSpanish = detectedLanguage.toLowerCase().includes('spanish') || detectedLanguage.toLowerCase().includes('español');
+      const targetLanguage = isSpanish ? 'English' : 'Spanish';
+      
+      setTranslationProgress(`Traduciendo a ${targetLanguage}...`);
+      
+      // Prepare fields to translate
+      const fieldsToTranslate = {
+        title: serviceData.title,
+        subtitle: serviceData.subtitle || '',
+        description: serviceData.description,
+        badge: serviceData.badge || '',
+        features: serviceData.features || []
+      };
+      
+      // Translate each field
+      const context = 'This is a service for an automotive tuning business. Maintain professional tone and technical accuracy.';
+      
+      const [translatedTitle, translatedSubtitle, translatedDescription, translatedBadge, ...translatedFeatures] = await Promise.all([
+        translateText(fieldsToTranslate.title, targetLanguage, null, context + ' This is a service title.'),
+        fieldsToTranslate.subtitle ? translateText(fieldsToTranslate.subtitle, targetLanguage, null, context + ' This is a service subtitle.') : '',
+        translateText(fieldsToTranslate.description, targetLanguage, null, context + ' This is a service description.'),
+        fieldsToTranslate.badge ? translateText(fieldsToTranslate.badge, targetLanguage, null, context + ' This is a service badge/label.') : '',
+        ...fieldsToTranslate.features.map(feature => 
+          feature ? translateText(feature, targetLanguage, null, context + ' This is a service feature.') : ''
+        )
+      ]);
+      
+      // Create translations object
+      const translations = {
+        [isSpanish ? 'en' : 'es']: {
+          title: translatedTitle,
+          subtitle: translatedSubtitle,
+          description: translatedDescription,
+          badge: translatedBadge,
+          features: translatedFeatures.filter(f => f.trim() !== '')
+        }
+      };
+      
+      setTranslationProgress('Traducción completada');
+      return translations;
+      
+    } catch (error) {
+      console.error('Error en traducción automática:', error);
+      toast.error('Error al traducir el servicio. Se guardará sin traducción.');
+      return null;
+    } finally {
+      setIsTranslating(false);
+      setTranslationProgress('');
+    }
   };
 
   // Handle form submission
@@ -474,12 +581,46 @@ const ServicesSection: React.FC = () => {
         features: features.filter(f => f.trim() !== '')
       };
 
-      const { data, error } = await supabase
+      // First, save the service without translations
+      const { data: serviceResult, error: serviceError } = await supabase
         .from('services')
         .insert([serviceData])
         .select();
 
-      if (error) throw error;
+      if (serviceError) throw serviceError;
+      
+      const createdService = serviceResult[0];
+      let translationSuccess = false;
+      
+      // Try to translate service data automatically
+      try {
+        const translations = await translateServiceData(serviceData);
+        
+        if (translations) {
+          // Update the service with translations
+          const { error: updateError } = await supabase
+            .from('services')
+            .update({ translations: translations })
+            .eq('id', createdService.id);
+            
+          if (updateError) {
+            console.error('Error updating service with translations:', updateError);
+            toast.error('Servicio creado pero falló la actualización de traducciones');
+          } else {
+            translationSuccess = true;
+          }
+        }
+      } catch (translationError) {
+        console.error('Translation failed:', translationError);
+        // Translation failed, but service was already saved
+      }
+      
+      // Show appropriate success message
+      if (translationSuccess) {
+        toast.success('Servicio creado exitosamente con traducción automática');
+      } else {
+        toast.success('Servicio creado exitosamente. Puedes agregar las traducciones manualmente desde el editor.');
+      }
 
       // Reset form
       setFormData({
@@ -489,7 +630,7 @@ const ServicesSection: React.FC = () => {
         price: '',
         original_price: '',
         badge: '',
-        category: 'Car Tuning',
+        category: categories.length > 0 ? `${categories[0].title_part1} ${categories[0].title_part2}`.trim() : '',
         status: 'Activo',
         popular: false,
         isAdditional: false,
@@ -504,10 +645,11 @@ const ServicesSection: React.FC = () => {
       // Switch to view tab
       setActiveTab('view');
 
-      console.log('Service created successfully:', data);
+      console.log('Service created successfully:', createdService);
     } catch (err: any) {
       setError(err.message);
       console.error('Error creating service:', err);
+      toast.error('Error al crear el servicio: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -570,6 +712,17 @@ const ServicesSection: React.FC = () => {
       ...service,
       features: service.features || []
     });
+    
+    // Cargar traducciones existentes si las hay
+    const translations = service.translations?.en || {};
+    setEditTranslations({
+      title: translations.title || '',
+      subtitle: translations.subtitle || '',
+      description: translations.description || '',
+      badge: translations.badge || '',
+      features: translations.features || []
+    });
+    setActiveEditTab('spanish');
     setIsEditModalOpen(true);
   };
 
@@ -586,11 +739,129 @@ const ServicesSection: React.FC = () => {
     }));
   };
 
+  const handleEditTranslationChange = (field: string, value: any) => {
+    setEditTranslations(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const translateEditField = async (field: string, value: string) => {
+    if (!value.trim()) return;
+    
+    try {
+      setIsEditTranslating(true);
+      const context = 'This is a service for an automotive tuning business. Maintain professional tone and technical accuracy.';
+      const translatedText = await translateText(value, 'English', null, context);
+      
+      setEditTranslations(prev => ({
+        ...prev,
+        [field]: translatedText
+      }));
+    } catch (error) {
+      console.error('Error translating field:', error);
+    } finally {
+      setIsEditTranslating(false);
+    }
+  };
+
+  const translateAllEditFields = async () => {
+    try {
+      setIsEditTranslating(true);
+      const context = 'This is a service for an automotive tuning business. Maintain professional tone and technical accuracy.';
+      
+      const fieldsToTranslate = [
+        { field: 'title', value: editFormData.title },
+        { field: 'subtitle', value: editFormData.subtitle },
+        { field: 'description', value: editFormData.description },
+        { field: 'badge', value: editFormData.badge }
+      ].filter(item => item.value?.trim());
+      
+      const featuresToTranslate = (editFormData.features || []).filter(f => f.trim());
+      
+      const translations = await Promise.all([
+        ...fieldsToTranslate.map(item => translateText(item.value, 'English', null, context)),
+        ...featuresToTranslate.map(feature => translateText(feature, 'English', null, context))
+      ]);
+      
+      const newTranslations = { ...editTranslations };
+      fieldsToTranslate.forEach((item, index) => {
+        newTranslations[item.field] = translations[index];
+      });
+      
+      if (featuresToTranslate.length > 0) {
+        newTranslations.features = translations.slice(fieldsToTranslate.length);
+      }
+      
+      setEditTranslations(newTranslations);
+    } catch (error) {
+      console.error('Error translating all fields:', error);
+    } finally {
+      setIsEditTranslating(false);
+    }
+  };
+
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validación de campos requeridos en español
+    const requiredSpanishFields = ['title', 'description'];
+    const missingSpanishFields = requiredSpanishFields.filter(field => 
+      !editFormData[field as keyof typeof editFormData] || 
+      String(editFormData[field as keyof typeof editFormData]).trim() === ''
+    );
+
+    if (missingSpanishFields.length > 0) {
+      alert(`Por favor completa los siguientes campos en español: ${missingSpanishFields.join(', ')}`);
+      return;
+    }
+
+    // Validación de campos requeridos en inglés
+    const requiredEnglishFields = ['title', 'description'];
+    const missingEnglishFields = requiredEnglishFields.filter(field => 
+      !editTranslations[field as keyof typeof editTranslations] || 
+      String(editTranslations[field as keyof typeof editTranslations]).trim() === ''
+    );
+
+    if (missingEnglishFields.length > 0) {
+      alert(`Por favor completa los siguientes campos en inglés: ${missingEnglishFields.join(', ')}`);
+      return;
+    }
+
+    // Validación de características
+    if (editFormData.features && editFormData.features.length > 0) {
+      const emptySpanishFeatures = editFormData.features.some(feature => !feature.trim());
+      if (emptySpanishFeatures) {
+        alert('Por favor completa todas las características en español o elimina las vacías.');
+        return;
+      }
+
+      if (!editTranslations.features || editTranslations.features.length !== editFormData.features.length) {
+        alert('Por favor asegúrate de que todas las características tengan su traducción al inglés.');
+        return;
+      }
+
+      const emptyEnglishFeatures = editTranslations.features.some(feature => !feature.trim());
+      if (emptyEnglishFeatures) {
+        alert('Por favor completa todas las características en inglés o elimina las vacías.');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
+      // Preparar las traducciones
+      const translations = {
+        en: {
+          title: editTranslations.title || '',
+          subtitle: editTranslations.subtitle || '',
+          description: editTranslations.description || '',
+          badge: editTranslations.badge || '',
+          features: editTranslations.features || []
+        }
+      };
+
       const { error } = await supabase
         .from('services')
         .update({
@@ -605,7 +876,8 @@ const ServicesSection: React.FC = () => {
           popular: editFormData.popular || editFormData.isPopular || false,
           is_additional: editFormData.is_additional || editFormData.isAdditional || false,
           image_url: editFormData.image_url || editFormData.imageUrl || null,
-          features: (editFormData.features || []).filter(f => f.trim() !== '')
+          features: (editFormData.features || []).filter(f => f.trim() !== ''),
+          translations: translations
         })
         .eq('id', editingService.id);
 
@@ -635,24 +907,64 @@ const ServicesSection: React.FC = () => {
   };
 
   const updateEditFeature = (index: number, value: string) => {
-    setEditFormData(prev => ({
-      ...prev,
-      features: (prev.features || []).map((f, i) => i === index ? value : f)
-    }));
+    if (activeEditTab === 'spanish') {
+      setEditFormData(prev => ({
+        ...prev,
+        features: (prev.features || []).map((f, i) => i === index ? value : f)
+      }));
+    } else {
+      setEditTranslations(prev => ({
+        ...prev,
+        features: (prev.features || []).map((f, i) => i === index ? value : f)
+      }));
+    }
   };
 
   const addEditFeature = () => {
-    setEditFormData(prev => ({
-      ...prev,
-      features: [...(prev.features || []), '']
-    }));
+    if (activeEditTab === 'spanish') {
+      setEditFormData(prev => ({
+        ...prev,
+        features: [...(prev.features || []), '']
+      }));
+    } else {
+      setEditTranslations(prev => ({
+        ...prev,
+        features: [...(prev.features || []), '']
+      }));
+    }
   };
 
   const removeEditFeature = (index: number) => {
-    setEditFormData(prev => ({
-      ...prev,
-      features: (prev.features || []).filter((_, i) => i !== index)
-    }));
+    if (activeEditTab === 'spanish') {
+      setEditFormData(prev => ({
+        ...prev,
+        features: (prev.features || []).filter((_, i) => i !== index)
+      }));
+    } else {
+      setEditTranslations(prev => ({
+        ...prev,
+        features: (prev.features || []).filter((_, i) => i !== index)
+      }));
+    }
+  };
+
+  // Función para traducir una característica específica
+  const translateEditFeature = async (index: number, spanishText: string) => {
+    if (!spanishText.trim()) return;
+    
+    setIsEditTranslating(true);
+    try {
+      const translatedText = await geminiTranslation(spanishText, 'es', 'en');
+      setEditTranslations(prev => {
+        const newFeatures = [...(prev.features || [])];
+        newFeatures[index] = translatedText;
+        return { ...prev, features: newFeatures };
+      });
+    } catch (error) {
+      console.error('Error translating feature:', error);
+    } finally {
+      setIsEditTranslating(false);
+    }
   };
 
   return (
@@ -681,6 +993,16 @@ const ServicesSection: React.FC = () => {
             }`}
           >
             Ver Servicios ({services.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('categories')}
+            className={`px-4 py-3 rounded-lg transition-colors touch-manipulation text-sm sm:text-base ${
+              activeTab === 'categories'
+                ? 'bg-primary text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            Gestionar Categorías
           </button>
         </div>
       </div>
@@ -766,10 +1088,22 @@ const ServicesSection: React.FC = () => {
                   value={formData.category}
                   onChange={(e) => handleInputChange('category', e.target.value)}
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
+                  disabled={categoriesLoading}
                 >
-                  <option>Car Tuning</option>
-                  <option>TCU Tuning</option>
-                  <option>Otros Servicios</option>
+                  {categoriesLoading ? (
+                    <option>Cargando categorías...</option>
+                  ) : categories.length === 0 ? (
+                    <option>No hay categorías disponibles</option>
+                  ) : (
+                    categories.map((category) => (
+                      <option 
+                        key={category.id} 
+                        value={`${category.title_part1} ${category.title_part2}`.trim()}
+                      >
+                        {category.title_part1} {category.title_part2}
+                      </option>
+                    ))
+                  )}
                 </select>
               </div>
               <div>
@@ -900,6 +1234,19 @@ const ServicesSection: React.FC = () => {
               </div>
             </div>
             
+            {/* Indicador de traducción */}
+            {isTranslating && (
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
+                  <div>
+                    <p className="text-blue-400 font-medium">Traducción automática en progreso...</p>
+                    <p className="text-blue-300 text-sm">{translationProgress}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex justify-end space-x-4">
               <button
                 type="button"
@@ -909,13 +1256,26 @@ const ServicesSection: React.FC = () => {
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isSubmitting || isTranslating}
+                className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
               >
-                {isSubmitting ? 'Creando...' : 'Crear Servicio'}
+                {isSubmitting || isTranslating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>{isTranslating ? 'Traduciendo...' : 'Creando...'}</span>
+                  </>
+                ) : (
+                  <span>Crear Servicio</span>
+                )}
               </button>
             </div>
           </form>
+          
+        </div>
+      ) : activeTab === 'categories' ? (
+        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-4 sm:p-6 lg:p-8">
+          <h3 className="text-xl font-bold text-white mb-6">Gestión de Categorías</h3>
+          <CategoryManager />
         </div>
       ) : (
         /* Vista de Servicios Creados */
@@ -1005,7 +1365,18 @@ const ServicesSection: React.FC = () => {
                     <h3 className="text-lg font-bold text-white">
                       {service.title}
                     </h3>
-
+                    {/* Indicador de traducción */}
+                    {!service.translations || Object.keys(service.translations).length === 0 ? (
+                      <div className="flex items-center space-x-1 bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs">
+                        <span>⚠️</span>
+                        <span>Sin traducción</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center space-x-1 bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
+                        <span>✅</span>
+                        <span>Traducido</span>
+                      </div>
+                    )}
                   </div>
                   
                   {service.subtitle && (
@@ -1085,180 +1456,342 @@ const ServicesSection: React.FC = () => {
               </button>
             </div>
             
+            {/* Pestañas de idioma */}
+            <div className="flex space-x-2 mb-6">
+              <button
+                type="button"
+                onClick={() => setActiveEditTab('spanish')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeEditTab === 'spanish'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                🇪🇸 Español
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveEditTab('english')}
+                className={`px-4 py-2 rounded-lg transition-colors ${
+                  activeEditTab === 'english'
+                    ? 'bg-primary text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                🇬🇧 English
+              </button>
+              {activeEditTab === 'english' && (
+                <button
+                  type="button"
+                  onClick={translateAllEditFields}
+                  disabled={isEditTranslating}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                >
+                  {isEditTranslating ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Traduciendo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🤖</span>
+                      <span>Traducir Todo</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+            
             <form onSubmit={handleEditSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Título del Servicio
+                    Título del Servicio {activeEditTab === 'english' && '(English)'}
                   </label>
-                  <input
-                    type="text"
-                    value={editFormData.title}
-                    onChange={(e) => handleEditInputChange('title', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={activeEditTab === 'spanish' ? editFormData.title : editTranslations.title}
+                      onChange={(e) => {
+                        if (activeEditTab === 'spanish') {
+                          handleEditInputChange('title', e.target.value);
+                        } else {
+                          handleEditTranslationChange('title', e.target.value);
+                        }
+                      }}
+                      className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                      placeholder={activeEditTab === 'spanish' ? 'Ej: CAR TUNING' : 'Ex: CAR TUNING'}
+                    />
+                    {activeEditTab === 'english' && (
+                      <button
+                        type="button"
+                        onClick={() => translateEditField('title', editFormData.title)}
+                        disabled={isEditTranslating || !editFormData.title}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                        title="Traducir desde español"
+                      >
+                        🤖
+                      </button>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Subtítulo
+                    Subtítulo {activeEditTab === 'english' && '(English)'}
                   </label>
-                  <input
-                    type="text"
-                    value={editFormData.subtitle}
-                    onChange={(e) => handleEditInputChange('subtitle', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={activeEditTab === 'spanish' ? editFormData.subtitle : editTranslations.subtitle}
+                      onChange={(e) => {
+                        if (activeEditTab === 'spanish') {
+                          handleEditInputChange('subtitle', e.target.value);
+                        } else {
+                          handleEditTranslationChange('subtitle', e.target.value);
+                        }
+                      }}
+                      className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                      placeholder={activeEditTab === 'spanish' ? 'Ej: (STAGE 1)' : 'Ex: (STAGE 1)'}
+                    />
+                    {activeEditTab === 'english' && (
+                      <button
+                        type="button"
+                        onClick={() => translateEditField('subtitle', editFormData.subtitle)}
+                        disabled={isEditTranslating || !editFormData.subtitle}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                        title="Traducir desde español"
+                      >
+                        🤖
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Precio Actual (€)
-                  </label>
-                  <input
-                    type="number"
-                    value={editFormData.priceFrom}
-                    onChange={(e) => handleEditInputChange('priceFrom', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="299"
-                  />
-                </div>
+                {activeEditTab === 'spanish' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Precio Actual (€)
+                      </label>
+                      <input
+                        type="number"
+                        value={editFormData.priceFrom}
+                        onChange={(e) => handleEditInputChange('priceFrom', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="299"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Precio Original (€)
+                      </label>
+                      <input
+                        type="number"
+                        value={editFormData.priceTo}
+                        onChange={(e) => handleEditInputChange('priceTo', e.target.value)}
+                        className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                        placeholder="399"
+                      />
+                    </div>
+                  </>
+                )}
                 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Precio Original (€)
+                    Badge/Etiqueta {activeEditTab === 'english' && '(English)'}
                   </label>
-                  <input
-                    type="number"
-                    value={editFormData.priceTo}
-                    onChange={(e) => handleEditInputChange('priceTo', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="399"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Badge/Etiqueta
-                  </label>
-                  <input
-                    type="text"
-                    value={editFormData.badge || ''}
-                    onChange={(e) => handleEditInputChange('badge', e.target.value)}
-                    placeholder="Ej: BÁSICO, MÁS POPULAR"
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Categoría
-                  </label>
-                  <select
-                    value={editFormData.category}
-                    onChange={(e) => handleEditInputChange('category', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
-                    required
-                  >
-                    <option value="Car Tuning">Car Tuning</option>
-                    <option value="TCU Tuning">TCU Tuning</option>
-                    <option value="Otros Servicios">Otros Servicios</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Estado
-                  </label>
-                  <select
-                    value={editFormData.status || 'active'}
-                    onChange={(e) => handleEditInputChange('status', e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
-                  >
-                    <option value="active">Activo</option>
-                    <option value="inactive">Inactivo</option>
-                  </select>
-                </div>
-                
-                <div className="flex flex-col space-y-3">
-                  <label className="flex items-center space-x-3 cursor-pointer">
+                  <div className="relative">
                     <input
-                      type="checkbox"
-                      checked={editFormData.isPopular || false}
-                      onChange={(e) => handleEditInputChange('isPopular', e.target.checked)}
-                      className="w-5 h-5 text-primary bg-gray-900/50 border-gray-600 rounded focus:ring-primary focus:ring-2"
+                      type="text"
+                      value={activeEditTab === 'spanish' ? (editFormData.badge || '') : editTranslations.badge}
+                      onChange={(e) => {
+                        if (activeEditTab === 'spanish') {
+                          handleEditInputChange('badge', e.target.value);
+                        } else {
+                          handleEditTranslationChange('badge', e.target.value);
+                        }
+                      }}
+                      placeholder={activeEditTab === 'spanish' ? 'Ej: BÁSICO, MÁS POPULAR' : 'Ex: BASIC, MOST POPULAR'}
+                      className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                     />
-                    <span className="text-sm font-medium text-gray-300">Servicio Popular</span>
-                  </label>
-                  
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={editFormData.isAdditional || false}
-                      onChange={(e) => handleEditInputChange('isAdditional', e.target.checked)}
-                      className="w-5 h-5 text-primary bg-gray-900/50 border-gray-600 rounded focus:ring-primary focus:ring-2"
-                    />
-                    <span className="text-sm font-medium text-gray-300">Es un servicio adicional</span>
-                  </label>
+                    {activeEditTab === 'english' && (
+                      <button
+                        type="button"
+                        onClick={() => translateEditField('badge', editFormData.badge)}
+                        disabled={isEditTranslating || !editFormData.badge}
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                        title="Traducir desde español"
+                      >
+                        🤖
+                      </button>
+                    )}
+                  </div>
                 </div>
+                
+                {activeEditTab === 'spanish' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Categoría
+                    </label>
+                    <select
+                      value={editFormData.category}
+                      onChange={(e) => handleEditInputChange('category', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
+                      required
+                      disabled={categoriesLoading}
+                    >
+                      {categoriesLoading ? (
+                        <option>Cargando categorías...</option>
+                      ) : categories.length === 0 ? (
+                        <option>No hay categorías disponibles</option>
+                      ) : (
+                        categories.map((category) => (
+                          <option 
+                            key={category.id} 
+                            value={`${category.title_part1} ${category.title_part2}`.trim()}
+                          >
+                            {category.title_part1} {category.title_part2}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+                )}
+                
+                {activeEditTab === 'spanish' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                      Estado
+                    </label>
+                    <select
+                      value={editFormData.status || 'active'}
+                      onChange={(e) => handleEditInputChange('status', e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
+                    >
+                      <option value="active">Activo</option>
+                      <option value="inactive">Inactivo</option>
+                    </select>
+                  </div>
+                )}
+                
+                {activeEditTab === 'spanish' && (
+                  <div className="flex flex-col space-y-3">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editFormData.isPopular || false}
+                        onChange={(e) => handleEditInputChange('isPopular', e.target.checked)}
+                        className="w-5 h-5 text-primary bg-gray-900/50 border-gray-600 rounded focus:ring-primary focus:ring-2"
+                      />
+                      <span className="text-sm font-medium text-gray-300">Servicio Popular</span>
+                    </label>
+                    
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editFormData.isAdditional || false}
+                        onChange={(e) => handleEditInputChange('isAdditional', e.target.checked)}
+                        className="w-5 h-5 text-primary bg-gray-900/50 border-gray-600 rounded focus:ring-primary focus:ring-2"
+                      />
+                      <span className="text-sm font-medium text-gray-300">Es un servicio adicional</span>
+                    </label>
+                  </div>
+                )}
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Descripción
+                  Descripción {activeEditTab === 'english' && '(English)'}
                 </label>
-                <textarea
-                  value={editFormData.description}
-                  onChange={(e) => handleEditInputChange('description', e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Imagen del Servicio
-                </label>
-                <div className="flex items-center space-x-4">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleEditImageUpload}
-                    className="hidden"
-                    id="edit-image-upload"
+                <div className="relative">
+                  <textarea
+                    value={activeEditTab === 'spanish' ? (editFormData.description || '') : editTranslations.description}
+                    onChange={(e) => {
+                      if (activeEditTab === 'spanish') {
+                        handleEditInputChange('description', e.target.value);
+                      } else {
+                        handleEditTranslationChange('description', e.target.value);
+                      }
+                    }}
+                    rows={4}
+                    className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary resize-none"
+                    placeholder={activeEditTab === 'spanish' ? 'Describe el servicio en detalle...' : 'Describe the service in detail...'}
                   />
-                  <label
-                    htmlFor="edit-image-upload"
-                    className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer"
-                  >
-                    Cambiar Imagen
-                  </label>
-                  {editFormData.imageUrl && (
-                    <img
-                      src={editFormData.imageUrl}
-                      alt="Preview"
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
+                  {activeEditTab === 'english' && (
+                    <button
+                      type="button"
+                      onClick={() => translateEditField('description', editFormData.description)}
+                      disabled={isEditTranslating || !editFormData.description}
+                      className="absolute right-2 top-2 p-1 text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                      title="Traducir desde español"
+                    >
+                      🤖
+                    </button>
                   )}
                 </div>
               </div>
               
+              {activeEditTab === 'spanish' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagen del Servicio
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleEditImageUpload}
+                      className="hidden"
+                      id="edit-image-upload"
+                    />
+                    <label
+                      htmlFor="edit-image-upload"
+                      className="px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors cursor-pointer"
+                    >
+                      Cambiar Imagen
+                    </label>
+                    {editFormData.imageUrl && (
+                      <img
+                        src={editFormData.imageUrl}
+                        alt="Preview"
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Características
+                  Características {activeEditTab === 'english' && '(English)'}
                 </label>
                 <div className="space-y-2">
-                  {(editFormData.features || []).map((feature, index) => (
+                  {(activeEditTab === 'spanish' ? (editFormData.features || []) : (editTranslations.features || [])).map((feature, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        value={feature}
-                        onChange={(e) => updateEditFeature(index, e.target.value)}
-                        className="flex-1 px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
-                        placeholder="Característica del servicio"
-                      />
+                      <div className="flex-1 relative">
+                        <input
+                          type="text"
+                          value={feature}
+                          onChange={(e) => updateEditFeature(index, e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
+                          placeholder={activeEditTab === 'spanish' ? 'Característica del servicio' : 'Service feature'}
+                        />
+                        {activeEditTab === 'english' && editFormData.features && editFormData.features[index] && (
+                          <button
+                            type="button"
+                            onClick={() => translateEditFeature(index, editFormData.features[index])}
+                            disabled={isEditTranslating || !editFormData.features[index]}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                            title="Traducir desde español"
+                          >
+                            🤖
+                          </button>
+                        )}
+                      </div>
                       <button
                         type="button"
                         onClick={() => removeEditFeature(index)}
@@ -1274,7 +1807,7 @@ const ServicesSection: React.FC = () => {
                     className="flex items-center space-x-2 px-4 py-2 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    <span>Agregar Característica</span>
+                    <span>{activeEditTab === 'spanish' ? 'Agregar Característica' : 'Add Feature'}</span>
                   </button>
                 </div>
               </div>

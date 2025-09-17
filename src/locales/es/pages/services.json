@@ -1,5 +1,7 @@
 {
   "loading": "Cargando servicios...",
   "title": "Servicios",
-  "subtitle": "Nuestros servicios profesionales de tuning"
+  "subtitle": "Nuestros servicios profesionales de tuning",
+  "all": "Todos",
+  "searchPlaceholder": "BUSCAR SERVICIOS..."
 }

@@ -9,6 +9,7 @@ import { useCookieConsent } from './hooks/useCookieConsent';
 import { useSEO } from './hooks/useSEO';
 import { Settings } from 'lucide-react';
 import { AuthProvider } from './contexts/AuthContext';
+import { CategoryProvider } from './contexts/CategoryContext';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
@@ -133,8 +134,9 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <AppContent />
-
+        <CategoryProvider>
+          <AppContent />
+        </CategoryProvider>
       </AuthProvider>
     </Router>
   );
