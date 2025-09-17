@@ -40,6 +40,8 @@ import disclaimerES from './locales/es/pages/disclaimer.json';
 import disclaimerEN from './locales/en/pages/disclaimer.json';
 import privacyPolicyES from './locales/es/pages/privacy-policy.json';
 import privacyPolicyEN from './locales/en/pages/privacy-policy.json';
+import adminDashboardES from './locales/es/pages/admin-dashboard.json';
+import adminDashboardEN from './locales/en/pages/admin-dashboard.json';
 
 // Importar traducciones SEO
 import seoES from './locales/es/seo.json';
@@ -117,6 +119,7 @@ const resources = {
       ...navbarES, 
       ...footerES, 
       ...servicesES,
+      ...adminDashboardES,
       common: commonES
     }),
     'service-configuration': serviceConfigurationES,
@@ -137,6 +140,7 @@ const resources = {
       ...navbarEN, 
       ...footerEN, 
       ...servicesEN,
+      ...adminDashboardEN,
       common: commonEN
     }),
     'service-configuration': serviceConfigurationEN,
