@@ -768,7 +768,6 @@ const ServicesSection: React.FC = () => {
                   className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary"
                 >
                   <option>Car Tuning</option>
-                  <option>Truck/Agriculture Tuning</option>
                   <option>TCU Tuning</option>
                   <option>Otros Servicios</option>
                 </select>
@@ -946,7 +945,6 @@ const ServicesSection: React.FC = () => {
               <select className="w-full sm:w-auto px-4 py-2 bg-gray-900/50 border border-gray-600 rounded-lg text-white focus:border-primary focus:ring-1 focus:ring-primary text-sm sm:text-base">
                 <option>Todas las categorías</option>
                 <option>Car Tuning</option>
-                <option>Truck/Agriculture</option>
                 <option>TCU Tuning</option>
                 <option>Otros Servicios</option>
               </select>
@@ -1165,7 +1163,6 @@ const ServicesSection: React.FC = () => {
                     required
                   >
                     <option value="Car Tuning">Car Tuning</option>
-                    <option value="Truck/Agriculture Tuning">Truck/Agriculture Tuning</option>
                     <option value="TCU Tuning">TCU Tuning</option>
                     <option value="Otros Servicios">Otros Servicios</option>
                   </select>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Settings, Gauge, Wrench, Cog, Truck, Car } from 'lucide-react';
+import { Search, Settings, Gauge, Wrench, Cog, Car } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -76,9 +76,7 @@ const Services = () => {
       car_tuning: filteredServices.filter(service => {
         return service.category === 'Car Tuning' || service.category === 'car_tuning';
       }),
-      truck: filteredServices.filter(service => {
-        return service.category === 'Truck/Agriculture Tuning' || service.category === 'truck';
-      }),
+
       tcu: filteredServices.filter(service => {
         return service.category === 'TCU Tuning' || service.category === 'tcu';
       }),
@@ -92,7 +90,7 @@ const Services = () => {
   
   // Servicios eliminados - ahora solo se usan los de Supabase
 
-  // Servicios de truck eliminados - solo Supabase
+  
 
   // Servicios de TCU eliminados - solo Supabase
 
@@ -272,34 +270,7 @@ const Services = () => {
         </div>
       </div>
 
-      {/* Truck/Agriculture Section */}
-      <div id="trucks-agriculture" className="py-20 px-4 bg-gray-900/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-4">
-              <Truck className="text-primary w-8 h-8 mr-3" />
-              <h2 className="text-4xl md:text-5xl font-bold" dangerouslySetInnerHTML={{ __html: t('services.truckAgriculture.title') }}>
-              </h2>
-            </div>
-            <p className="text-gray-400 text-lg">
-              {t('services.truckAgriculture.subtitle')}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {groupedServices.truck.length > 0 ? (
-              groupedServices.truck.map(renderServiceCard)
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <div className="bg-gray-900/50 rounded-xl p-8 border border-gray-700">
-                  <Truck className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-400 mb-2">No hay servicios de Truck/Agriculture disponibles</h3>
-                  <p className="text-gray-500">Los servicios se mostrarán aquí cuando se agreguen desde el panel de administración.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+
 
       {/* TCU Tuning Section */}
       <div id="tcu-tuning" className="py-20 px-4">

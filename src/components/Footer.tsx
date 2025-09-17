@@ -100,7 +100,6 @@ const Footer = () => {
             <h4 className="text-lg font-semibold text-white">{t('footer.services.title')}</h4>
             <ul className="space-y-2">
               <li><button onClick={() => handleServiceClick('car-tuning')} className="text-gray-300 hover:text-white transition-colors duration-300 text-left">{t('footer.services.links.carTuning')}</button></li>
-              <li><button onClick={() => handleServiceClick('trucks-agriculture')} className="text-gray-300 hover:text-white transition-colors duration-300 text-left">{t('footer.services.links.trucks')}</button></li>
               <li><button onClick={() => handleServiceClick('tcu-tuning')} className="text-gray-300 hover:text-white transition-colors duration-300 text-left">{t('footer.services.links.tcuTuning')}</button></li>
               <li><button onClick={() => handleServiceClick('other-services')} className="text-gray-300 hover:text-white transition-colors duration-300 text-left">{t('footer.services.links.others')}</button></li>
             </ul>

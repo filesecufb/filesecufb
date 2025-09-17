@@ -6,10 +6,7 @@
     "carTuning": {
       "title": "AUTOMOTIVE TUNING SERVICES"
     },
-    "truckAgriculture": {
-      "title": "TRUCK & <span class='text-primary'>AGRICULTURE</span>",
-      "subtitle": "SPECIALIZED SERVICES FOR COMMERCIAL AND AGRICULTURAL VEHICLES"
-    },
+
     "tcuTuning": {
       "subtitle": "TRANSMISSION OPTIMIZATION WITH INTERNAL TORQUE AND SHIFT SPEED"
     },
