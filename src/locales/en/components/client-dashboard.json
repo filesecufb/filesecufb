@@ -68,6 +68,9 @@
       "processed": "Processed",
       "unknownSize": "Unknown size"
     },
+    "modal": {
+      "download": "Download"
+    },
     "loading": "Loading orders..."
   },
   "profile": {
@@ -123,6 +126,7 @@
   "modal": {
     "completeInfo": "Complete Order Information",
     "orderNumber": "Order Number",
+    "download": "Download",
     "orderId": "Order ID",
     "orderDate": "Order Date",
     "status": "Status",

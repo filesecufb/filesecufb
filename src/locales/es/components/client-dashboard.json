@@ -68,6 +68,9 @@
       "processed": "Procesados",
       "unknownSize": "Tamaño desconocido"
     },
+    "modal": {
+      "download": "Descargar"
+    },
     "loading": "Cargando pedidos..."
   },
   "profile": {
@@ -121,8 +124,9 @@
     "confirmPassword": "Confirmar Contraseña"
   },
   "modal": {
-    "completeInfo": "Información Completa del Pedido",
-    "orderNumber": "Número de Pedido",
+      "completeInfo": "Información Completa del Pedido",
+      "orderNumber": "Número de Pedido",
+      "download": "Descargar",
     "orderId": "ID del Pedido",
     "orderDate": "Fecha del Pedido",
     "status": "Estado",
