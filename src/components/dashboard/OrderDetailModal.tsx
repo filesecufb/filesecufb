@@ -479,7 +479,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                                 className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                               >
                                 <Download className="w-4 h-4" />
-                                {t('clientDashboard.modal.download')}
+                                {t('clientDashboard.orders.modal.download')}
                               </button>
                             </div>
                           ))
@@ -512,7 +512,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                                 className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                               >
                                 <Download className="w-4 h-4" />
-                                {t('clientDashboard.modal.download')}
+                                {t('clientDashboard.orders.modal.download')}
                               </button>
                             </div>
                           ))
