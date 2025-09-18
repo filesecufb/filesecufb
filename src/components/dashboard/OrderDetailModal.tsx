@@ -1,11 +1,11 @@
 import React from 'react';
 import { X, FileText, User, Car, Wrench, Download, CreditCard, Printer, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getServiceTitle, getServiceSubtitle, getServiceDescription } from '../../hooks/useServices';
+import { getServiceTitle, getServiceSubtitle, getServiceDescription, Service } from '../../hooks/useServices';
 import { generatePDF } from '../../lib/pdfGenerator';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
-import { formatFileSize } from '../../pages/ClientDashboard';
+import { formatFileSize } from '../../utils/fileUtils';
 import { calculateExpirationDate } from '../../utils/dateUtils';
 
 // Types
@@ -24,7 +24,7 @@ interface Order {
   vehicle_gearbox?: string;
   service_name?: string;
   service_type?: string;
-  services?: { title: string };
+  services?: Service;
   engine_hp?: string;
   engine_kw?: string;
   vin?: string;
@@ -40,11 +40,7 @@ interface Order {
   cold_air_intake_remarks?: string;
   decat?: boolean;
   decat_remarks?: string;
-  additional_services_details?: Array<{
-    title: string;
-    price: string;
-    description?: string;
-  }>;
+  additional_services_details?: Service[];
   additional_info?: string;
   base_price?: string;
   additional_services_price?: number;
@@ -89,6 +85,8 @@ interface Invoice {
   admin_comments_en?: string;
   created_at: string;
 }
+
+
 
 interface OrderDetailModalProps {
   order: Order;
