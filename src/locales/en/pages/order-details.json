@@ -32,6 +32,7 @@
   "modifications": {
     "title": "Vehicle Modifications",
     "aftermarketExhaust": "Aftermarket Exhaust",
+    "aftermarketIntake": "Aftermarket Intake",
     "aftermarketIntakeManifold": "Aftermarket Intake Manifold",
     "coldAirIntake": "Cold Air Intake",
     "decat": "Decat"
@@ -117,6 +118,8 @@
   "common": {
     "download": "Download",
     "notProvided": "Not provided",
-    "na": "N/A"
+    "na": "N/A",
+    "yes": "Yes",
+    "no": "No"
   }
 }
