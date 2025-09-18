@@ -49,6 +49,47 @@
       "hardwareNumber": "Número de Hardware",
       "vin": "VIN",
       "softwareNumber": "Número de Software"
+    },
+    "modifications": {
+      "title": "Modificaciones del Vehículo",
+      "aftermarketExhaust": "Escape Aftermarket",
+      "aftermarketIntake": "Colector de Admisión Aftermarket",
+      "coldAirIntake": "Admisión de Aire Frío",
+      "decat": "Decat"
+    },
+    "common": {
+      "yes": "Sí",
+      "no": "No",
+      "download": "Descargar"
+    },
+    "actions": {
+      "title": "Acciones Rápidas",
+      "downloadInfo": "Descargar Información",
+      "downloadAll": "Descargar Todo"
+    },
+    "files": {
+      "title": "Archivos",
+      "download": "Descargando...",
+      "mainFile": {
+        "title": "Archivo Principal",
+        "ecuFile": "Archivo ECU",
+        "noFiles": "No hay archivos principales",
+        "noFilesDescription": "El archivo principal se subirá cuando esté disponible"
+      },
+      "additionalFiles": {
+        "title": "Archivos Adicionales",
+        "noFiles": "No hay archivos adicionales",
+        "noFilesDescription": "No se han subido archivos adicionales"
+      },
+      "tunedMaps": {
+        "title": "Mapas Tuneados",
+        "uploaded": "Subido",
+        "deleting": "Eliminando...",
+        "cancel": "Cancelar"
+      }
+    },
+    "additionalInfo": {
+      "title": "Información Adicional"
     }
   },
   "cookies": {

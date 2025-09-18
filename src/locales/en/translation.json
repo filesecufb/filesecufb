@@ -49,6 +49,47 @@
       "hardwareNumber": "Hardware Number",
       "vin": "VIN",
       "softwareNumber": "Software Number"
+    },
+    "modifications": {
+      "title": "Vehicle Modifications",
+      "aftermarketExhaust": "Aftermarket Exhaust",
+      "aftermarketIntake": "Aftermarket Intake Manifold",
+      "coldAirIntake": "Cold Air Intake",
+      "decat": "Decat"
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No",
+      "download": "Download"
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "downloadInfo": "Download Information",
+      "downloadAll": "Download All"
+    },
+    "files": {
+      "title": "Files",
+      "download": "Downloading...",
+      "mainFile": {
+        "title": "Main File",
+        "ecuFile": "ECU File",
+        "noFiles": "No main files",
+        "noFilesDescription": "The main file will be uploaded when available"
+      },
+      "additionalFiles": {
+        "title": "Additional Files",
+        "noFiles": "No additional files",
+        "noFilesDescription": "No additional files have been uploaded"
+      },
+      "tunedMaps": {
+        "title": "Tuned Maps",
+        "uploaded": "Uploaded",
+        "deleting": "Deleting...",
+        "cancel": "Cancel"
+      }
+    },
+    "additionalInfo": {
+      "title": "Additional Information"
     }
   },
   "cookies": {
