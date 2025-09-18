@@ -1,7 +1,20 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Obtener la API key del entorno (compatible con Vite y Node.js)
+const getApiKey = () => {
+  // En el navegador con Vite
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_GEMINI_API_KEY;
+  }
+  // En Node.js
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_GEMINI_API_KEY;
+  }
+  return null;
+};
+
 // Inicializar Gemini AI con la API key del entorno
-const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(getApiKey());
 
 /**
  * Función para esperar un tiempo determinado (delay)
@@ -85,7 +98,7 @@ export async function translateText(text, targetLanguage = 'English', sourceLang
   }
 
   // Validar que la API key esté configurada
-  if (!import.meta.env.VITE_GEMINI_API_KEY) {
+  if (!getApiKey()) {
     throw new Error('VITE_GEMINI_API_KEY no está configurada en las variables de entorno');
   }
 
@@ -111,16 +124,22 @@ export async function translateText(text, targetLanguage = 'English', sourceLang
       
       prompt += `. Only return the translated text, no explanations or additional content:\n\n"${text}"`;
 
+      // Debug logs removidos para limpiar la consola
+
       // Realizar la traducción
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const translatedText = response.text();
 
+      // Respuesta de Gemini recibida
+      
       // Si llegamos aquí, la traducción fue exitosa
       console.log(`✅ Traducción exitosa en intento ${attempt}`);
       
       // Limpiar la respuesta (remover comillas si las hay)
-      return translatedText.replace(/^["']|["']$/g, '').trim();
+      const cleanedText = translatedText.replace(/^["']|["']$/g, '').trim();
+      
+      return cleanedText;
 
     } catch (error) {
       console.error(`❌ Error en intento ${attempt}:`, error.message);

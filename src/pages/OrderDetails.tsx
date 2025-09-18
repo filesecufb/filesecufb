@@ -5,9 +5,11 @@ import JSZip from 'jszip';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
+import { getServiceTitle, getServiceSubtitle, getServiceDescription } from '../hooks/useServices';
 import toast from 'react-hot-toast';
 import { generatePDF, generatePDFBlob } from '../lib/pdfGenerator';
 import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
+import { translateText } from '../lib/geminiTranslation';
 
 interface OrderData {
   id: string;
@@ -76,6 +78,7 @@ interface AdminFile {
   file_category?: 'map' | 'invoice' | 'other';
   bucket_name?: string;
   admin_comments?: string;
+  admin_comments_en?: string;
   created_at: string;
 }
 
@@ -94,8 +97,8 @@ interface AdminInvoice {
 const OrderDetails: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
-  const { user, isAdmin, loading: authLoading } = useAuth();
-  const { t } = useTranslation();
+  const { user, profile, isAdmin, loading: authLoading } = useAuth();
+  const { t, i18n } = useTranslation();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -112,6 +115,15 @@ const OrderDetails: React.FC = () => {
   const [adminFiles, setAdminFiles] = useState<AdminFile[]>([]);
   const [adminInvoices, setAdminInvoices] = useState<AdminFile[]>([]);
   const [adminFilesLoading, setAdminFilesLoading] = useState(false);
+  
+  // Estados para traducción automática
+  const [mapCommentEn, setMapCommentEn] = useState('');
+  const [invoiceCommentEn, setInvoiceCommentEn] = useState('');
+  const [isTranslatingMap, setIsTranslatingMap] = useState(false);
+  const [isTranslatingInvoice, setIsTranslatingInvoice] = useState(false);
+  const [showMapTranslation, setShowMapTranslation] = useState(false);
+  const [showInvoiceTranslation, setShowInvoiceTranslation] = useState(false);
+  const [translationError, setTranslationError] = useState<{map?: string, invoice?: string}>({});
 
 
   // Protección de rutas: Solo admins pueden acceder
@@ -122,13 +134,15 @@ const OrderDetails: React.FC = () => {
         navigate('/login', { replace: true });
         return;
       }
-      if (!isAdmin) {
+      
+      // Solo verificar el rol si el perfil está cargado
+      if (profile && profile.role !== 'admin') {
         toast.error('Acceso denegado. Esta página es solo para administradores.');
         navigate('/', { replace: true });
         return;
       }
     }
-  }, [authLoading, user, isAdmin, navigate]);
+  }, [authLoading, user, profile, navigate]);
 
   // NUEVA LÓGICA: Cargar datos del pedido desde Supabase
   useEffect(() => {
@@ -184,7 +198,7 @@ const OrderDetails: React.FC = () => {
             try {
               const { data: servicesData, error: servicesError } = await supabase
                 .from('services')
-                .select('id, title, price')
+                .select('id, title, price, translations')
                 .in('id', data.additional_services);
 
               if (servicesError) {
@@ -330,7 +344,7 @@ const OrderDetails: React.FC = () => {
       // Obtener archivos tuneados del admin (file_category = 'map')
       const { data: mapFilesData, error: mapFilesError } = await supabase
         .from('order_files')
-        .select('*')
+        .select('*, admin_comments_en')
         .eq('order_id', order.id)
         .eq('file_category', 'map')
         .is('uploaded_by', null) // Admin files have null uploaded_by
@@ -343,7 +357,7 @@ const OrderDetails: React.FC = () => {
       // Obtener facturas del admin (file_category = 'invoice')
       const { data: invoiceFilesData, error: invoiceFilesError } = await supabase
         .from('order_files')
-        .select('*')
+        .select('*, admin_comments_en')
         .eq('order_id', order.id)
         .eq('file_category', 'invoice')
         .is('uploaded_by', null) // Admin files have null uploaded_by
@@ -368,6 +382,7 @@ const OrderDetails: React.FC = () => {
           file_type: file.file_type,
           file_category: file.file_category,
           admin_comments: file.admin_comments,
+          admin_comments_en: file.admin_comments_en,
           created_at: file.created_at,
           uploaded_by: file.uploaded_by
         };
@@ -388,6 +403,7 @@ const OrderDetails: React.FC = () => {
           file_type: file.file_type,
           file_category: file.file_category,
           admin_comments: file.admin_comments,
+          admin_comments_en: file.admin_comments_en,
           created_at: file.created_at,
           uploaded_by: file.uploaded_by
         };
@@ -576,7 +592,8 @@ const OrderDetails: React.FC = () => {
         file_size: file.size,
         file_type: file.type,
         file_category: 'map', // Categoría para archivos tuneados
-        admin_comments: mapComment || null
+        admin_comments: mapComment || null,
+        admin_comments_en: mapCommentEn || null // Traducción en inglés
       };
 
       console.log('💾 NUEVA LÓGICA - Inserting to order_files:', insertData);
@@ -596,6 +613,8 @@ const OrderDetails: React.FC = () => {
 
       toast.success('Archivo tuneado subido correctamente');
       setMapComment('');
+      setMapCommentEn('');
+      setShowMapTranslation(false);
       
       // Limpiar el input de archivo
       const fileInput = event.target;
@@ -667,7 +686,8 @@ const OrderDetails: React.FC = () => {
         file_size: file.size,
         file_type: file.type,
         file_category: 'invoice', // Categoría para facturas
-        admin_comments: invoiceComment || null
+        admin_comments: invoiceComment || null,
+        admin_comments_en: invoiceCommentEn || null // Traducción en inglés
       };
 
       console.log('💾 NUEVA LÓGICA - Inserting invoice to order_files:', insertData);
@@ -687,6 +707,8 @@ const OrderDetails: React.FC = () => {
 
       toast.success('Factura subida correctamente');
       setInvoiceComment('');
+      setInvoiceCommentEn('');
+      setShowInvoiceTranslation(false);
       
       // Limpiar el input de archivo
       const fileInput = event.target;
@@ -719,10 +741,32 @@ const OrderDetails: React.FC = () => {
     try {
       const comment = tempComments[fileId];
       
+      // Preparar datos para actualizar
+      const updateData: any = { admin_comments: comment };
+      
+      // Si hay comentario y no está vacío, intentar traducir automáticamente
+      if (comment && comment.trim()) {
+        try {
+          const translatedComment = await translateText(
+            comment,
+            'English',
+            'Spanish',
+            'Este es un comentario administrativo sobre un archivo. Traduce de manera técnica y precisa.'
+          );
+          updateData.admin_comments_en = translatedComment;
+        } catch (translationError) {
+          console.warn('No se pudo traducir automáticamente:', translationError);
+          // Continuar sin traducción automática
+        }
+      } else {
+        // Si el comentario está vacío, limpiar también la traducción
+        updateData.admin_comments_en = null;
+      }
+      
       // Actualizar en la base de datos
       const { error } = await supabase
         .from(table)
-        .update({ admin_comments: comment })
+        .update(updateData)
         .eq('id', fileId);
 
       if (error) {
@@ -733,7 +777,11 @@ const OrderDetails: React.FC = () => {
       if (table === 'order_files') {
         setAdminFiles(prev => 
           prev.map(file => 
-            file.id === fileId ? { ...file, admin_comments: comment } : file
+            file.id === fileId ? { 
+              ...file, 
+              admin_comments: comment,
+              admin_comments_en: updateData.admin_comments_en
+            } : file
           )
         );
       } else if (order) {
@@ -741,7 +789,11 @@ const OrderDetails: React.FC = () => {
           setOrder(prev => ({
             ...prev!,
             invoices: prev!.invoices?.map(invoice => 
-              invoice.id === fileId ? { ...invoice, admin_comments: comment } : invoice
+              invoice.id === fileId ? { 
+                ...invoice, 
+                admin_comments: comment,
+                admin_comments_en: updateData.admin_comments_en
+              } : invoice
             )
           }));
         }
@@ -749,7 +801,12 @@ const OrderDetails: React.FC = () => {
 
       setEditingComments(prev => ({ ...prev, [fileId]: false }));
       setTempComments(prev => ({ ...prev, [fileId]: '' }));
-      toast.success('Comentario actualizado correctamente');
+      
+      if (updateData.admin_comments_en) {
+        toast.success('Comentario guardado y traducido automáticamente');
+      } else {
+        toast.success('Comentario actualizado correctamente');
+      }
     } catch (err: any) {
       console.error('Error updating comment:', err);
       toast.error(`Error al actualizar comentario: ${err.message}`);
@@ -764,7 +821,82 @@ const OrderDetails: React.FC = () => {
     setShowDeleteConfirm(prev => ({ ...prev, [fileId]: false }));
   };
 
+  // Funciones de traducción automática
+  const translateMapComment = async () => {
+    if (!mapComment.trim()) {
+      toast.error('Por favor, escribe un comentario antes de traducir');
+      return;
+    }
 
+    try {
+      setIsTranslatingMap(true);
+      setTranslationError(prev => ({ ...prev, map: undefined }));
+      
+      const translatedText = await translateText(
+        mapComment,
+        'English',
+        'Spanish',
+        'Este es un comentario sobre un mapa tuneado de un vehículo. Traduce de manera técnica y precisa.'
+      );
+      
+      setMapCommentEn(translatedText);
+      setShowMapTranslation(true);
+      toast.success('Comentario traducido correctamente');
+    } catch (error: any) {
+      console.error('❌ Error translating map comment:', error);
+      let errorMessage = 'Error al traducir el comentario';
+      
+      if (error.message?.includes('quota') || error.message?.includes('limit')) {
+        errorMessage = 'Límite de traducción alcanzado. Puedes escribir la traducción manualmente.';
+        setTranslationError(prev => ({ ...prev, map: errorMessage }));
+        setShowMapTranslation(true); // Mostrar campo para edición manual
+      } else {
+        setTranslationError(prev => ({ ...prev, map: errorMessage }));
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsTranslatingMap(false);
+    }
+  };
+
+  const translateInvoiceComment = async () => {
+    if (!invoiceComment.trim()) {
+      toast.error('Por favor, escribe un comentario antes de traducir');
+      return;
+    }
+
+    try {
+      setIsTranslatingInvoice(true);
+      setTranslationError(prev => ({ ...prev, invoice: undefined }));
+      
+      const translatedText = await translateText(
+        invoiceComment,
+        'English',
+        'Spanish',
+        'Este es un comentario sobre una factura. Traduce de manera profesional y clara.'
+      );
+      
+      setInvoiceCommentEn(translatedText);
+      setShowInvoiceTranslation(true);
+      toast.success('Comentario traducido correctamente');
+    } catch (error: any) {
+      console.error('Error translating invoice comment:', error);
+      let errorMessage = 'Error al traducir el comentario';
+      
+      if (error.message?.includes('quota') || error.message?.includes('limit')) {
+        errorMessage = 'Límite de traducción alcanzado. Puedes escribir la traducción manualmente.';
+        setTranslationError(prev => ({ ...prev, invoice: errorMessage }));
+        setShowInvoiceTranslation(true); // Mostrar campo para edición manual
+      } else {
+        setTranslationError(prev => ({ ...prev, invoice: errorMessage }));
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsTranslatingInvoice(false);
+    }
+  };
 
   // NUEVA FUNCIÓN: Eliminar archivos del admin
   // FUNCIÓN DELETEFILE CREADA DESDE CERO
@@ -1248,7 +1380,9 @@ const OrderDetails: React.FC = () => {
                     <div className="space-y-2">
                       {order.additional_services_details.map((service: any, index: number) => (
                         <div key={service.id || index} className="flex justify-between items-center py-2">
-                          <span className="text-gray-300">{service.title}</span>
+                          <span className="text-gray-300">
+                            {service.translations ? getServiceTitle(service, i18n.language) : service.title}
+                          </span>
                           <span className="text-primary font-medium">€{parseFloat(service.price || 0).toFixed(2)}</span>
                         </div>
                       ))}
@@ -1307,10 +1441,7 @@ const OrderDetails: React.FC = () => {
                     <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.readingMethod')}</label>
                     <p className="text-white font-medium text-sm sm:text-base break-words">{order.read_method || 'N/A'}</p>
                   </div>
-                  <div>
-                    <label className="text-gray-400 text-xs sm:text-sm font-medium">{t('orderDetails.vehicleInfo.hardwareNumber')}</label>
-                    <p className="text-white font-medium text-xs sm:text-sm font-mono break-all">{order.hardware_number || 'N/A'}</p>
-                  </div>
+
                 </div>
                 {(order.vin || order.software_number) && (
                   <div className="sm:col-span-2 lg:col-span-3 space-y-3 sm:space-y-4">
@@ -1569,7 +1700,20 @@ const OrderDetails: React.FC = () => {
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
                                 <p className="text-gray-300 text-xs sm:text-sm">
-                                  {file.admin_comments || 'Sin comentarios'}
+                                  {(() => {
+                                    const result = i18n.language === 'en' && file.admin_comments_en 
+                                      ? file.admin_comments_en 
+                                      : file.admin_comments || (i18n.language === 'en' ? 'No comments' : 'Sin comentarios');
+                                    console.log('Map comment translation:', {
+                                      language: i18n.language,
+                                      admin_comments_en: file.admin_comments_en,
+                                      admin_comments: file.admin_comments,
+                                      result: result,
+                                      fileId: file.id
+                                    });
+                                    return result;
+                                  })()
+                                  }
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(file.id, file.admin_comments || '')}
@@ -1694,7 +1838,20 @@ const OrderDetails: React.FC = () => {
                             <div className="mt-2">
                               <div className="flex items-center justify-between">
                                 <p className="text-gray-300 text-xs sm:text-sm">
-                                  {invoice.admin_comments || t('orderDetails.files.invoices.noComments')}
+                                  {(() => {
+                                    const result = i18n.language === 'en' && invoice.admin_comments_en 
+                                      ? invoice.admin_comments_en 
+                                      : invoice.admin_comments || t('orderDetails.files.invoices.noComments');
+                                    console.log('Invoice comment translation:', {
+                                      language: i18n.language,
+                                      admin_comments_en: invoice.admin_comments_en,
+                                      admin_comments: invoice.admin_comments,
+                                      result: result,
+                                      invoiceId: invoice.id
+                                    });
+                                    return result;
+                                  })()
+                                  }
                                 </p>
                                 <button
                                   onClick={() => startEditingComment(invoice.id, invoice.admin_comments || '')}
@@ -1757,13 +1914,48 @@ const OrderDetails: React.FC = () => {
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.upload.tunedMap.title')}</h3>
                 <div className="border-2 border-dashed border-gray-600 rounded-lg p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <textarea
-                      value={mapComment}
-                      onChange={(e) => setMapComment(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
-                      rows={3}
-                      placeholder={t('orderDetails.upload.tunedMap.comments')}
-                    />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-gray-300 text-sm font-medium">Comentario (Español)</label>
+                        <button
+                          onClick={translateMapComment}
+                          disabled={isTranslatingMap || !mapComment.trim()}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded-lg transition-colors flex items-center space-x-1"
+                        >
+                          {isTranslatingMap ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                              <span>Traduciendo...</span>
+                            </>
+                          ) : (
+                            <span>Traducir al inglés</span>
+                          )}
+                        </button>
+                      </div>
+                      <textarea
+                        value={mapComment}
+                        onChange={(e) => setMapComment(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
+                        rows={3}
+                        placeholder={t('orderDetails.upload.tunedMap.comments')}
+                      />
+                    </div>
+                    
+                    {(showMapTranslation || translationError.map) && (
+                      <div className="space-y-2">
+                        <label className="text-gray-300 text-sm font-medium">Traducción (Inglés)</label>
+                        {translationError.map && (
+                          <p className="text-yellow-400 text-xs">{translationError.map}</p>
+                        )}
+                        <textarea
+                          value={mapCommentEn}
+                          onChange={(e) => setMapCommentEn(e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-700/50 border border-blue-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-sm"
+                          rows={3}
+                          placeholder="English translation of the comment..."
+                        />
+                      </div>
+                    )}
                     
                     <div className="text-center">
                       <input
@@ -1799,13 +1991,48 @@ const OrderDetails: React.FC = () => {
                 <h3 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">{t('orderDetails.upload.invoice.title')}</h3>
                 <div className="border-2 border-dashed border-blue-600/30 rounded-lg p-4 sm:p-6">
                   <div className="space-y-3 sm:space-y-4">
-                    <textarea
-                      value={invoiceComment}
-                      onChange={(e) => setInvoiceComment(e.target.value)}
-                      className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
-                      rows={3}
-                      placeholder={t('orderDetails.upload.invoice.comments')}
-                    />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label className="text-gray-300 text-sm font-medium">Comentario (Español)</label>
+                        <button
+                          onClick={translateInvoiceComment}
+                          disabled={isTranslatingInvoice || !invoiceComment.trim()}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded-lg transition-colors flex items-center space-x-1"
+                        >
+                          {isTranslatingInvoice ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                              <span>Traduciendo...</span>
+                            </>
+                          ) : (
+                            <span>Traducir al inglés</span>
+                          )}
+                        </button>
+                      </div>
+                      <textarea
+                        value={invoiceComment}
+                        onChange={(e) => setInvoiceComment(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none text-sm"
+                        rows={3}
+                        placeholder={t('orderDetails.upload.invoice.comments')}
+                      />
+                    </div>
+                    
+                    {(showInvoiceTranslation || translationError.invoice) && (
+                      <div className="space-y-2">
+                        <label className="text-gray-300 text-sm font-medium">Traducción (Inglés)</label>
+                        {translationError.invoice && (
+                          <p className="text-yellow-400 text-xs">{translationError.invoice}</p>
+                        )}
+                        <textarea
+                          value={invoiceCommentEn}
+                          onChange={(e) => setInvoiceCommentEn(e.target.value)}
+                          className="w-full px-3 py-2 bg-gray-700/50 border border-blue-600/50 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-sm"
+                          rows={3}
+                          placeholder="English translation of the comment..."
+                        />
+                      </div>
+                    )}
                     
                     <div className="text-center">
                       <input

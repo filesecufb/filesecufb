@@ -1,5 +1,6 @@
 {
   "title": "Order Details",
+  "loading": "Loading order details...",
   "backToOrders": "Back to Orders",
   "orderNumber": "Order #",
   "customerInfo": {

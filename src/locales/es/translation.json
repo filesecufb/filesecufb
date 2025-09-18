@@ -11,6 +11,46 @@
       }
     }
   },
+  "fileRetention": {
+    "willBeDeleted": "Se eliminará el:",
+    "banner": {
+      "title": "⚠️ Importante: Política de Retención de Archivos",
+      "description": "Todos los archivos (originales, tuneados y facturas) se mantienen disponibles por 120 días desde su subida.",
+      "recommendation": "Te recomendamos descargarlos cuanto antes para evitar perderlos después de la fecha de caducidad."
+    }
+  },
+  "orderDetails": {
+    "loading": "Cargando detalles del pedido...",
+    "title": "Detalles del Pedido #{{id}}",
+    "backToOrders": "Volver a Pedidos",
+    "customerInfo": {
+      "title": "Información del Cliente",
+      "fullName": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "noPhone": "No proporcionado",
+      "clientId": "ID del Cliente"
+    },
+    "serviceInfo": {
+      "title": "Información del Servicio",
+      "totalPrice": "Precio Total",
+      "additionalServices": "Servicios Adicionales"
+    },
+    "vehicleInfo": {
+      "title": "Información del Vehículo",
+      "brandModel": "Marca y Modelo",
+      "generation": "Generación",
+      "year": "Año",
+      "engine": "Motor",
+      "ecu": "ECU",
+      "transmission": "Transmisión",
+      "power": "Potencia",
+      "readingMethod": "Método de Lectura",
+      "hardwareNumber": "Número de Hardware",
+      "vin": "VIN",
+      "softwareNumber": "Número de Software"
+    }
+  },
   "cookies": {
     "banner": {
       "title": "Configuración de Cookies",

@@ -1,7 +1,12 @@
 import React from 'react';
-import { X, FileText, User, Car, Wrench, Download, CreditCard, Printer } from 'lucide-react';
+import { X, FileText, User, Car, Wrench, Download, CreditCard, Printer, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getServiceTitle, getServiceSubtitle, getServiceDescription } from '../../hooks/useServices';
 import { generatePDF } from '../../lib/pdfGenerator';
+import { toast } from 'sonner';
+import { supabase } from '../../lib/supabase';
+import { formatFileSize } from '../../pages/ClientDashboard';
+import { calculateExpirationDate } from '../../utils/dateUtils';
 
 // Types
 interface Order {
@@ -72,6 +77,7 @@ interface AdminFile {
   file_size: number;
   file_category: string;
   admin_comments?: string;
+  admin_comments_en?: string;
   created_at: string;
 }
 
@@ -80,6 +86,7 @@ interface Invoice {
   file_name?: string;
   file_url?: string;
   admin_comments?: string;
+  admin_comments_en?: string;
   created_at: string;
 }
 
@@ -110,7 +117,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
   formatFileSize,
   getStatusText
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // Usar la función unificada de generación de PDF
   const handleGenerateOrderPDF = async (order: Order) => {
@@ -256,7 +263,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
               </div>
               <div>
                 <p className="text-gray-400 text-sm">{t('clientDashboard.modal.service')}</p>
-                <p className="text-white font-medium">{order.service_name || order.service_type || order.services?.title || t('clientDashboard.modal.service')}</p>
+                <p className="text-white font-medium">
+                  {order.services ? getServiceTitle(order.services, i18n.language) : (order.service_name || order.service_type || t('clientDashboard.modal.service'))}
+                </p>
               </div>
             </div>
           </div>
@@ -360,11 +369,15 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 {order.additional_services_details.map((service, index) => (
                   <div key={index} className="bg-gray-700/30 rounded-lg p-3">
                     <div className="flex justify-between items-center">
-                      <p className="text-white font-medium">{service.title}</p>
+                      <p className="text-white font-medium">
+                        {service.translations ? getServiceTitle(service, i18n.language) : service.title}
+                      </p>
                       <p className="text-green-400 font-semibold">€{service.price}</p>
                     </div>
                     {service.description && (
-                      <p className="text-gray-400 text-sm mt-2">{service.description}</p>
+                      <p className="text-gray-400 text-sm mt-2">
+                        {service.translations ? getServiceDescription(service, i18n.language) : service.description}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -416,6 +429,25 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           
           
           
+          {/* Banner informativo sobre retención de archivos */}
+          {((orderFiles[order.id] && orderFiles[order.id].length > 0) || 
+            (adminFiles[order.id] && adminFiles[order.id].length > 0 && order.status === 'completed')) && (
+            <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-amber-500/20 p-2 rounded-lg flex-shrink-0">
+                  <AlertCircle className="w-5 h-5 text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-amber-300 font-semibold mb-1">{t('fileRetention.banner.title')}</h4>
+                  <p className="text-amber-200 text-sm leading-relaxed">
+                    {t('fileRetention.banner.description')}
+                    <br />{t('fileRetention.banner.recommendation')}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Archivos */}
           {((orderFiles[order.id] && orderFiles[order.id].length > 0) || 
             (adminFiles[order.id] && adminFiles[order.id].length > 0 && order.status === 'completed')) && (
@@ -438,6 +470,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                             {new Date(file.created_at).toLocaleDateString('es-ES')} • 
                             {formatFileSize(file.file_size)}
                           </p>
+                          <p className="text-gray-400 text-sm">{t('fileRetention.willBeDeleted')} {calculateExpirationDate(file.created_at)}</p>
                         </div>
                         <button
                           onClick={() => handleDownload(file.file_url, file.file_name)}
@@ -470,8 +503,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                                   {new Date(file.created_at).toLocaleDateString('es-ES')} • 
                                   {formatFileSize(file.file_size)}
                                 </p>
+                                <p className="text-gray-400 text-sm">{t('fileRetention.willBeDeleted')} {calculateExpirationDate(file.created_at)}</p>
                                 {file.admin_comments && (
-                                  <p className="text-green-200 text-sm mt-2 italic">{file.admin_comments}</p>
+                                  <p className="text-green-200 text-sm mt-2 italic">{i18n.language === 'en' && file.admin_comments_en ? file.admin_comments_en : file.admin_comments}</p>
                                 )}
                               </div>
                               <button
@@ -503,8 +537,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                                   {new Date(file.created_at).toLocaleDateString('es-ES')} • 
                                   {formatFileSize(file.file_size)}
                                 </p>
+                                <p className="text-gray-400 text-sm">{t('fileRetention.willBeDeleted')} {calculateExpirationDate(file.created_at)}</p>
                                 {file.admin_comments && (
-                                  <p className="text-blue-200 text-sm mt-2 italic">{file.admin_comments}</p>
+                                  <p className="text-blue-200 text-sm mt-2 italic">{i18n.language === 'en' && file.admin_comments_en ? file.admin_comments_en : file.admin_comments}</p>
                                 )}
                               </div>
                               <button
@@ -540,8 +575,9 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                       <p className="text-gray-400 text-sm">
                         {new Date(invoice.created_at).toLocaleDateString('es-ES')}
                       </p>
+                      <p className="text-gray-400 text-sm">{t('fileRetention.willBeDeleted')} {calculateExpirationDate(invoice.created_at)}</p>
                       {invoice.admin_comments && (
-                        <p className="text-blue-200 text-sm mt-2 italic">{invoice.admin_comments}</p>
+                        <p className="text-blue-200 text-sm mt-2 italic">{i18n.language === 'en' && invoice.admin_comments_en ? invoice.admin_comments_en : invoice.admin_comments}</p>
                       )}
                     </div>
                     {invoice.file_url && (

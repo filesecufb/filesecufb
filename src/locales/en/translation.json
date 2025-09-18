@@ -11,6 +11,46 @@
       }
     }
   },
+  "fileRetention": {
+    "willBeDeleted": "Will be deleted on:",
+    "banner": {
+      "title": "⚠️ Important: File Retention Policy",
+      "description": "All files (original, tuned and invoices) are kept available for 120 days from upload.",
+      "recommendation": "We recommend downloading them as soon as possible to avoid losing them after the expiration date."
+    }
+  },
+  "orderDetails": {
+    "loading": "Loading order details...",
+    "title": "Order Details #{{id}}",
+    "backToOrders": "Back to Orders",
+    "customerInfo": {
+      "title": "Customer Information",
+      "fullName": "Full Name",
+      "email": "Email",
+      "phone": "Phone",
+      "noPhone": "Not provided",
+      "clientId": "Client ID"
+    },
+    "serviceInfo": {
+      "title": "Service Information",
+      "totalPrice": "Total Price",
+      "additionalServices": "Additional Services"
+    },
+    "vehicleInfo": {
+      "title": "Vehicle Information",
+      "brandModel": "Brand and Model",
+      "generation": "Generation",
+      "year": "Year",
+      "engine": "Engine",
+      "ecu": "ECU",
+      "transmission": "Transmission",
+      "power": "Power",
+      "readingMethod": "Reading Method",
+      "hardwareNumber": "Hardware Number",
+      "vin": "VIN",
+      "softwareNumber": "Software Number"
+    }
+  },
   "cookies": {
     "banner": {
       "title": "Cookie Settings",

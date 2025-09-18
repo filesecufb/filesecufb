@@ -3,6 +3,8 @@ import { Car, Calendar, Wrench, FileText, CheckCircle, Clock, AlertCircle, Downl
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { toast } from 'react-hot-toast';
+import { calculateExpirationDate } from '../utils/dateUtils';
+import { getServiceTitle, getServiceSubtitle, getServiceDescription } from '../hooks/useServices';
 
 interface OrderCardProps {
   order: any;
@@ -11,7 +13,7 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {} }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -272,14 +274,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.service')}</p>
-                <p className="text-white font-medium break-words">{order.services?.title || order.service_name || order.service_type || 'Servicio no especificado'}</p>
+                <p className="text-white font-medium break-words">
+                  {order.services ? getServiceTitle(order.services, i18n.language) : (order.service_name || order.service_type || 'Servicio no especificado')}
+                </p>
                 {order.additional_services_details && order.additional_services_details.length > 0 && (
                   <div className="mt-2">
                     <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">{t('clientDashboard.orders.card.additionalServices')}</p>
                     <div className="space-y-1">
                       {order.additional_services_details.map((service: any, index: number) => (
                         <div key={index} className="flex justify-between items-center text-sm">
-                          <span className="text-gray-300">{service.title}</span>
+                          <span className="text-gray-300">
+                            {service.translations ? getServiceTitle(service, i18n.language) : service.title}
+                          </span>
                           <span className="text-primary font-medium">€{service.price}</span>
                         </div>
                       ))}
@@ -307,6 +313,23 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
         
         {/* Información adicional del pedido */}
 
+        {/* Banner informativo sobre retención de archivos */}
+        {((order.status === 'completed' || order.status === 'delivered') && adminFiles[order.id] && Array.isArray(adminFiles[order.id]) && adminFiles[order.id].length > 0) && (
+          <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-4 mb-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-amber-500/20 p-2 rounded-lg flex-shrink-0">
+                <AlertCircle className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-amber-300 font-semibold text-sm mb-1">{t('fileRetention.banner.title')}</h4>
+                <p className="text-amber-200 text-sm leading-relaxed">
+                  {t('fileRetention.banner.description')} {t('fileRetention.banner.recommendation')}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Archivos Tuneados - Solo para pedidos completados */}
         {(order.status === 'completed' || order.status === 'delivered') && adminFiles[order.id] && Array.isArray(adminFiles[order.id]) && adminFiles[order.id].filter((file: any) => file.file_category === 'map').length > 0 && (
           <div className="bg-gray-700/20 rounded-lg p-4 mb-4">
@@ -328,10 +351,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
                            {formatFileSize(file.file_size)}
                          </p>
                        )}
+                       <p className="text-xs text-gray-500">
+                         {t('fileRetention.willBeDeleted')} {calculateExpirationDate(file.upload_date || file.created_at)}
+                       </p>
                      </div>
                      {file.admin_comments && (
                        <p className="text-green-200 text-sm mt-2 italic">
-                         {file.admin_comments}
+                         {i18n.language === 'en' && file.admin_comments_en ? file.admin_comments_en : file.admin_comments}
                        </p>
                      )}
                   </div>
@@ -340,7 +366,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
                     className="bg-green-600 hover:bg-green-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                   >
                     <Download className="w-4 h-4" />
-                    Descargar
+                    {t('clientDashboard.orders.modal.download')}
                   </button>
                 </div>
               ))}
@@ -369,10 +395,13 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
                            {formatFileSize(file.file_size)}
                          </p>
                        )}
+                       <p className="text-xs text-gray-500">
+                         {t('fileRetention.willBeDeleted')} {calculateExpirationDate(file.upload_date || file.created_at)}
+                       </p>
                      </div>
                      {file.admin_comments && (
                        <p className="text-blue-200 text-sm mt-2 italic">
-                         {file.admin_comments}
+                         {i18n.language === 'en' && file.admin_comments_en ? file.admin_comments_en : file.admin_comments}
                        </p>
                      )}
                   </div>
@@ -381,7 +410,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewMore, adminFiles = {
                     className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold transition-all duration-300 flex items-center gap-2 text-sm"
                   >
                     <Download className="w-4 h-4" />
-                    Descargar
+                    {t('clientDashboard.orders.modal.download')}
                   </button>
                 </div>
               ))}

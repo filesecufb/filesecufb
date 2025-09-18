@@ -5,6 +5,7 @@ import { ArrowRight, Zap, Settings, Gauge, Shield, Clock, MessageCircle, Chevron
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useSEO } from '../hooks/useSEO'
+import { getServiceBadge } from '../hooks/useServices'
 
 interface FAQItemProps {
   question: string
@@ -313,7 +314,7 @@ const Home: React.FC = () => {
               const serviceName = service.name || service.title || 'Servicio';
               const serviceDescription = service.description || 'Descripción del servicio';
               const servicePrice = service.price || '€0.00';
-              const serviceBadge = service.badge;
+              const serviceBadge = getServiceBadge(service, 'es');
               const serviceImage = service.image_url || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&h=600&fit=crop&crop=center&q=80';
               
               return (

@@ -1,5 +1,6 @@
 {
   "title": "Detalles del Pedido",
+  "loading": "Cargando detalles del pedido...",
   "backToOrders": "Volver a Pedidos",
   "orderNumber": "Pedido #",
   "customerInfo": {

@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useSEO } from '../hooks/useSEO';
 import { useTranslation } from 'react-i18next';
-import { useServices, getServiceTitle, getServiceSubtitle, getServiceDescription, getServiceFeatures, Service } from '../hooks/useServices';
+import { useServices, getServiceTitle, getServiceSubtitle, getServiceDescription, getServiceFeatures, getServiceBadge, Service } from '../hooks/useServices';
 import { useServiceCategories, getCategoryTitle, getCategorySubtitle } from '../hooks/useServiceCategories';
 import { useCategoryContext } from '../contexts/CategoryContext';
 
@@ -215,10 +215,10 @@ const Services = () => {
               </span>
             )}
           </div>
-          {service.badge && (
+          {getServiceBadge(service, language) && (
             <div className="bg-primary/20 px-3 py-1 rounded-full border border-primary/30">
               <span className="text-primary text-sm font-semibold">
-                {service.badge}
+                {getServiceBadge(service, language)}
               </span>
             </div>
           )}

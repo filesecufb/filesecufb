@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { handleStatusChange as sendStatusChangeEmail, OrderData as EmailOrderData } from '../services/emailService';
 import { translateText, detectLanguage } from '../lib/geminiTranslation';
 import CategoryManager from '../components/CategoryManager';
+import { getServiceBadge } from '../hooks/useServices';
 
 type AdminSection = 'overview' | 'services' | 'clients' | 'orders';
 
@@ -295,7 +296,7 @@ const OverviewSection: React.FC = () => {
               // Load profile and service info separately
               const [profileResult, serviceResult] = await Promise.all([
                 supabase.from('profiles').select('full_name, email').eq('id', order.client_id).single(),
-                supabase.from('services').select('title').eq('id', order.service_id).single()
+                supabase.from('services').select('title, translations').eq('id', order.service_id).single()
               ]);
               
               const profile = profileResult.data;
@@ -1350,9 +1351,9 @@ const ServicesSection: React.FC = () => {
                     alt={service.title}
                     className="w-full h-48 object-cover"
                   />
-                  {service.badge && (
+                  {getServiceBadge(service, 'es') && (
                     <div className="absolute top-4 right-4 bg-primary px-3 py-1 rounded-full text-xs font-bold text-white">
-                      {service.badge}
+                      {getServiceBadge(service, 'es')}
                     </div>
                   )}
                   <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-2 py-1 rounded text-xs text-white">

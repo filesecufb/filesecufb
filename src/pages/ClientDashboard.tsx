@@ -331,7 +331,7 @@ const ClientDashboard: React.FC = () => {
             try {
               const { data: serviceData } = await supabase
                 .from('services')
-                .select('id, title, category, image_url')
+                .select('id, title, category, image_url, translations')
                 .eq('id', order.service_id)
                 .single();
 
@@ -354,7 +354,8 @@ const ClientDashboard: React.FC = () => {
                       id: serviceDetails.id,
                       title: serviceDetails.title,
                       price: serviceDetails.price,
-                      description: serviceDetails.description
+                      description: serviceDetails.description,
+                      translations: serviceDetails.translations
                     };
                   }
                   return null;
@@ -441,7 +442,7 @@ const ClientDashboard: React.FC = () => {
 
         const { data: services, error } = await supabase
           .from('services')
-          .select('id, title, price, description')
+          .select('id, title, price, description, translations')
           .in('id', validIds);
 
         if (error) {
@@ -635,6 +636,21 @@ const ClientDashboard: React.FC = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+  };
+
+  // Función para calcular fecha de caducidad (120 días desde la fecha de subida)
+  const calculateExpirationDate = (uploadDate: string): string => {
+    if (!uploadDate) return 'Fecha no disponible';
+    
+    const upload = new Date(uploadDate);
+    const expiration = new Date(upload);
+    expiration.setDate(upload.getDate() + 120);
+    
+    const day = expiration.getDate().toString().padStart(2, '0');
+    const month = (expiration.getMonth() + 1).toString().padStart(2, '0');
+    const year = expiration.getFullYear();
+    
+    return `${day}/${month}/${year}`;
   };
 
   // Function to load invoices for completed orders

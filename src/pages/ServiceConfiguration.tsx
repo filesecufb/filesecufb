@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { handleNewOrder, OrderData } from '../services/emailService';
+import { getServiceTitle, getServiceSubtitle } from '../hooks/useServices';
 
 interface ServiceConfigurationData {
   // Vehicle Information
@@ -57,7 +58,7 @@ const ServiceConfiguration: React.FC = () => {
   const navigate = useNavigate();
   const { serviceId } = useParams<{ serviceId?: string }>();
   const { user, profile, loading: authLoading } = useAuth();
-  const { t } = useTranslation('service-configuration');
+  const { t, i18n } = useTranslation('service-configuration');
   
 
   
@@ -751,9 +752,9 @@ const ServiceConfiguration: React.FC = () => {
         {selectedService ? (
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedService.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{getServiceTitle(selectedService, i18n.language)}</h2>
               {selectedService.subtitle && (
-                <p className="text-gray-600">{selectedService.subtitle}</p>
+                <p className="text-gray-600">{getServiceSubtitle(selectedService, i18n.language)}</p>
               )}
             </div>
           </div>
@@ -1168,7 +1169,7 @@ const ServiceConfiguration: React.FC = () => {
                           }}
                           className="mr-3 text-blue-600 focus:ring-blue-500"
                         />
-                        <span className="text-gray-900 font-medium">{service.title}</span>
+                        <span className="text-gray-900 font-medium">{getServiceTitle(service, i18n.language)}</span>
                       </div>
                       <span className="text-blue-600 font-semibold">
                         {service.price ? `€${service.price}` : t('pricing.priceOnRequest')}
@@ -1395,7 +1396,7 @@ const ServiceConfiguration: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('headers.pricingSummary')}</h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-700">{selectedService.title}:</span>
+                  <span className="text-gray-700">{selectedService.translations ? getServiceTitle(selectedService, i18n.language) : selectedService.title}:</span>
                   <span className="text-gray-900 font-medium">
                     €{typeof selectedService.price === 'string' 
                       ? parseFloat(selectedService.price.replace(/[^\d.-]/g, '')) || 0
