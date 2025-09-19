@@ -10,7 +10,7 @@ import { useServiceCategories, getCategoryTitle, getCategorySubtitle } from '../
 import { useCategoryContext } from '../contexts/CategoryContext';
 
 const Services = () => {
-  const { t, i18n } = useTranslation('services');
+  const { t, i18n } = useTranslation(['translation', 'services']);
   const language = i18n.language;
   
   // Función para obtener traducciones de services
@@ -262,7 +262,7 @@ const Services = () => {
           {loading && (
             <div className="flex items-center justify-center mt-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-gray-300">{t('loading')}</span>
+              <span className="ml-2 text-gray-300">{t('loading', { ns: 'services' })}</span>
             </div>
           )}
           {error && (
