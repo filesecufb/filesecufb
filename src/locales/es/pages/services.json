@@ -3,5 +3,9 @@
   "title": "Servicios",
   "subtitle": "Nuestros servicios profesionales de tuning",
   "all": "Todos",
-  "searchPlaceholder": "BUSCAR SERVICIOS..."
+  "searchPlaceholder": "BUSCAR SERVICIOS...",
+  "hero": {
+    "title": "SERVICIOS TUNING",
+    "subtitle": "DESCUBRE NUESTRA GAMA COMPLETA DE SERVICIOS DE OPTIMIZACIÓN EXTREMA"
+  }
 }
