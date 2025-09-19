@@ -10,7 +10,7 @@ import { useServiceCategories, getCategoryTitle, getCategorySubtitle } from '../
 import { useCategoryContext } from '../contexts/CategoryContext';
 
 const Services = () => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('services');
   const language = i18n.language;
   
   // Función para obtener traducciones de services
